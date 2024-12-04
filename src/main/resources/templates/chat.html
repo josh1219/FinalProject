@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>채팅 서비스</title>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7f6;
+        }
+        #chat-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 50px auto;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        #chat-header {
+            background-color: #5c6bc0bd;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            border-radius: 10px 10px 0 0;
+        }
+        #chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            height: 400px;
+        }
+        .message-wrapper {
+            display: flex;
+            margin: 10px 0;
+            align-items: flex-end;
+        }
+        .message-content {
+            max-width: 80%;
+            padding: 10px 15px;
+            border-radius: 20px;
+            word-wrap: break-word;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        .message-text {
+            margin-bottom: 5px;
+        }
+        .message-time {
+            font-size: 0.7em;
+            color: #666;
+        }
+        .user-message .message-time {
+            align-self: flex-start;
+        }
+        .other-message .message-time {
+            align-self: flex-end;
+        }
+        .system-message {
+            background-color: #f0f0f0;
+            color: #666;
+            text-align: center;
+            font-style: italic;
+            align-self: center;
+            max-width: 100%;
+            width: 100%;
+        }
+        .user-message-wrapper {
+            justify-content: flex-end;
+        }
+        .user-message {
+            background-color: #5c6bc0bd;
+            color: white;
+            border-radius: 13px ;
+            margin-left: auto;
+            position: relative;
+        }
+        .user-message::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            bottom: 10px;
+            border-left: 10px solid #5c6bc0bd;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+        .other-message-wrapper {
+            justify-content: flex-start;
+        }
+        .other-message {
+            background-color: #e2e3e5;
+            color: #333;
+            border-radius: 13px ;
+            margin-right: auto;
+            position: relative;
+        }
+        .other-message::after {
+            content: '';
+            position: absolute;
+            left: -10px;
+            bottom: 10px;
+            border-right: 10px solid #e2e3e5;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+        }
+        #chat-input1 {
+            display: flex;
+            padding: 15px;
+            border-top: 1px solid #ddd;
+            background-color: white;
+            border-radius: 0 0 10px 10px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        #chat-input1 input[type="text"] {
+            padding: 12px;
+            border-radius: 25px;
+            border: 1px solid #ddd;
+            flex-grow: 1;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        #chat-input1 button {
+            padding: 12px 20px;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        #file-input {
+            padding: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        #username {
+            margin: 15px;
+            padding: 12px;
+            border-radius: 25px;
+            border: 1px solid #ddd;
+            width: 60%;
+            font-size: 14px;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+
+        /* 버튼에 이미지 적용 */
+        #file-button {
+            width: 30px;
+            height: 30px;
+            background: url('images/camera0.svg') no-repeat center center;
+            background-size: contain;
+        }
+
+        #send-button {
+            width: 30px;
+            height: 30px;
+            background: url('images/send0.svg') no-repeat center center;
+            background-size: contain;
+        }
+
+        /* 파일 선택 input 숨기기 */
+        #file-select {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div id="chat-container">
+    <div id="chat-header">채팅 서비스</div>
+    <div id="chat-messages"></div>
+    <div id="chat-input1">
+        <input type="text" id="message" placeholder="메세지를 입력해주세요." disabled/>
+        <button id="file-button" onclick="document.getElementById('file-select').click();" disabled></button> <!-- 파일 첨부 버튼 -->
+        <button id="send-button" onclick="sendMessage()" disabled></button> <!-- 전송 버튼 -->
+        <input type="file" id="file-select" onchange="handleFileSelect(event)">
+    </div>
+    <input type="text" id="username" placeholder="채팅에 사용할 이름 입력" />
+</div>
+
+<script>
+    var stompClient = null;
+    var username = null;
+
+    function getCurrentTime() {
+        const now = new Date();
+        return now.toLocaleTimeString('ko-KR', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        });
+    }
+
+    function connect() {
+        var socket = new SockJS('/chat');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+            updateConnectionStatus(true);
+
+            stompClient.subscribe('/topic/messages', function (message) {
+                showMessage(JSON.parse(message.body));
+            });
+
+            sendSystemMessage(username + " 님이 채팅에 참여하셨습니다.");
+        });
+    }
+
+    function showMessage(message) {
+        var messagesDiv = document.getElementById("chat-messages");
+        var messageWrapper = document.createElement("div");
+        var messageContent = document.createElement("div");
+        var messageText = document.createElement("div");
+        var messageTime = document.createElement("div");
+
+        const time = message.timestamp || getCurrentTime();
+
+        if (message.type === "system") {
+            messageWrapper.className = "message-wrapper";
+            messageContent.className = "message-content system-message";
+            messageContent.textContent = message.content;
+        } else if (message.username === username) {
+            messageWrapper.className = "message-wrapper user-message-wrapper";
+            messageContent.className = "message-content user-message";
+            messageText.textContent = "You: " + message.content;
+            messageText.className = "message-text";
+            messageTime.textContent = time;
+            messageTime.className = "message-time";
+
+            messageContent.appendChild(messageText);
+            messageContent.appendChild(messageTime);
+        } else {
+            messageWrapper.className = "message-wrapper other-message-wrapper";
+            messageContent.className = "message-content other-message";
+            messageText.textContent = message.username + ": " + message.content;
+            messageText.className = "message-text";
+            messageTime.textContent = time;
+            messageTime.className = "message-time";
+
+            messageContent.appendChild(messageText);
+            messageContent.appendChild(messageTime);
+        }
+
+        messageWrapper.appendChild(messageContent);
+        messagesDiv.appendChild(messageWrapper);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    }
+
+    function sendMessage() {
+        var messageInput = document.getElementById("message");
+        var message = messageInput.value.trim();
+        if (message) {
+            stompClient.send("/app/sendMessage", {}, JSON.stringify({
+                username: username,
+                content: message,
+                type: "chat",
+                timestamp: getCurrentTime()
+            }));
+            messageInput.value = "";
+        }
+    }
+
+    function sendSystemMessage(content) {
+        stompClient.send("/app/sendMessage", {}, JSON.stringify({
+            username: username,
+            content: content,
+            type: "system",
+            timestamp: getCurrentTime()
+        }));
+    }
+
+    function updateConnectionStatus(connected) {
+        const messageInput = document.getElementById("message");
+        const sendButton = document.getElementById("send-button");
+        const fileButton = document.getElementById("file-button");
+
+        if (connected) {
+            messageInput.disabled = false;
+            sendButton.disabled = false;
+            fileButton.disabled = false;
+        } else {
+            messageInput.disabled = true;
+            sendButton.disabled = true;
+            fileButton.disabled = true;
+        }
+    }
+
+    function handleFileSelect(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // 파일 처리 로직 (예: 서버로 전송)
+            sendFileMessage(file);
+        }
+    }
+
+    function sendFileMessage(file) {
+        const formData = new FormData();
+        formData.append("file", file);
+        // 여기에 파일을 전송할 서버 엔드포인트를 추가하세요.
+        // 예를 들어, Ajax를 사용하여 서버로 파일을 전송할 수 있습니다.
+        alert('파일이 첨부되었습니다: ' + file.name);
+    }
+
+    // 사용자 이름 입력 후 엔터 눌렀을 때 채팅 연결
+    document.getElementById("username").addEventListener("keypress", function (e) {
+        if (e.key === "Enter" && this.value.trim()) {
+            username = this.value.trim();
+            this.disabled = true;
+            connect();
+        }
+    });
+
+    // 메세지 입력 후 엔터 눌렀을 때 전송
+    document.getElementById("message").addEventListener("keypress", function (e) {
+        if (e.key === "Enter") {
+            sendMessage();
+        }
+    });
+</script>
+</body>
+</html>

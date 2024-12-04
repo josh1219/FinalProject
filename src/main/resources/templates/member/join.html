@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/css/vars.css">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+   a, button, input, select, h1, h2, h3, h4, h5, * {
+       box-sizing: border-box;
+       margin: 0;
+       padding: 0;
+       border: none;
+       text-decoration: none;
+       background: none;
+       -webkit-font-smoothing: antialiased;
+   }
+   
+   menu, ol, ul {
+       list-style-type: none;
+       margin: 0;
+       padding: 0;
+   }
+
+   .error {
+       border-color: #e01013 !important;
+   }
+
+   .input-field {
+       width: 100%;
+       height: 100%;
+       border: none;
+       outline: none;
+       background: transparent;
+       color: #000000;
+       font-family: "IstokWeb-Bold", sans-serif;
+       font-size: 12px;
+   }
+
+   .input-field[readonly] {
+       background-color: #f5f5f5;
+       cursor: not-allowed;
+   }
+
+   .gender {
+       margin-bottom: 20px;
+   }
+
+   .gender-options {
+       display: flex;
+       gap: 20px;
+   }
+
+   .gender-radio {
+       display: none;
+   }
+
+   .gender-label {
+       display: inline-block;
+       padding: 8px 30px;
+       background: #ffffff;
+       border: 1px solid #aeaeae;
+       border-radius: 20px;
+       cursor: pointer;
+       font-size: 12px;
+       color: #000000;
+       transition: all 0.3s ease;
+   }
+
+   .gender-radio:checked + .gender-label {
+       background: #2c74d2;
+       border-color: #2c74d2;
+       color: #ffffff;
+   }
+
+   .social-info {
+       text-align: center;
+       margin-bottom: 20px;
+       padding: 15px;
+       background-color: #f8f9fa;
+       border-radius: 5px;
+   }
+
+   .profile-image {
+       width: 60px;
+       height: 60px;
+       border-radius: 50%;
+       margin-bottom: 10px;
+   }
+
+   .provider-text {
+       font-size: 14px;
+       color: #666;
+   }
+  </style>
+  <title>PETOPIA - 회원가입</title>
+</head>
+<body>
+  <div class="insert-member">
+    <form th:action="@{/member/join}" method="post" id="joinForm">
+      <!-- 소셜 로그인 정보 hidden 필드 -->
+      <input type="hidden" name="picture" th:value="${picture}">
+      <input type="hidden" name="provider" th:value="${provider}">
+      <input type="hidden" name="mType" th:value="${mType}">
+
+      <!-- 소셜 로그인 정보 표시 -->
+      <div th:if="${isSocialLogin}" class="social-info">
+          <img th:if="${picture}" th:src="${picture}" class="profile-image" alt="프로필 이미지">
+          <p class="provider-text">
+              <span th:text="${provider}">소셜</span> 계정으로 가입
+          </p>
+      </div>
+
+      <button type="submit" class="member-insert-button">
+        <div class="div">가입하기</div>
+      </button>
+
+      <div class="email">
+        <div class="div14">
+          <span>
+            <span class="div-14-span13">이메일</span>
+            <span class="div-14-span14">*</span>
+          </span>
+        </div>
+        <div class="email-box">
+          <input type="email" name="mEmail" th:value="${mEmail}" class="input-field" 
+                 placeholder="예) abc@gmail.com" th:readonly="${isSocialLogin}" required>
+        </div>
+      </div>
+
+      <div class="password">
+        <div class="div14">
+          <span>
+            <span class="div-14-span11">비밀번호</span>
+            <span class="div-14-span12">*</span>
+          </span>
+        </div>
+        <div class="password-box">
+          <input type="password" name="mPassword" class="input-field" 
+                 placeholder="8자 이상 영문, 숫자, 특수문자 포함" required>
+        </div>
+      </div>
+
+      <div class="password-chack">
+        <div class="div14">
+          <span>
+            <span class="div-14-span9">비밀번호 확인</span>
+            <span class="div-14-span10">*</span>
+          </span>
+        </div>
+        <div class="password-chack-box">
+          <input type="password" id="passwordCheck" class="input-field" 
+                 placeholder="비밀번호를 한 번 더 입력해주세요." required>
+        </div>
+      </div>
+
+      <div class="name">
+        <div class="div14">
+          <span>
+            <span class="div-14-span7">이름</span>
+            <span class="div-14-span8">*</span>
+          </span>
+        </div>
+        <div class="name-box">
+          <input type="text" name="name" th:value="${name}" class="input-field" 
+                 placeholder="예) 홍길동" required>
+        </div>
+      </div>
+
+      <div class="birthday">
+        <div class="div14">
+          <span>
+            <span class="div-14-span5">생년월일</span>
+            <span class="div-14-span6">*</span>
+          </span>
+        </div>
+        <div class="birthday-box">
+          <input type="text" name="birthday" class="input-field" 
+                 placeholder="예) 19990815" required>
+        </div>
+      </div>
+
+      <div class="gender">
+        <div class="div16">성별</div>
+        <div class="gender-options">
+          <input type="radio" name="gender" id="male" value="남성" class="gender-radio">
+          <label for="male" class="gender-label">남자</label>
+          <input type="radio" name="gender" id="female" value="여성" class="gender-radio">
+          <label for="female" class="gender-label">여자</label>
+        </div>
+      </div>
+
+      <div class="phone-number">
+        <div class="div14">
+          <span>
+            <span class="div-14-span3">휴대폰번호</span>
+            <span class="div-14-span4">*</span>
+          </span>
+        </div>
+        <div class="phone-number-box">
+          <input type="tel" name="phone" class="input-field" 
+                 placeholder="예) 01012345678" required>
+        </div>
+      </div>
+
+      <div class="adress">
+        <div class="div14">
+          <span>
+            <span class="div-14-span">주소</span>
+            <span class="div-14-span2">*</span>
+          </span>
+        </div>
+        <div class="adress-01-box">
+          <input type="text" name="address" class="input-field" 
+                 placeholder="지번 주소 / 도로명 주소" required>
+        </div>
+      </div>
+
+      <div class="div12">
+        <input type="checkbox" id="agreeAll" class="rectangle-25">
+        <label for="agreeAll" class="div13">아래 약관에 모두 동의합니다.</label>
+      </div>
+
+      <div class="div9">
+        <input type="checkbox" class="agree-check-box-01 agreement" required>
+        <div class="div10">필수) 이용약관 동의</div>
+        <div class="div11">자세히 보기</div>
+      </div>
+
+      <div class="div6">
+        <input type="checkbox" class="agree-check-box-02 agreement" required>
+        <div class="div7">필수) 개인정보 처리방침 동의</div>
+        <div class="div8">자세히 보기</div>
+      </div>
+
+      <div class="div5">
+        <input type="checkbox" class="agree-check-box-03 agreement" required>
+        <div class="div4">필수) 위치정보 이용약관 동의</div>
+        <div class="div2">자세히 보기</div>
+      </div>
+
+      <div class="div3">
+        <input type="checkbox" class="agree-check-box-04 agreement" required>
+        <div class="div4">필수) 마케팅 정보 수신 동의</div>
+        <div class="div2">자세히 보기</div>
+      </div>
+
+      <div class="_14">
+        <input type="checkbox" class="agree-check-box-05 agreement" required>
+        <div class="_142">필수) 만 14세 이상임에 동의</div>
+        <div class="div2">자세히 보기</div>
+      </div>
+    </form>
+
+    <div class="frame-66">
+      <div class="div17">회원가입</div>
+    </div>
+    <div class="header">
+      <div class="frame-48">
+        <div class="petopia">PETOPIA</div>
+      </div>
+      <div class="frame-67">
+        <a href="/"><img class="arrow-left" src="/images/arrow-left0.svg" /></a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('joinForm');
+        const passwordInput = document.querySelector('input[name="mPassword"]');
+        const passwordCheckInput = document.getElementById('passwordCheck');
+        const emailInput = document.querySelector('input[name="mEmail"]');
+        const nameInput = document.querySelector('input[name="name"]');
+        const birthdayInput = document.querySelector('input[name="birthday"]');
+        const phoneInput = document.querySelector('input[name="phone"]');
+        const agreeAllCheckbox = document.getElementById('agreeAll');
+        const agreementCheckboxes = document.querySelectorAll('.agreement');
+
+        // 유효성 검사 패턴
+        const patterns = {
+            email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+            password: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
+            birthday: /^\d{8}$/
+        };
+
+        // 입력 필드 유효성 검사
+        function validateField(input, pattern) {
+            const parentElement = input.parentElement;
+            if (!input.value) {
+                parentElement.classList.remove('error');
+                return true;
+            }
+            
+            const isValid = pattern.test(input.value);
+            if (isValid) {
+                parentElement.classList.remove('error');
+            } else {
+                parentElement.classList.add('error');
+            }
+            return isValid;
+        }
+
+        // 이메일 유효성 검사
+        emailInput.addEventListener('input', () => {
+            validateField(emailInput, patterns.email);
+        });
+
+        // 비밀번호 유효성 검사
+        passwordInput.addEventListener('input', () => {
+            validateField(passwordInput, patterns.password);
+            if (passwordCheckInput.value) {
+                validatePasswordMatch();
+            }
+        });
+
+        // 비밀번호 확인 검사
+        function validatePasswordMatch() {
+            if (passwordInput.value !== passwordCheckInput.value) {
+                passwordCheckInput.parentElement.classList.add('error');
+                return false;
+            }
+            passwordCheckInput.parentElement.classList.remove('error');
+            return true;
+        }
+
+        passwordCheckInput.addEventListener('input', validatePasswordMatch);
+
+        // 생년월일 유효성 검사
+        birthdayInput.addEventListener('input', () => {
+            validateField(birthdayInput, patterns.birthday);
+        });
+
+        // 전화번호 유효성 검사
+        phoneInput.addEventListener('input', () => {
+            validateField(phoneInput, /^\d{10,11}$/);
+        });
+
+        // 전체 동의 체크박스
+        agreeAllCheckbox.addEventListener('change', function() {
+            agreementCheckboxes.forEach(checkbox => {
+                checkbox.checked = this.checked;
+            });
+        });
+
+        // 개별 체크박스 변경 시 전체 동의 체크박스 상태 업데이트
+        agreementCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                agreeAllCheckbox.checked = Array.from(agreementCheckboxes)
+                    .every(checkbox => checkbox.checked);
+            });
+        });
+
+        // 폼 제출 시 유효성 검사
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            let isValid = true;
+
+            isValid = validateField(emailInput, patterns.email) && isValid;
+            isValid = validateField(passwordInput, patterns.password) && isValid;
+            isValid = validatePasswordMatch() && isValid;
+            isValid = validateField(birthdayInput, patterns.birthday) && isValid;
+            isValid = validateField(phoneInput, /^\d{10,11}$/) && isValid;
+
+            // 필수 입력 필드 검사
+            [emailInput, passwordInput, passwordCheckInput, nameInput, birthdayInput, phoneInput].forEach(input => {
+                if (!input.value) {
+                    input.parentElement.classList.add('error');
+                    isValid = false;
+                }
+            });
+
+            // 약관 동의 검사
+            const allAgreed = Array.from(agreementCheckboxes).every(checkbox => checkbox.checked);
+            if (!allAgreed) {
+                isValid = false;
+            }
+
+            if (isValid) {
+                this.submit();
+            }
+        });
+    });
+  </script>
+</body>
+</html>

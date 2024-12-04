@@ -1,0 +1,481 @@
+/* 로그인 페이지 스타일 */
+.login-member-final,
+.login-member-final * {
+  box-sizing: border-box;
+}
+.login-member-final {
+  background: #ffffff;
+  padding: 30px 20px 30px 20px;
+  height: 852px;
+  position: relative;
+  overflow: hidden;
+}
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  height: 49px;
+  position: absolute;
+  right: 20px;
+  left: 20px;
+  top: 30px;
+  overflow: hidden;
+}
+.frame-48 {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 86px;
+  position: relative;
+}
+.petopia {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  position: relative;
+}
+.body-1 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  width: 353px;
+  height: 125px;
+  position: absolute;
+  left: calc(50% - 176.5px);
+  top: 118px;
+  overflow: hidden;
+}
+.frame-66 {
+  padding: 10px 0px 10px 0px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.petopia2 {
+  text-align: center;
+  position: relative;
+}
+.petopia-2-span {
+  color: #000000;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+}
+.petopia-2-span2 {
+  color: #000000;
+  font-family: "IstokWeb-Regular", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+}
+.petopia-2-span3 {
+  color: #2c74d2;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+}
+.div {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  position: absolute;
+  left: calc(50% - 40.5px);
+  top: 262px;
+}
+.frame-45 {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 48px;
+  height: 49px;
+  position: absolute;
+  right: 20px;
+  top: 30px;
+}
+.iconly-regular-outline-home {
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 27px;
+  position: relative;
+}
+.home {
+  width: 85.42%;
+  height: 89.6%;
+  position: absolute;
+  right: 6.25%;
+  left: 8.33%;
+  bottom: 6.23%;
+  top: 4.17%;
+  overflow: visible;
+}
+.frame-70 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  width: 230px;
+  position: absolute;
+  left: calc(50% - 114.5px);
+  top: 408px;
+}
+.frame-69 {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  width: 171px;
+  position: relative;
+}
+.email {
+  border-radius: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+}
+.email-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 0px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+.div2 {
+  color: #aeaeae;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  position: relative;
+  width: 165px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.email-box2 {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+.member-insert-button {
+  background: #2c74d2;
+  border-radius: 2px;
+  padding: 1px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 59px;
+  height: 50px;
+  position: absolute;
+  left: calc(50% - -56px);
+  top: 0px;
+}
+.div3 {
+  color: #ffffff;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  position: relative;
+  width: 51px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.keep-login-check-box {
+  padding: 10px 1px 10px 1px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  position: absolute;
+  left: calc(50% - 116.5px);
+  top: 470px;
+}
+.keep-login-check-box2 {
+  background: #d9d9d9;
+  border-radius: 2px;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  position: relative;
+}
+.div4 {
+  padding: 10px 1px 10px 1px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  position: absolute;
+  left: calc(50% - 97.5px);
+  top: 470px;
+}
+.div5 {
+  color: #636262;
+  text-align: center;
+  font-family: "InaiMathi-Regular", sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.div6 {
+  padding: 10px 1px 10px 1px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 34px;
+  position: absolute;
+  left: calc(50% - -45.5px);
+  top: 470px;
+}
+.div7 {
+  color: #636262;
+  text-align: center;
+  font-family: "InaiMathi-Regular", sans-serif;
+  font-size: 10px;
+  font-weight: 400;
+  position: relative;
+  width: 65px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.frame-68 {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: calc(50% - 113.5px);
+  top: 520px;
+}
+.div8 {
+  color: #000000;
+  text-align: left;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.div-8-span {
+  color: #000000;
+  font-family: "InaiMathi-Regular", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+}
+.div-8-span2 {
+  color: #000000;
+  font-family: "InaiMathi-Regular", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+}
+.frame-72 {
+  padding: 10px 1px 10px 1px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  position: absolute;
+  left: calc(50% - -37.5px);
+  top: 520px;
+}
+.div9 {
+  color: #000000;
+  text-align: left;
+  font-family: "InaiMathi-Bold", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.frame-73 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 116px;
+  height: auto;
+  position: absolute;
+  left: 20px;
+  top: 637px;
+  overflow: visible;
+}
+.frame-74 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 116px;
+  height: auto;
+  position: absolute;
+  right: 20px;
+  top: 637px;
+  overflow: visible;
+}
+.sns-login {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: calc(50% - 48.5px);
+  top: 629px;
+}
+.sns {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Regular", sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  position: relative;
+}
+.naver-login {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  position: absolute;
+  left: calc(50% - 31.5px);
+  top: 703px;
+}
+.naver-login2 {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  position: static;
+}
+.naver-login-api {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  object-fit: cover;
+}
+.kakao-login {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  position: absolute;
+  left: calc(50% - 92.5px);
+  top: 703px;
+}
+.group-45 {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  position: static;
+}
+.kakao-login2 {
+  width: 40px;
+  height: 40px;
+  position: static;
+}
+.kokoa-login-api {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  object-fit: cover;
+}
+.google-login {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  position: absolute;
+  left: calc(50% - -29.5px);
+  top: 703px;
+}
+.google-login2 {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  position: static;
+}
+.google-login-api {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  object-fit: cover;
+}

@@ -1,0 +1,720 @@
+.insert-member,
+.insert-member * {
+  box-sizing: border-box;
+}
+.insert-member {
+  background: #ffffff;
+  padding: 30px 20px 30px 20px;
+  height: 852px;
+  position: relative;
+  overflow: hidden;
+}
+.member-insert-button {
+  background: rgba(44, 116, 210, 0.68);
+  border-radius: 2px;
+  padding: 1px 28px 1px 28px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  height: 33px;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 776px;
+}
+.div {
+  color: #ffffff;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+._14 {
+  display: flex;
+  flex-direction: row;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+  width: 262px;
+  position: absolute;
+  left: calc(50% - 130.5px);
+  top: 741px;
+}
+.agree-check-box-05 {
+  background: #ffffff;
+  border-radius: 5px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+._142 {
+  color: #636262;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  width: 171px;
+}
+.div2 {
+  color: #636262;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  position: relative;
+  width: 61px;
+}
+.div3 {
+  display: flex;
+  flex-direction: row;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+  width: 262px;
+  position: absolute;
+  left: calc(50% - 130.5px);
+  top: 717px;
+}
+.agree-check-box-04 {
+  background: #ffffff;
+  border-radius: 5px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+.div4 {
+  color: #636262;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  width: 171px;
+}
+.div5 {
+  display: flex;
+  flex-direction: row;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+  width: 262px;
+  position: absolute;
+  left: calc(50% - 130.5px);
+  top: 693px;
+}
+.agree-check-box-03 {
+  background: #ffffff;
+  border-radius: 5px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+.div6 {
+  display: flex;
+  flex-direction: row;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+  width: 262px;
+  position: absolute;
+  left: calc(50% - 130.5px);
+  top: 669px;
+}
+.agree-check-box-02 {
+  background: #ffffff;
+  border-radius: 5px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+.div7 {
+  color: #636262;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  width: 168px;
+}
+.div8 {
+  color: #636262;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  position: relative;
+  width: 64px;
+}
+.div9 {
+  display: flex;
+  flex-direction: row;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+  width: 262px;
+  position: absolute;
+  left: calc(50% - 130.5px);
+  top: 645px;
+}
+.agree-check-box-01 {
+  background: #ffffff;
+  border-radius: 5px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+.div10 {
+  color: #636262;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  width: 170px;
+}
+.div11 {
+  color: #636262;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: underline;
+  position: relative;
+  width: 62px;
+}
+.div12 {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  width: 262px;
+  position: absolute;
+  left: calc(50% - 130.5px);
+  top: 615px;
+}
+.rectangle-25 {
+  background: #ffffff;
+  border-radius: 5px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  position: relative;
+}
+.div13 {
+  color: #404040;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  position: relative;
+  width: 234px;
+}
+.adress {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 529px;
+}
+.div14 {
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  align-self: stretch;
+}
+.div-14-span {
+  color: #000000;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.div-14-span2 {
+  color: #e01013;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.adress-01-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+.div15 {
+  color: #aeaeae;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.adress-02-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+.phone-number {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 474px;
+}
+.div-14-span3 {
+  color: #000000;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.div-14-span4 {
+  color: #e01013;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.phone-number-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+._01012345678 {
+  color: #aeaeae;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.gender {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: baseline;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 420px;
+}
+.div16 {
+  color: #000000;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  align-self: stretch;
+}
+.gender-select-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+.birthday {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 366px;
+}
+.div-14-span5 {
+  color: #000000;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.div-14-span6 {
+  color: #e01013;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.birthday-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+._19990815 {
+  color: #aeaeae;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 311px;
+}
+.div-14-span7 {
+  color: #000000;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.div-14-span8 {
+  color: #e01013;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.name-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+.password-chack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 256px;
+}
+.div-14-span9 {
+  color: #000000;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.div-14-span10 {
+  color: #e01013;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.password-chack-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+.password {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 201px;
+}
+.div-14-span11 {
+  color: #000000;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.div-14-span12 {
+  color: #e01013;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.password-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+._8-16 {
+  color: #aeaeae;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.email {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 146px;
+}
+.div-14-span13 {
+  color: #000000;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.div-14-span14 {
+  color: #e01013;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+}
+.email-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+.abc-gmail-com {
+  color: #aeaeae;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.frame-66 {
+  padding: 10px 0px 10px 0px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 66px;
+  top: 81px;
+}
+.div17 {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  position: relative;
+}
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  height: 49px;
+  position: absolute;
+  right: 20px;
+  left: 20px;
+  top: 30px;
+  overflow: hidden;
+}
+.frame-48 {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 86px;
+  position: relative;
+}
+.petopia {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  position: relative;
+}
+.frame-67 {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  width: 45px;
+  height: 49px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+.arrow-left {
+  flex: 1;
+  height: 24px;
+  position: relative;
+  overflow: visible;
+}
+
+.div9, .div6, .div5, .div3, ._14 {
+    height: 25px;
+    margin-bottom: 10px;
+}
+
+.div12 {
+    margin-bottom: 15px;
+}

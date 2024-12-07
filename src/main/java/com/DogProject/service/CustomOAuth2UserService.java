@@ -34,44 +34,35 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
 
         OAuthAttributes attributes = OAuthAttributes.of(registrationId, userNameAttributeName, oAuth2User.getAttributes());
-        Member member = saveOrUpdate(attributes, registrationId);
+        
+        // 이메일로 기존 회원 확인
+        Member member = memberRepository.findBymEmail(attributes.getEmail()).orElse(null);
+        
+        if (member == null) {
+            // 새로운 회원인 경우, 세션에 임시 정보 저장
+            Member tempMember = Member.socialBuilder()
+                    .name(attributes.getName())
+                    .mEmail(attributes.getEmail())
+                    .picture(attributes.getPicture())
+                    .provider(attributes.getProvider())
+                    .enabled(true)
+                    .build();
+            
+            httpSession.setAttribute("socialMember", tempMember);
+            httpSession.setAttribute("requireRegistration", true);
+        } else {
+            // 기존 회원인 경우, OAuth2 정보 업데이트
+            member.updateOAuth2Info(
+                attributes.getName(),
+                attributes.getPicture(),
+                attributes.getProvider()
+            );
+            memberRepository.save(member);
+        }
 
         return new DefaultOAuth2User(
-                Collections.singleton(new SimpleGrantedAuthority(member.getRoleKey())),
+                Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),
                 attributes.getAttributes(),
                 attributes.getNameAttributeKey());
-    }
-
-    @Transactional
-    protected Member saveOrUpdate(OAuthAttributes attributes, String registrationId) {
-        Member member = memberRepository.findBymEmail(attributes.getEmail())
-                .map(entity -> {
-                    entity.updateOAuth2Info(
-                        attributes.getName(),
-                        attributes.getPicture(),
-                        attributes.getProvider(),
-                        getMemberType(registrationId)
-                    );
-                    return entity;
-                })
-                .orElseGet(() -> Member.socialBuilder()
-                        .name(attributes.getName())
-                        .mEmail(attributes.getEmail())
-                        .picture(attributes.getPicture())
-                        .provider(attributes.getProvider())
-                        .mType(getMemberType(registrationId))
-                        .enabled(true)
-                        .build());
-
-        return memberRepository.save(member);
-    }
-
-    private String getMemberType(String registrationId) {
-        switch (registrationId.toLowerCase()) {
-            case "kakao": return "2";
-            case "naver": return "3";
-            case "google": return "4";
-            default: return "1";
-        }
     }
 }

@@ -4,384 +4,512 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/css/vars.css">
-  <link rel="stylesheet" href="/css/style.css">
-  <style>
-   a, button, input, select, h1, h2, h3, h4, h5, * {
-       box-sizing: border-box;
-       margin: 0;
-       padding: 0;
-       border: none;
-       text-decoration: none;
-       background: none;
-       -webkit-font-smoothing: antialiased;
-   }
-   
-   menu, ol, ul {
-       list-style-type: none;
-       margin: 0;
-       padding: 0;
-   }
-
-   .error {
-       border-color: #e01013 !important;
-   }
-
-   .input-field {
-       width: 100%;
-       height: 100%;
-       border: none;
-       outline: none;
-       background: transparent;
-       color: #000000;
-       font-family: "IstokWeb-Bold", sans-serif;
-       font-size: 12px;
-   }
-
-   .input-field[readonly] {
-       background-color: #f5f5f5;
-       cursor: not-allowed;
-   }
-
-   .gender {
-       margin-bottom: 20px;
-   }
-
-   .gender-options {
-       display: flex;
-       gap: 20px;
-   }
-
-   .gender-radio {
-       display: none;
-   }
-
-   .gender-label {
-       display: inline-block;
-       padding: 8px 30px;
-       background: #ffffff;
-       border: 1px solid #aeaeae;
-       border-radius: 20px;
-       cursor: pointer;
-       font-size: 12px;
-       color: #000000;
-       transition: all 0.3s ease;
-   }
-
-   .gender-radio:checked + .gender-label {
-       background: #2c74d2;
-       border-color: #2c74d2;
-       color: #ffffff;
-   }
-
-   .social-info {
-       text-align: center;
-       margin-bottom: 20px;
-       padding: 15px;
-       background-color: #f8f9fa;
-       border-radius: 5px;
-   }
-
-   .profile-image {
-       width: 60px;
-       height: 60px;
-       border-radius: 50%;
-       margin-bottom: 10px;
-   }
-
-   .provider-text {
-       font-size: 14px;
-       color: #666;
-   }
-  </style>
   <title>PETOPIA - 회원가입</title>
+  <meta name="_csrf" content="your_csrf_token" />
+  <meta name="_csrf_header" content="X-CSRF-TOKEN" />
+  <link rel="stylesheet" href="/css/join.css">
 </head>
 <body>
-  <div class="insert-member">
-    <form th:action="@{/member/join}" method="post" id="joinForm">
-      <!-- 소셜 로그인 정보 hidden 필드 -->
-      <input type="hidden" name="picture" th:value="${picture}">
-      <input type="hidden" name="provider" th:value="${provider}">
-      <input type="hidden" name="mType" th:value="${mType}">
-
-      <!-- 소셜 로그인 정보 표시 -->
-      <div th:if="${isSocialLogin}" class="social-info">
-          <img th:if="${picture}" th:src="${picture}" class="profile-image" alt="프로필 이미지">
-          <p class="provider-text">
-              <span th:text="${provider}">소셜</span> 계정으로 가입
-          </p>
+  <div class="page-wrapper">
+    <div class="container">
+      <div class="header-container">
+        <div class="top-header">
+          <div class="logo">PETOPIA</div>
+          <div class="header-buttons">
+            <a href="javascript:history.back()" class="back-button">
+              <span>←</span>
+            </a>
+            <a href="/home">
+              <img src="/images/home0.svg" alt="홈으로" class="home-icon">
+            </a>
+          </div>
+        </div>
+        <h1 class="form-title">회원가입</h1>
       </div>
 
-      <button type="submit" class="member-insert-button">
-        <div class="div">가입하기</div>
-      </button>
+      <form th:action="@{/member/join}" method="post" id="joinForm">
+        <!-- 소셜 로그인 정보 hidden 필드 -->
+        <input type="hidden" name="picture" th:value="${picture}">
+        <input type="hidden" name="provider" th:value="${provider}">
+        <input type="hidden" name="mType" th:value="${mType}">
 
-      <div class="email">
-        <div class="div14">
-          <span>
-            <span class="div-14-span13">이메일</span>
-            <span class="div-14-span14">*</span>
-          </span>
+        <!-- 소셜 로그인 정보 표시 -->
+        <div th:if="${isSocialLogin}" class="social-info">
+            <img th:if="${picture}" th:src="${picture}" class="profile-image" alt="프로필 이미지">
+            <p class="provider-text">
+                <span th:text="${provider}">소셜</span> 계정으로 가입
+            </p>
         </div>
-        <div class="email-box">
-          <input type="email" name="mEmail" th:value="${mEmail}" class="input-field" 
-                 placeholder="예) abc@gmail.com" th:readonly="${isSocialLogin}" required>
-        </div>
-      </div>
 
-      <div class="password">
-        <div class="div14">
-          <span>
-            <span class="div-14-span11">비밀번호</span>
-            <span class="div-14-span12">*</span>
-          </span>
+        <div class="input-container">
+          <label class="input-label">
+            이메일<span class="required">*</span>
+          </label>
+          <div class="input-group">
+            <input type="email" name="mEmail" th:value="${memberDTO.mEmail}" class="input-box" 
+                   th:readonly="${memberDTO.provider != null && memberDTO.provider != 'local' && memberDTO.provider != 'kakao'}"
+                   placeholder="예) abc@gmail.com" required>
+            <div id="emailError" class="error-message" style="display: none; color: #e01013; font-size: 12px; margin-top: 4px;"></div>
+          </div>
         </div>
-        <div class="password-box">
-          <input type="password" name="mPassword" class="input-field" 
+
+        <div class="input-container">
+          <label class="input-label">
+            비밀번호<span class="required">*</span>
+          </label>
+          <input type="password" name="mPassword" id="mPassword" class="input-box" 
                  placeholder="8자 이상 영문, 숫자, 특수문자 포함" required>
+          <div class="error-message" id="mPasswordError"></div>
         </div>
-      </div>
 
-      <div class="password-chack">
-        <div class="div14">
-          <span>
-            <span class="div-14-span9">비밀번호 확인</span>
-            <span class="div-14-span10">*</span>
-          </span>
-        </div>
-        <div class="password-chack-box">
-          <input type="password" id="passwordCheck" class="input-field" 
+        <div class="input-container">
+          <label class="input-label">
+            비밀번호 확인<span class="required">*</span>
+          </label>
+          <input type="password" id="passwordCheck" class="input-box" 
                  placeholder="비밀번호를 한 번 더 입력해주세요." required>
+          <div class="error-message" id="passwordCheckError"></div>
         </div>
-      </div>
 
-      <div class="name">
-        <div class="div14">
-          <span>
-            <span class="div-14-span7">이름</span>
-            <span class="div-14-span8">*</span>
-          </span>
-        </div>
-        <div class="name-box">
-          <input type="text" name="name" th:value="${name}" class="input-field" 
+        <div class="input-container">
+          <label class="input-label">
+            이름<span class="required">*</span>
+          </label>
+          <input type="text" name="name" th:value="${name}" class="input-box" 
                  placeholder="예) 홍길동" required>
+          <div class="error-message" id="nameError"></div>
         </div>
-      </div>
 
-      <div class="birthday">
-        <div class="div14">
-          <span>
-            <span class="div-14-span5">생년월일</span>
-            <span class="div-14-span6">*</span>
-          </span>
+        <div class="input-container">
+          <label class="input-label">
+            생년월일<span class="required">*</span>
+          </label>
+          <input type="text" name="birthday" class="input-box" 
+                 placeholder="예) 19990815" required
+                 pattern="\d{8}" maxlength="8">
+          <div class="error-message" id="birthdayError"></div>
         </div>
-        <div class="birthday-box">
-          <input type="text" name="birthday" class="input-field" 
-                 placeholder="예) 19990815" required>
+
+        <div class="input-container">
+          <label class="input-label">
+            휴대폰 번호<span class="required">*</span>
+          </label>
+          <input type="tel" name="phone" class="input-box" 
+                 placeholder="예) 01012345678" required
+                 pattern="[0-9]{10,11}" maxlength="11">
+          <div class="error-message" id="phoneError"></div>
         </div>
-      </div>
 
-      <div class="gender">
-        <div class="div16">성별</div>
-        <div class="gender-options">
-          <input type="radio" name="gender" id="male" value="남성" class="gender-radio">
-          <label for="male" class="gender-label">남자</label>
-          <input type="radio" name="gender" id="female" value="여성" class="gender-radio">
-          <label for="female" class="gender-label">여자</label>
+        <div class="input-container">
+          <label class="input-label">
+            성별<span class="required">*</span>
+          </label>
+          <div class="gender-buttons">
+            <button type="button" class="gender-button" data-value="male">남자</button>
+            <button type="button" class="gender-button" data-value="female">여자</button>
+          </div>
+          <input type="hidden" name="gender" id="genderInput" required>
+          <div class="error-message" id="genderError"></div>
         </div>
-      </div>
 
-      <div class="phone-number">
-        <div class="div14">
-          <span>
-            <span class="div-14-span3">휴대폰번호</span>
-            <span class="div-14-span4">*</span>
-          </span>
+        <div class="input-container">
+          <label class="input-label">
+            주소<span class="required">*</span>
+          </label>
+          <div class="address-group">
+            <div class="postcode-group">
+              <input type="text" id="sample6_postcode" placeholder="우편번호" class="input-box postcode" readonly>
+              <button type="button" onclick="sample6_execDaumPostcode()" class="address-search-btn">주소 검색</button>
+            </div>
+            <input type="text" id="sample6_address" placeholder="주소" class="input-box" readonly>
+            <input type="text" id="sample6_detailAddress" placeholder="상세주소" class="input-box">
+            <input type="hidden" name="address" id="fullAddress">
+            <div class="error-message" id="addressError"></div>
+          </div>
         </div>
-        <div class="phone-number-box">
-          <input type="tel" name="phone" class="input-field" 
-                 placeholder="예) 01012345678" required>
+
+        <div class="terms-container">
+          <div class="terms-all">
+            <input type="checkbox" id="agreeAll" class="checkbox">
+            <label for="agreeAll">아래 약관에 모두 동의합니다.</label>
+          </div>
+
+          <div class="terms-item">
+            <input type="checkbox" id="terms1" class="checkbox agreement" required>
+            <label for="terms1">(필수) 이용약관 동의</label>
+            <button type="button" class="terms-detail">자세히 보기</button>
+          </div>
+
+          <div class="terms-item">
+            <input type="checkbox" id="terms2" class="checkbox agreement" required>
+            <label for="terms2">(필수) 개인정보 처리방침 동의</label>
+            <button type="button" class="terms-detail">자세히 보기</button>
+          </div>
+
+          <div class="terms-item">
+            <input type="checkbox" id="terms3" class="checkbox agreement" required>
+            <label for="terms3">(필수) 위치정보 이용약관 동의</label>
+            <button type="button" class="terms-detail">자세히 보기</button>
+          </div>
+
+          <div class="terms-item">
+            <input type="checkbox" id="terms4" class="checkbox agreement" required>
+            <label for="terms4">(필수) 마케팅 정보 수신 동의</label>
+            <button type="button" class="terms-detail">자세히 보기</button>
+          </div>
+
+          <div class="terms-item">
+            <input type="checkbox" id="terms5" class="checkbox agreement" required>
+            <label for="terms5">(필수) 만 14세 이상임에 동의</label>
+          </div>
         </div>
-      </div>
 
-      <div class="adress">
-        <div class="div14">
-          <span>
-            <span class="div-14-span">주소</span>
-            <span class="div-14-span2">*</span>
-          </span>
-        </div>
-        <div class="adress-01-box">
-          <input type="text" name="address" class="input-field" 
-                 placeholder="지번 주소 / 도로명 주소" required>
-        </div>
-      </div>
-
-      <div class="div12">
-        <input type="checkbox" id="agreeAll" class="rectangle-25">
-        <label for="agreeAll" class="div13">아래 약관에 모두 동의합니다.</label>
-      </div>
-
-      <div class="div9">
-        <input type="checkbox" class="agree-check-box-01 agreement" required>
-        <div class="div10">필수) 이용약관 동의</div>
-        <div class="div11">자세히 보기</div>
-      </div>
-
-      <div class="div6">
-        <input type="checkbox" class="agree-check-box-02 agreement" required>
-        <div class="div7">필수) 개인정보 처리방침 동의</div>
-        <div class="div8">자세히 보기</div>
-      </div>
-
-      <div class="div5">
-        <input type="checkbox" class="agree-check-box-03 agreement" required>
-        <div class="div4">필수) 위치정보 이용약관 동의</div>
-        <div class="div2">자세히 보기</div>
-      </div>
-
-      <div class="div3">
-        <input type="checkbox" class="agree-check-box-04 agreement" required>
-        <div class="div4">필수) 마케팅 정보 수신 동의</div>
-        <div class="div2">자세히 보기</div>
-      </div>
-
-      <div class="_14">
-        <input type="checkbox" class="agree-check-box-05 agreement" required>
-        <div class="_142">필수) 만 14세 이상임에 동의</div>
-        <div class="div2">자세히 보기</div>
-      </div>
-    </form>
-
-    <div class="frame-66">
-      <div class="div17">회원가입</div>
-    </div>
-    <div class="header">
-      <div class="frame-48">
-        <div class="petopia">PETOPIA</div>
-      </div>
-      <div class="frame-67">
-        <a href="/"><img class="arrow-left" src="/images/arrow-left0.svg" /></a>
-      </div>
+        <button type="submit" class="submit-button">가입하기</button>
+      </form>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('joinForm');
-        const passwordInput = document.querySelector('input[name="mPassword"]');
-        const passwordCheckInput = document.getElementById('passwordCheck');
-        const emailInput = document.querySelector('input[name="mEmail"]');
-        const nameInput = document.querySelector('input[name="name"]');
-        const birthdayInput = document.querySelector('input[name="birthday"]');
-        const phoneInput = document.querySelector('input[name="phone"]');
-        const agreeAllCheckbox = document.getElementById('agreeAll');
-        const agreementCheckboxes = document.querySelectorAll('.agreement');
+        
+        // 비밀번호 유효성 검사
+        const passwordInput = document.getElementById('mPassword');
+        const passwordError = document.getElementById('mPasswordError');
+        const passwordCheck = document.getElementById('passwordCheck');
+        const passwordCheckError = document.getElementById('passwordCheckError');
 
-        // 유효성 검사 패턴
-        const patterns = {
-            email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            password: /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/,
-            birthday: /^\d{8}$/
+        // 비밀번호 입력 필드 이벤트 리스너
+        passwordInput.addEventListener('input', function() {
+            const password = this.value;
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+            
+            if (password === '') {
+                this.classList.remove('valid', 'invalid');
+                passwordError.style.display = 'none';
+            } else if (passwordRegex.test(password)) {
+                this.classList.remove('invalid');
+                this.classList.add('valid');
+                passwordError.textContent = '안전한 비밀번호입니다.';
+                passwordError.style.color = '#28a745';
+                passwordError.style.display = 'block';
+            } else {
+                this.classList.remove('valid');
+                this.classList.add('invalid');
+                passwordError.textContent = '비밀번호는 8자 이상이며, 영문/숫자/특수문자를 모두 포함해야 합니다.';
+                passwordError.style.color = '#e01013';
+                passwordError.style.display = 'block';
+            }
+
+            // 비밀번호 확인 필드가 비어있지 않다면 일치 여부 다시 체크
+            if (passwordCheck.value !== '') {
+                passwordCheck.dispatchEvent(new Event('input'));
+            }
+        });
+
+        // 비밀번호 확인 필드 이벤트 리스너
+        passwordCheck.addEventListener('input', function() {
+            const password = passwordInput.value;
+            const confirmPassword = this.value;
+
+            if (confirmPassword === '') {
+                this.classList.remove('valid', 'invalid');
+                passwordCheckError.style.display = 'none';
+            } else if (password === confirmPassword) {
+                this.classList.remove('invalid');
+                this.classList.add('valid');
+                passwordCheckError.textContent = '비밀번호가 일치합니다.';
+                passwordCheckError.style.color = '#28a745';
+                passwordCheckError.style.display = 'block';
+            } else {
+                this.classList.remove('valid');
+                this.classList.add('invalid');
+                passwordCheckError.textContent = '비밀번호가 일치하지 않습니다.';
+                passwordCheckError.style.color = '#e01013';
+                passwordCheckError.style.display = 'block';
+            }
+        });
+
+        // 나머지 입력 필드 유효성 검사 규칙
+        const validationRules = {
+            mEmail: {
+                regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                errorMsg: '올바른 이메일 형식이 아닙니다.'
+            },
+            name: {
+                regex: /^[가-힣]{2,}$/,
+                errorMsg: '이름은 2자 이상의 한글이어야 합니다.'
+            },
+            birthday: {
+                regex: /^\d{8}$/,
+                errorMsg: '생년월일은 8자리 숫자(YYYYMMDD)로 입력해주세요.'
+            },
+            phone: {
+                regex: /^01[016789]\d{7,8}$/,
+                errorMsg: '올바른 휴대폰 번호를 입력해주세요.'
+            }
         };
 
-        // 입력 필드 유효성 검사
-        function validateField(input, pattern) {
-            const parentElement = input.parentElement;
-            if (!input.value) {
-                parentElement.classList.remove('error');
-                return true;
-            }
+        // 각 입력 필드에 대한 유효성 검사 이벤트 리스너 추가
+        Object.keys(validationRules).forEach(fieldName => {
+            const input = document.querySelector(`input[name="${fieldName}"]`);
+            const errorDiv = document.getElementById(`${fieldName}Error`);
             
-            const isValid = pattern.test(input.value);
-            if (isValid) {
-                parentElement.classList.remove('error');
-            } else {
-                parentElement.classList.add('error');
+            if (input && errorDiv) {
+                input.addEventListener('input', function() {
+                    const value = this.value.trim();
+                    const rule = validationRules[fieldName];
+                    
+                    // 이메일 필드는 기존 중복 체크 로직 유지
+                    if (fieldName === 'mEmail') {
+                        return;
+                    }
+                    
+                    if (value === '') {
+                        this.classList.remove('valid', 'invalid');
+                        errorDiv.style.display = 'none';
+                    } else if (rule.regex.test(value)) {
+                        this.classList.remove('invalid');
+                        this.classList.add('valid');
+                        errorDiv.textContent = '올바른 형식입니다.';
+                        errorDiv.classList.remove('error');
+                        errorDiv.classList.add('success');
+                        errorDiv.style.display = 'block';
+                    } else {
+                        this.classList.remove('valid');
+                        this.classList.add('invalid');
+                        errorDiv.textContent = rule.errorMsg;
+                        errorDiv.classList.remove('success');
+                        errorDiv.classList.add('error');
+                        errorDiv.style.display = 'block';
+                    }
+
+                    // 비밀번호 필드가 변경되면 비밀번호 확인 필드도 다시 검사
+                    if (fieldName === 'mPassword') {
+                        const passwordCheck = document.getElementById('passwordCheck');
+                        if (passwordCheck && passwordCheck.value) {
+                            const event = new Event('input');
+                            passwordCheck.dispatchEvent(event);
+                        }
+                    }
+                });
             }
-            return isValid;
-        }
-
-        // 이메일 유효성 검사
-        emailInput.addEventListener('input', () => {
-            validateField(emailInput, patterns.email);
         });
 
-        // 비밀번호 유효성 검사
-        passwordInput.addEventListener('input', () => {
-            validateField(passwordInput, patterns.password);
-            if (passwordCheckInput.value) {
-                validatePasswordMatch();
-            }
-        });
-
-        // 비밀번호 확인 검사
-        function validatePasswordMatch() {
-            if (passwordInput.value !== passwordCheckInput.value) {
-                passwordCheckInput.parentElement.classList.add('error');
-                return false;
-            }
-            passwordCheckInput.parentElement.classList.remove('error');
-            return true;
-        }
-
-        passwordCheckInput.addEventListener('input', validatePasswordMatch);
-
-        // 생년월일 유효성 검사
-        birthdayInput.addEventListener('input', () => {
-            validateField(birthdayInput, patterns.birthday);
-        });
-
-        // 전화번호 유효성 검사
-        phoneInput.addEventListener('input', () => {
-            validateField(phoneInput, /^\d{10,11}$/);
-        });
-
-        // 전체 동의 체크박스
-        agreeAllCheckbox.addEventListener('change', function() {
-            agreementCheckboxes.forEach(checkbox => {
-                checkbox.checked = this.checked;
-            });
-        });
-
-        // 개별 체크박스 변경 시 전체 동의 체크박스 상태 업데이트
-        agreementCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                agreeAllCheckbox.checked = Array.from(agreementCheckboxes)
-                    .every(checkbox => checkbox.checked);
-            });
-        });
-
-        // 폼 제출 시 유효성 검사
+        // 폼 제출 전 최종 검증
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-
             let isValid = true;
 
-            isValid = validateField(emailInput, patterns.email) && isValid;
-            isValid = validateField(passwordInput, patterns.password) && isValid;
-            isValid = validatePasswordMatch() && isValid;
-            isValid = validateField(birthdayInput, patterns.birthday) && isValid;
-            isValid = validateField(phoneInput, /^\d{10,11}$/) && isValid;
-
-            // 필수 입력 필드 검사
-            [emailInput, passwordInput, passwordCheckInput, nameInput, birthdayInput, phoneInput].forEach(input => {
-                if (!input.value) {
-                    input.parentElement.classList.add('error');
+            // 모든 필수 입력 필드 검증
+            Object.keys(validationRules).forEach(fieldName => {
+                const input = document.querySelector(`input[name="${fieldName}"]`);
+                if (input && !input.classList.contains('valid')) {
                     isValid = false;
+                    input.classList.add('invalid');
+                    const errorDiv = document.getElementById(`${fieldName}Error`);
+                    if (errorDiv) {
+                        errorDiv.textContent = validationRules[fieldName].errorMsg;
+                        errorDiv.style.display = 'block';
+                    }
                 }
             });
 
-            // 약관 동의 검사
-            const allAgreed = Array.from(agreementCheckboxes).every(checkbox => checkbox.checked);
-            if (!allAgreed) {
+            // 비밀번호 확인 검증
+            if (passwordCheck && !passwordCheck.classList.contains('valid')) {
                 isValid = false;
             }
 
             if (isValid) {
                 this.submit();
+            } else {
+                alert('입력 정보를 다시 확인해주세요.');
             }
         });
+
+        // CSRF 토큰 가져오기
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        // 이메일 입력 시 실시간 중복 체크
+        const emailInput = document.querySelector('input[name="mEmail"]');
+        const emailError = document.getElementById('emailError');
+        let emailCheckTimeout;
+
+        emailInput.addEventListener('input', function() {
+            clearTimeout(emailCheckTimeout);
+            const email = this.value.trim();
+            
+            // 이메일 형식 검사
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                emailError.textContent = '올바른 이메일 형식이 아닙니다.';
+                emailError.style.display = 'block';
+                emailInput.style.borderColor = '#e01013';
+                return;
+            }
+
+            // 타이핑 후 0.5초 뒤에 중복 체크 실행
+            emailCheckTimeout = setTimeout(() => {
+                fetch('/member/checkEmail', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: `email=${encodeURIComponent(email)}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.isDuplicate) {
+                        emailError.textContent = '이미 사용 중인 이메일입니다.';
+                        emailError.style.display = 'block';
+                        emailInput.style.borderColor = '#e01013';
+                    } else {
+                        emailError.textContent = '사용 가능한 이메일입니다.';
+                        emailError.style.color = '#28a745';
+                        emailError.style.display = 'block';
+                        emailInput.style.borderColor = '#28a745';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    emailError.textContent = '이메일 확인 중 오류가 발생했습니다.';
+                    emailError.style.display = 'block';
+                    emailInput.style.borderColor = '#e01013';
+                });
+            }, 500);
+        });
+
+        // 약관동의 체크박스 처리
+        const allCheckbox = document.getElementById('agreeAll');
+        const agreementCheckboxes = document.querySelectorAll('.agreement');
+        
+        // 전체 동의 체크박스 이벤트
+        allCheckbox.addEventListener('change', function() {
+            const isChecked = this.checked;
+            agreementCheckboxes.forEach(checkbox => {
+                checkbox.checked = isChecked;
+            });
+        });
+
+        // 개별 체크박스 이벤트
+        agreementCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const allChecked = Array.from(agreementCheckboxes).every(cb => cb.checked);
+                allCheckbox.checked = allChecked;
+            });
+        });
+    });
+  </script>
+
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <script>
+    // 주소 검색 함수
+    function sample6_execDaumPostcode() {
+      new daum.Postcode({
+        oncomplete: function(data) {
+          document.getElementById('sample6_postcode').value = data.zonecode;
+          document.getElementById('sample6_address').value = data.address;
+          document.getElementById('sample6_detailAddress').focus();
+          updateFullAddress();
+        }
+      }).open();
+    }
+
+    function updateFullAddress() {
+        const postcode = document.getElementById('sample6_postcode').value;
+        const address = document.getElementById('sample6_address').value;
+        const detailAddress = document.getElementById('sample6_detailAddress').value;
+        
+        // 모든 주소 정보를 조합
+        const fullAddressValue = postcode && address ? 
+            `${postcode} ${address} ${detailAddress}`.trim() : '';
+        
+        // hidden input에 설정
+        document.getElementById('fullAddress').value = fullAddressValue;
+        
+        // 에러 메시지 처리
+        const addressError = document.getElementById('addressError');
+        if (addressError) {
+            if (!fullAddressValue) {
+                addressError.textContent = '주소를 입력해주세요.';
+                addressError.style.display = 'block';
+            } else {
+                addressError.style.display = 'none';
+            }
+        }
+    }
+
+    // 주소 검색 API 호출 후에도 updateFullAddress 실행
+    function sample6_execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                document.getElementById('sample6_postcode').value = data.zonecode;
+                document.getElementById('sample6_address').value = data.address;
+                document.getElementById('sample6_detailAddress').focus();
+                updateFullAddress(); // 주소 선택 후 바로 업데이트
+            }
+        }).open();
+    }
+
+    // 상세주소 입력 시에도 전체 주소 업데이트
+    document.getElementById('sample6_detailAddress').addEventListener('input', updateFullAddress);
+  </script>
+
+  <script>
+    // 성별 선택 버튼 이벤트
+    const genderButtons = document.querySelectorAll('.gender-button');
+    const genderInput = document.getElementById('genderInput');
+
+    genderButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            genderButtons.forEach(btn => btn.classList.remove('selected'));
+            this.classList.add('selected');
+            genderInput.value = this.dataset.value;
+        });
+    });
+
+    // 폼 제출 전 유효성 검사
+    document.getElementById('joinForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        let isValid = true;
+
+        // 생년월일 검사
+        const birthday = document.querySelector('input[name="birthday"]');
+        if (!/^\d{8}$/.test(birthday.value)) {
+            document.getElementById('birthdayError').textContent = '올바른 생년월일 형식이 아닙니다.';
+            isValid = false;
+            return;
+        }
+
+        // 휴대폰 번호 검사
+
+        const phone = document.querySelector('input[name="phone"]');
+        if (!/^[0-9]{10,11}$/.test(phone.value)) {
+            document.getElementById('phoneError').textContent = '올바른 휴대폰 번호 형식이 아닙니다.';
+            isValid = false;
+            return;
+        }
+
+        // 성별 검사
+        if (!genderInput.value) {
+            document.getElementById('genderError').textContent = '성별을 선택해주세요.';
+            isValid = false;
+            return;
+        }
+
+        // 주소 검사
+        if (!document.getElementById('fullAddress').value) {
+            document.getElementById('addressError').textContent = '주소를 입력해주세요.';
+            isValid = false;
+            return;
+        }
+
+        if (isValid) {
+            this.submit();
+        }
     });
   </script>
 </body>

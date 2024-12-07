@@ -3,17 +3,32 @@ package com.DogProject.controller;
 import com.DogProject.dto.MemberDTO;
 import com.DogProject.entity.Member;
 import com.DogProject.service.MemberService;
+import com.DogProject.constant.Role;  
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.time.LocalDateTime;
+
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.Authentication;
+
+import javax.servlet.http.Cookie;
 
 @Controller
 @RequestMapping("/member")
@@ -33,14 +48,22 @@ public class MemberController {
             memberDTO.setName(socialMember.getName());
             memberDTO.setMEmail(socialMember.getMEmail());
             memberDTO.setPicture(socialMember.getPicture());
-            memberDTO.setMType(socialMember.getMType());
             memberDTO.setProvider(socialMember.getProvider());
+            
+            // 소셜 로그인 제공자별로 다르게 처리
+            if ("kakao".equals(socialMember.getProvider())) {
+                // 카카오는 이메일 입력 가능하도록 비워둠
+                memberDTO.setMEmail("");
+            }
+            
             model.addAttribute("isSocialLogin", true);
+            model.addAttribute("picture", socialMember.getPicture());
+            model.addAttribute("provider", socialMember.getProvider());
             
             // 세션에서 소셜 로그인 정보 제거
             session.removeAttribute("socialMember");
         } else {
-            memberDTO.setMType("1"); // 일반 회원가입
+            memberDTO.setProvider("local"); // 일반 회원가입
             model.addAttribute("isSocialLogin", false);
         }
         
@@ -49,45 +72,68 @@ public class MemberController {
     }
 
     @PostMapping("/join")
-    public String join(@Valid MemberDTO memberDTO, BindingResult bindingResult, Model model) {
-        // 일반 회원가입인 경우 비밀번호 유효성 검사
-        if ("1".equals(memberDTO.getMType()) && !memberDTO.isPasswordValid()) {
-            bindingResult.addError(new ObjectError("memberDTO", 
-                "비밀번호는 8자 이상, 영문, 숫자, 특수문자를 포함해야 합니다."));
-        }
-
-        if (bindingResult.hasErrors()) {
-            // 소셜 로그인 여부 다시 설정
-            model.addAttribute("isSocialLogin", !"1".equals(memberDTO.getMType()));
-            return "member/join";
-        }
-
+    public String joinProcess(@Valid MemberDTO memberDTO, BindingResult bindingResult, Model model) {
         try {
-            Member member = Member.userBuilder()
-                    .name(memberDTO.getName())
-                    .mEmail(memberDTO.getMEmail())
-                    .mPassword(memberDTO.getMPassword())
-                    .birthday(memberDTO.getBirthday())
-                    .phone(memberDTO.getPhone())
-                    .gender(memberDTO.getGender())
-                    .address(memberDTO.getAddress())
-                    .picture(memberDTO.getPicture())
-                    .provider(memberDTO.getProvider())
-                    .mType(memberDTO.getMType())
-                    .build();
+            // 유효성 검사 실패 시
+            if (bindingResult.hasErrors()) {
+                return "member/join";
+            }
 
+            // 비밀번호 유효성 검사
+            if (!memberDTO.isPasswordValid()) {
+                bindingResult.rejectValue("mPassword", "error.mPassword", 
+                    "비밀번호는 8자 이상이며, 영문/숫자/특수문자를 모두 포함해야 합니다.");
+                return "member/join";
+            }
+
+            // DTO를 Entity로 변환
+            Member member = new Member();
+            member.setName(memberDTO.getName());
+            member.setMEmail(memberDTO.getMEmail());
+            member.setMPassword(memberDTO.getMPassword());
+            member.setBirthday(memberDTO.getBirthday());
+            member.setPhone(memberDTO.getPhone());
+            member.setGender(memberDTO.getGender());
+            member.setAddress(memberDTO.getAddress());
+            member.setPicture(memberDTO.getPicture());
+            member.setProvider("local");  // 명시적으로 local로 설정
+            member.setEnabled(true);
+            member.setRole(Role.USER);  
+            member.setPoint(0);
+            member.setLastLoginDate(LocalDateTime.now());
+
+            System.out.println("회원가입 - Provider 설정: " + member.getProvider());  // 로그 추가
+
+            // 회원 저장
             memberService.saveMember(member);
+            
             return "redirect:/member/login";
         } catch (IllegalStateException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            // 소셜 로그인 여부 다시 설정
-            model.addAttribute("isSocialLogin", !"1".equals(memberDTO.getMType()));
+            return "member/join";
+        } catch (Exception e) {
+            model.addAttribute("errorMessage", "회원가입 중 오류가 발생했습니다.");
             return "member/join";
         }
     }
 
+    @PostMapping("/checkEmail")
+    @ResponseBody
+    public ResponseEntity<Map<String, Boolean>> checkEmail(@RequestParam String email) {
+        boolean isDuplicate = memberService.existsByEmail(email);
+        Map<String, Boolean> response = new HashMap<>();
+        response.put("isDuplicate", isDuplicate);
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/login")
-    public String loginForm() {
+    public String loginForm(HttpServletRequest request) {
+        // 이미 인증된 사용자라면 홈으로 리다이렉트
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && 
+            !auth.getPrincipal().equals("anonymousUser")) {
+            return "redirect:/home";
+        }
         return "member/login";
     }
 
@@ -95,5 +141,34 @@ public class MemberController {
     public String loginError(Model model) {
         model.addAttribute("loginErrorMsg", "아이디 또는 비밀번호를 확인해주세요");
         return "member/login";
+    }
+
+    @PostMapping("/logout")
+    public String logout(HttpServletRequest request, HttpServletResponse response) {
+        // 현재 인증 정보 가져오기
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null) {
+            // 세션 무효화
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+            
+            // 모든 쿠키 삭제
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie cookie : cookies) {
+                    cookie.setValue("");
+                    cookie.setPath("/");
+                    cookie.setMaxAge(0);
+                    response.addCookie(cookie);
+                }
+            }
+            
+            // SecurityContext 클리어
+            SecurityContextHolder.clearContext();
+        }
+        
+        return "redirect:/member/login";
     }
 }

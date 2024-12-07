@@ -19,6 +19,5 @@ public class SessionMember implements Serializable {
         this.mEmail = member.getMEmail();
         this.picture = member.getPicture();
         this.provider = member.getProvider();
-        this.mType = member.getMType();
     }
 }

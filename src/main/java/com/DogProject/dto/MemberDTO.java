@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
@@ -32,21 +33,17 @@ public class MemberDTO {
     @Pattern(regexp = "^\\d{10,11}$", message = "전화번호는 10-11자리의 숫자여야 합니다.")
     private String phone;
 
+    @NotBlank(message = "성별을 선택해주세요.")
     private String gender;
+
+    @NotBlank(message = "주소는 필수 입력값입니다.")
     private String address;
+
     private String picture;
     private String provider;
-    private String mType;
 
     public boolean isPasswordValid() {
-        // mType이 "1"(일반 회원가입)인 경우에만 비밀번호 검증
-        if ("1".equals(mType)) {
-            if (mPassword == null || mPassword.trim().isEmpty()) {
-                return false;
-            }
-            // 비밀번호는 8자 이상, 영문, 숫자, 특수문자를 포함해야 함
-            return mPassword.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$");
-        }
-        return true; // 소셜 로그인의 경우 비밀번호 검증 스킵
+        // 비밀번호는 8자 이상, 영문, 숫자, 특수문자를 포함해야 함
+        return mPassword != null && mPassword.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$");
     }
 }

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PETOPIA - 홈</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .user-info {
+            text-align: right;
+        }
+        .welcome {
+            margin-bottom: 10px;
+            color: #666;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+        }
+        .button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .login-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .join-button {
+            background-color: #2196F3;
+            color: white;
+        }
+        .logout-button {
+            background-color: #f44336;
+            color: white;
+        }
+        .content {
+            text-align: center;
+            padding: 20px;
+        }
+        .member-info {
+            text-align: left;
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .member-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">PETOPIA</div>
+            <div class="user-info">
+                <div th:if="${isLoggedIn}">
+                    <div class="welcome" th:text="|환영합니다, ${member.name}님!|"></div>
+                    <div class="buttons">
+                        <form th:action="@{/member/logout}" method="post" style="display: inline;">
+                            <button type="submit" class="button logout-button">로그아웃</button>
+                        </form>
+                    </div>
+                </div>
+                <div th:unless="${isLoggedIn}" class="buttons">
+                    <a href="/member/login" class="button login-button">로그인</a>
+                    <a href="/member/join" class="button join-button">회원가입</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <h1>PETOPIA에 오신 것을 환영합니다!</h1>
+            <p>반려동물과 함께하는 즐거운 시간</p>
+            
+            <!-- 로그인된 경우에만 회원 정보 표시 -->
+            <div th:if="${isLoggedIn}" class="member-info">
+                <h2>회원 정보</h2>
+                <p th:text="|이메일: ${member.mEmail}|"></p>
+                <p th:text="|이름: ${member.name}|"></p>
+                <p th:text="|가입 유형: ${
+                    member.provider == 'local' ? '일반 회원' :
+                    member.provider == 'kakao' ? '카카오 회원' :
+                    member.provider == 'naver' ? '네이버 회원' :
+                    member.provider == 'google' ? '구글 회원' : '알 수 없음'
+                }|"></p>
+                <p th:text="|Role: ${member.role}|"></p>     
+                <p th:text="|프로필 이미지: ${member.picture}|"></p>
+                <p th:text="|생년월일: ${member.birthday}|"></p>
+                <p th:text="|휴대폰 번호: ${member.phone}|"></p>
+                <p th:text="|주소: ${member.address}|"></p>
+                <p th:text="|성별: ${member.gender}|"></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

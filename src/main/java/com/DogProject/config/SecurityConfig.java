@@ -3,14 +3,19 @@ package com.DogProject.config;
 import com.DogProject.config.auth.OAuth2SuccessHandler;
 import com.DogProject.service.CustomOAuth2UserService;
 import com.DogProject.service.MemberService;
+import com.DogProject.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
+import java.util.Enumeration;
 
 @Configuration
 @EnableWebSecurity
@@ -29,22 +34,74 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable()
-            .headers().frameOptions().disable()
-            .and()
-                .authorizeRequests()
-                .antMatchers("/", "/css/**", "/images/**", "/js/**", "/member/**", "/error").permitAll()
+            .csrf()
+                .ignoringAntMatchers("/member/checkEmail")  // 이메일 중복 체크 API는 CSRF 검사 제외
+                .and()
+            .sessionManagement()
+                .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false)  // 동시 로그인 허용으로 변경
+                .expiredUrl("/member/login?expired")
+                .and()
+                .sessionFixation().migrateSession()  // 세션 마이그레이션으로 변경
+                .invalidSessionUrl("/member/login?invalid")
+                .and()
+            .headers()
+                .frameOptions().sameOrigin()
+                .and()
+            .authorizeRequests()
+                .antMatchers("/", "/css/**", "/images/**", "/js/**", "/member/**", "/error", 
+                        "/home", "/board/**", "/dog/**", "/shop/**", "/chat/**").permitAll()
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/member/checkEmail").permitAll()  // 이메일 중복 체크 API 허용
                 .anyRequest().authenticated()
-            .and()
-                .formLogin()
+                .and()
+            .formLogin()
                 .loginPage("/member/login")
-                .defaultSuccessUrl("/")
+                .loginProcessingUrl("/member/login")
+                .defaultSuccessUrl("/home")
+                .failureUrl("/member/login?error=true")
+                .usernameParameter("email")
+                .passwordParameter("password")
+                .successHandler((request, response, authentication) -> {
+                    String userEmail = authentication.getName();
+                    String role = authentication.getAuthorities().toString();
+                    
+                    // MemberService를 통해 사용자 정보 조회
+                    Member member = memberService.findBymEmail(userEmail);
+                    String provider = member != null ? member.getProvider() : "unknown";
+                    
+                    // USER_INFO 쿠키에 이메일, 권한, provider 정보 포함
+                    var userInfo = userEmail + "★" + provider + "★" + role;
+                    Cookie emailCookie = new Cookie("USER_INFO", userInfo);
+                    emailCookie.setPath("/");
+                    emailCookie.setMaxAge(3600); // 1시간
+                    response.addCookie(emailCookie);
+                    response.sendRedirect("/home");
+                })
+                .permitAll()
+                .and()
+            .logout()
+                .logoutUrl("/member/logout")
+                .logoutSuccessUrl("/member/login")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("USER_INFO", "remember-me")
+                .logoutSuccessHandler((request, response, authentication) -> {
+                    response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+                    response.setHeader("Pragma", "no-cache");
+                    response.setHeader("Expires", "0");
+                    response.sendRedirect("/member/login");
+                })
                 .permitAll()
             .and()
-                .logout()
-                .logoutSuccessUrl("/")
-            .and()
-                .oauth2Login()
+            .rememberMe()  
+                .key("uniqueAndSecret")  
+                .tokenValiditySeconds(60 * 60 * 24 * 30)  
+                .rememberMeParameter("remember-me")  
+                .userDetailsService(memberService)  
+                .and()
+            .oauth2Login()
                 .loginPage("/member/login")
                 .successHandler(oAuth2SuccessHandler)
                 .userInfoEndpoint()

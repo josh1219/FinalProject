@@ -48,7 +48,7 @@ public class Member {
     @Comment("회원 성별 (예: 남성/여성)")
     private String gender;
 
-    @Column(length = 255)
+    @Column(length = 255, nullable = false)
     @Comment("회원 주소")
     private String address;
 
@@ -57,12 +57,8 @@ public class Member {
     private String picture;
 
     @Column(length = 20)
-    @Comment("소셜 로그인 제공자")
-    private String provider;
-
-    @Column(length = 10)
-    @Comment("회원 가입 타입 (1:일반, 2:카카오, 3:네이버, 4:구글)")
-    private String mType;
+    @Comment("로그인 제공자 (local: 일반회원, kakao: 카카오, naver: 네이버, google: 구글)")
+    private String provider = "local";
 
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     @Comment("회원 포인트 (적립금)")
@@ -96,16 +92,17 @@ public class Member {
     @Comment("회원이 받은 채팅 리스트")
     private List<Chat> receivedChats = new ArrayList<>();
 
+
+
     /**
      * 소셜 로그인 회원을 위한 빌더
      */
     @Builder(builderMethodName = "socialBuilder")
-    public Member(String name, String mEmail, String picture, String provider, String mType, boolean enabled) {
+    public Member(String name, String mEmail, String picture, String provider, boolean enabled) {
         this.name = name;
         this.mEmail = mEmail;
         this.picture = picture;
         this.provider = provider;
-        this.mType = mType;
         this.enabled = enabled;
         this.role = Role.USER;
     }
@@ -123,20 +120,19 @@ public class Member {
         this.phone = phone;
         this.gender = gender;
         this.address = address;
-        this.mType = "1";  
         this.enabled = true;
         this.point = 0;
         this.role = Role.USER;
+        this.provider = "local";
     }
 
     /**
      * OAuth2 정보 업데이트
      */
-    public void updateOAuth2Info(String name, String picture, String provider, String mType) {
+    public void updateOAuth2Info(String name, String picture, String provider) {
         this.name = name;
         this.picture = picture;
         this.provider = provider;
-        this.mType = mType;
     }
 
     public String getRoleKey() {

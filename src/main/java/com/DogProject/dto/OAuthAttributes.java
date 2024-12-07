@@ -78,16 +78,6 @@ public class OAuthAttributes {
                 .mEmail(email)
                 .picture(picture)
                 .provider(provider)
-                .mType(getMemberType())
                 .build();
-    }
-
-    private String getMemberType() {
-        switch (provider) {
-            case "kakao": return "2";
-            case "naver": return "3";
-            case "google": return "4";
-            default: return "1";
-        }
     }
 }

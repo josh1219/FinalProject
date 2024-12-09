@@ -71,8 +71,14 @@ public class SecurityConfig {
                     Member member = memberService.findBymEmail(userEmail);
                     String provider = member != null ? member.getProvider() : "unknown";
                     
-                    // USER_INFO 쿠키에 이메일, 권한, provider 정보 포함
-                    var userInfo = userEmail + "★" + provider + "★" + role;
+                    // 세션에 로그인 정보 저장
+                    HttpSession session = request.getSession();
+                    session.setAttribute("member", member);
+                    session.setAttribute("isLoggedIn", true);
+                    session.setAttribute("mIdx", member.getMIdx());  
+                    
+                    // USER_INFO 쿠키에 이메일, 권한, provider, mIdx 정보 포함
+                    var userInfo = member.getMIdx() + "★" + userEmail + "★" + provider + "★" + role;  // mIdx 추가
                     Cookie emailCookie = new Cookie("USER_INFO", userInfo);
                     emailCookie.setPath("/");
                     emailCookie.setMaxAge(3600); // 1시간

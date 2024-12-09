@@ -96,7 +96,8 @@ public class MemberController {
             member.setGender(memberDTO.getGender());
             member.setAddress(memberDTO.getAddress());
             member.setPicture(memberDTO.getPicture());
-            member.setProvider("local");  // 명시적으로 local로 설정
+            // provider 값을 폼에서 전달받은 값으로 설정
+            member.setProvider(memberDTO.getProvider() != null ? memberDTO.getProvider() : "local");
             member.setEnabled(true);
             member.setRole(Role.USER);  
             member.setPoint(0);
@@ -127,13 +128,7 @@ public class MemberController {
     }
 
     @GetMapping("/login")
-    public String loginForm(HttpServletRequest request) {
-        // 이미 인증된 사용자라면 홈으로 리다이렉트
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && 
-            !auth.getPrincipal().equals("anonymousUser")) {
-            return "redirect:/home";
-        }
+    public String loginForm() {
         return "member/login";
     }
 

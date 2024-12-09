@@ -37,7 +37,11 @@
         <div th:if="${isSocialLogin}" class="social-info">
             <img th:if="${picture}" th:src="${picture}" class="profile-image" alt="프로필 이미지">
             <p class="provider-text">
-                <span th:text="${provider}">소셜</span> 계정으로 가입
+                <span th:text="${
+                    provider == 'google' ? '구글' : 
+                    provider == 'naver' ? '네이버' :
+                    provider == 'kakao' ? '카카오' : '소셜'
+                }">소셜</span> 계정으로 회원가입
             </p>
         </div>
 
@@ -46,11 +50,25 @@
             이메일<span class="required">*</span>
           </label>
           <div class="input-group">
-            <input type="email" name="mEmail" th:value="${memberDTO.mEmail}" class="input-box" 
-                   th:readonly="${memberDTO.provider != null && memberDTO.provider != 'local' && memberDTO.provider != 'kakao'}"
-                   placeholder="예) abc@gmail.com" required>
-            <div id="emailError" class="error-message" style="display: none; color: #e01013; font-size: 12px; margin-top: 4px;"></div>
+            <input type="text" 
+                   th:if="${memberDTO != null and memberDTO.provider == 'kakao'}"
+                   id="kakaoEmail"
+                   class="input-box kakao-email"
+                   th:value="${(memberDTO != null and memberDTO.mEmail != null and #strings.contains(memberDTO.mEmail, '@')) ? 
+                             #strings.substring(memberDTO.mEmail, 0, #strings.indexOf(memberDTO.mEmail, '@')) : ''}"
+                   placeholder="카카오 계정 입력"
+                   required>
+            <input type="email" 
+                   th:unless="${memberDTO != null and memberDTO.provider == 'kakao'}"
+                   name="mEmail" 
+                   th:value="${memberDTO != null ? memberDTO.mEmail : ''}" 
+                   class="input-box" 
+                   th:readonly="${memberDTO != null and memberDTO.provider != null and memberDTO.provider != 'local'}"
+                   placeholder="예) abc@gmail.com" 
+                   required>
+            <input type="hidden" name="mEmail" id="fullKakaoEmail" th:if="${memberDTO != null and memberDTO.provider == 'kakao'}">
           </div>
+          <div class="error-message" id="mEmailError"></div>
         </div>
 
         <div class="input-container">
@@ -105,8 +123,8 @@
             성별<span class="required">*</span>
           </label>
           <div class="gender-buttons">
-            <button type="button" class="gender-button" data-value="male">남자</button>
-            <button type="button" class="gender-button" data-value="female">여자</button>
+            <button type="button" class="gender-button" data-value="남자">남자</button>
+            <button type="button" class="gender-button" data-value="여자">여자</button>
           </div>
           <input type="hidden" name="gender" id="genderInput" required>
           <div class="error-message" id="genderError"></div>
@@ -299,10 +317,12 @@
         // 폼 제출 전 최종 검증
         form.addEventListener('submit', function(e) {
             e.preventDefault();
+            
             let isValid = true;
 
             // 모든 필수 입력 필드 검증
-            Object.keys(validationRules).forEach(fieldName => {
+            const requiredFields = ['mEmail', 'name', 'birthday', 'phone'];
+            requiredFields.forEach(fieldName => {
                 const input = document.querySelector(`input[name="${fieldName}"]`);
                 if (input && !input.classList.contains('valid')) {
                     isValid = false;
@@ -320,10 +340,16 @@
                 isValid = false;
             }
 
+            // 성별 선택 검증
+            const genderInput = document.getElementById('genderInput');
+            if (!genderInput.value) {
+                isValid = false;
+                document.getElementById('genderError').textContent = '성별을 선택해주세요.';
+                document.getElementById('genderError').style.display = 'block';
+            }
+
             if (isValid) {
                 this.submit();
-            } else {
-                alert('입력 정보를 다시 확인해주세요.');
             }
         });
 
@@ -400,6 +426,43 @@
                 allCheckbox.checked = allChecked;
             });
         });
+
+        // 카카오 이메일 처리
+        const kakaoEmail = document.getElementById('kakaoEmail');
+        const fullKakaoEmail = document.getElementById('fullKakaoEmail');
+        
+        if (kakaoEmail && fullKakaoEmail) {
+            // 초기값 설정
+            if (kakaoEmail.value) {
+                fullKakaoEmail.value = kakaoEmail.value + '@kakao.com';
+            }
+            
+            kakaoEmail.addEventListener('input', function() {
+                const prefix = this.value.trim();
+                fullKakaoEmail.value = prefix + '@kakao.com';
+                
+                // 이메일 유효성 검사 실행
+                const emailError = document.getElementById('mEmailError');
+                const email = fullKakaoEmail.value;
+                const emailRegex = /^[a-zA-Z0-9._-]+@kakao\.com$/;
+                
+                if (prefix === '') {
+                    emailError.textContent = '이메일을 입력해주세요.';
+                    emailError.style.display = 'block';
+                    this.classList.remove('valid');
+                    this.classList.add('invalid');
+                } else if (!emailRegex.test(email)) {
+                    emailError.textContent = '올바른 이메일 형식이 아닙니다.';
+                    emailError.style.display = 'block';
+                    this.classList.remove('valid');
+                    this.classList.add('invalid');
+                } else {
+                    emailError.style.display = 'none';
+                    this.classList.remove('invalid');
+                    this.classList.add('valid');
+                }
+            });
+        }
     });
   </script>
 

@@ -59,8 +59,8 @@ public class SecurityConfig {
             .formLogin()
                 .loginPage("/member/login")
                 .loginProcessingUrl("/member/login")
-                .defaultSuccessUrl("/home")
-                .failureUrl("/member/login?error=true")
+                .defaultSuccessUrl("/home", true)  // true를 추가하여 항상 홈으로 리다이렉트
+                .failureUrl("/member/login/error")  // 실패 URL 수정
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .successHandler((request, response, authentication) -> {

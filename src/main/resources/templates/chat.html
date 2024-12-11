@@ -3,333 +3,457 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>채팅 서비스</title>
+    <title>PETOPIA 채팅</title>
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
-        body {
-            font-family: 'Roboto', sans-serif;
+        /* Reset and Global Styles */
+        a, button, input, select, h1, h2, h3, h4, h5, * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background-color: #f4f7f6;
+            border: none;
+            text-decoration: none;
+            background: none;
+            -webkit-font-smoothing: antialiased;
         }
-        #chat-container {
-            width: 100%;
-            max-width: 500px;
-            margin: 50px auto;
-            border-radius: 10px;
-            background-color: white;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+        menu, ol, ul {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Chat UI Styles */
+        body {
+            font-family: 'Inter', sans-serif;
             display: flex;
-            flex-direction: column;
-        }
-        #chat-header {
-            background-color: #5c6bc0bd;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-size: 18px;
-            border-radius: 10px 10px 0 0;
-        }
-        #chat-messages {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 15px;
-            background-color: #f9f9f9;
-            border-bottom: 1px solid #ddd;
-            display: flex;
-            flex-direction: column;
-            height: 400px;
-        }
-        .message-wrapper {
-            display: flex;
-            margin: 10px 0;
-            align-items: flex-end;
-        }
-        .message-content {
-            max-width: 80%;
-            padding: 10px 15px;
-            border-radius: 20px;
-            word-wrap: break-word;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-        .message-text {
-            margin-bottom: 5px;
-        }
-        .message-time {
-            font-size: 0.7em;
-            color: #666;
-        }
-        .user-message .message-time {
-            align-self: flex-start;
-        }
-        .other-message .message-time {
-            align-self: flex-end;
-        }
-        .system-message {
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             background-color: #f0f0f0;
-            color: #666;
-            text-align: center;
-            font-style: italic;
-            align-self: center;
-            max-width: 100%;
-            width: 100%;
         }
-        .user-message-wrapper {
-            justify-content: flex-end;
-        }
-        .user-message {
-            background-color: #5c6bc0bd;
-            color: white;
-            border-radius: 13px ;
-            margin-left: auto;
-            position: relative;
-        }
-        .user-message::after {
-            content: '';
-            position: absolute;
-            right: -10px;
-            bottom: 10px;
-            border-left: 10px solid #5c6bc0bd;
-            border-top: 10px solid transparent;
-            border-bottom: 10px solid transparent;
-        }
-        .other-message-wrapper {
-            justify-content: flex-start;
-        }
-        .other-message {
-            background-color: #e2e3e5;
-            color: #333;
-            border-radius: 13px ;
-            margin-right: auto;
-            position: relative;
-        }
-        .other-message::after {
-            content: '';
-            position: absolute;
-            left: -10px;
-            bottom: 10px;
-            border-right: 10px solid #e2e3e5;
-            border-top: 10px solid transparent;
-            border-bottom: 10px solid transparent;
-        }
-        #chat-input1 {
+
+        .chat {
+            background: #ffffff;
+            padding: 30px 20px;
             display: flex;
-            padding: 15px;
-            border-top: 1px solid #ddd;
-            background-color: white;
-            border-radius: 0 0 10px 10px;
+            flex-direction: column;
+            gap: 10px;
+            align-items: flex-start;
+            justify-content: flex-start;
+            height: 852px;
+            width: 414px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            flex-direction: row;
             align-items: center;
             justify-content: space-between;
+            width: 100%;
+            height: 49px;
         }
-        #chat-input1 input[type="text"] {
-            padding: 12px;
-            border-radius: 25px;
-            border: 1px solid #ddd;
+
+        .petopia {
+            color: #000000;
+            font-weight: 700;
+            font-size: 20px;
+        }
+
+        /* Notification and Profile buttons */
+        .header .icon-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-list {
+            background: rgba(136, 184, 246, 0.15);
             flex-grow: 1;
+            width: 100%;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .message-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .system-message {
+            background: rgba(44, 116, 210, 0.22);
+            border-radius: 20px;
+            padding: 10px;
+            text-align: center;
+            font-size: 13px;
+            margin-bottom: 10px;
+        }
+
+        .chat-input {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            width: 100%;
+            align-items: center;
+        }
+
+        #message {
+            flex-grow: 1;
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 10px;
+            resize: none;
+            border: 1px solid #ddd;
+        }
+
+        .username-input {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            width: 100%;
+        }
+
+        #username {
+            width: 100%;
             font-size: 14px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px 0;
+        }
+
+        .footer-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        .footer-item img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .footer-item-text {
+            font-size: 11px;
+            color: #000;
+        }
+
+        /* Icons and Images */
+        .icon-button {
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-button img {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Added message styles */
+        .other-message {
+            background-color: #f0f0f0;
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 70%;
+            align-self: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .user-message {
+            background-color: rgba(136, 184, 246, 0.5);
+            border-radius: 10px;
+            padding: 10px;
+            max-width: 70%;
+            align-self: flex-end;
+            margin-bottom: 10px;
+        }
+
+        .attachment {
+            margin-top: 10px;
+        }
+
+        .attachment img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
+
+        .preview {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .preview img {
+            max-width: 50px;
+            max-height: 50px;
+            border-radius: 10px;
             margin-right: 10px;
         }
-        #chat-input1 button {
-            padding: 12px 20px;
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-        }
-        #file-input {
-            padding: 5px;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            background: none;
-        }
-        #username {
-            margin: 15px;
-            padding: 12px;
-            border-radius: 25px;
-            border: 1px solid #ddd;
-            width: 60%;
-            font-size: 14px;
-            margin-left: auto;
-            margin-right: auto;
-            display: block;
-        }
 
-        /* 버튼에 이미지 적용 */
-        #file-button {
-            width: 30px;
-            height: 30px;
-            background: url('images/camera0.svg') no-repeat center center;
-            background-size: contain;
-        }
-
-        #send-button {
-            width: 30px;
-            height: 30px;
-            background: url('images/send0.svg') no-repeat center center;
-            background-size: contain;
-        }
-
-        /* 파일 선택 input 숨기기 */
-        #file-select {
-            display: none;
+        #deleteIcon {
+            width: 20px;
         }
     </style>
 </head>
 <body>
-<div id="chat-container">
-    <div id="chat-header">채팅 서비스</div>
-    <div id="chat-messages"></div>
-    <div id="chat-input1">
-        <input type="text" id="message" placeholder="메세지를 입력해주세요." disabled/>
-        <button id="file-button" onclick="document.getElementById('file-select').click();" disabled></button> <!-- 파일 첨부 버튼 -->
-        <button id="send-button" onclick="sendMessage()" disabled></button> <!-- 전송 버튼 -->
-        <input type="file" id="file-select" onchange="handleFileSelect(event)">
+<div class="chat">
+    <div class="header">
+        <div class="petopia">PETOPIA</div>
+        <div class="icon-buttons">
+            <div class="icon-button">
+                <img src="/images/notification0.svg" alt="Notifications"/>
+            </div>
+            <div class="icon-button">
+                <img src="/images/group-500.svg" alt="Profile"/>
+            </div>
+        </div>
     </div>
-    <input type="text" id="username" placeholder="채팅에 사용할 이름 입력" />
+
+    <div class="chat-list" id="chatMessages">
+        <div class="message-container" id="messageContainer"></div>
+    </div>
+
+    <div class="username-input" id="usernameInput">
+        <label for="username">사용자 이름</label>
+        <input id="username" type="text" placeholder="사용자 이름을 입력하세요"/>
+        <button id="setUsername">확인</button>
+    </div>
+
+    <div class="preview" id="filePreview" style="display: none;">
+        <img id="previewImage" src="" alt="Preview"/>
+        <div class="delete-button" onclick="removeAttachedFile()">
+            <img id="deleteIcon" src="/images/deleteIcon.png" alt="Delete"/>
+        </div>
+    </div>
+
+    <div class="chat-input">
+        <div class="icon-button">
+            <img src="/images/camera0.svg" alt="Attach" id="attachButton"/>
+            <input type="file" id="fileInput" accept="image/*" style="display: none;"/>
+        </div>
+        <textarea id="message" placeholder="메세지를 입력해주세요." disabled></textarea>
+        <div class="icon-button" id="sendMessage" onclick="sendMessage()" style="display: none;">
+            <img src="/images/send0.svg" alt="Send"/>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="footer-item" id="calendarBtn">
+            <img src="/images/calendar1.svg" alt="Calendar"/>
+            <div class="footer-item-text">캘린더</div>
+        </div>
+        <div class="footer-item" id="walkBtn">
+            <img src="/images/location0.svg" alt="Walk"/>
+            <div class="footer-item-text">산책</div>
+        </div>
+        <div class="footer-item" id="homeBtn">
+            <img src="/images/home1.svg" alt="Home"/>
+            <div class="footer-item-text">홈</div>
+        </div>
+        <div class="footer-item" id="communityBtn">
+            <img src="/images/_3-user0.svg" alt="Community"/>
+            <div class="footer-item-text">커뮤니티</div>
+        </div>
+        <div class="footer-item" id="menuBtn">
+            <img src="/images/category0.svg" alt="Menu"/>
+            <div class="footer-item-text">메뉴</div>
+        </div>
+    </div>
 </div>
 
 <script>
-    var stompClient = null;
-    var username = null;
+    function removeAttachedFile() {
+        // 파일 미리보기 영역 숨기기
+        document.getElementById('filePreview').style.display = 'none';
 
-    function getCurrentTime() {
-        const now = new Date();
-        return now.toLocaleTimeString('ko-KR', {
-            hour: '2-digit',
-            minute: '2-digit',
-            hour12: false
-        });
+        // 파일 입력 필드 초기화
+        document.getElementById('fileInput').value = '';
     }
 
-    function connect() {
-        var socket = new SockJS('/chat');
-        stompClient = Stomp.over(socket);
+    document.addEventListener('DOMContentLoaded', () => {
+        var stompClient = null;
+        var username = '';
+        var fileInput = document.getElementById('fileInput');
+        var filePreview = document.getElementById('filePreview');
+        var previewImage = document.getElementById('previewImage');
 
-        stompClient.connect({}, function (frame) {
-            console.log('Connected: ' + frame);
-            updateConnectionStatus(true);
-
-            stompClient.subscribe('/topic/messages', function (message) {
-                showMessage(JSON.parse(message.body));
+        function getCurrentTime() {
+            const now = new Date();
+            return now.toLocaleTimeString('ko-KR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
             });
-
-            sendSystemMessage(username + " 님이 채팅에 참여하셨습니다.");
-        });
-    }
-
-    function showMessage(message) {
-        var messagesDiv = document.getElementById("chat-messages");
-        var messageWrapper = document.createElement("div");
-        var messageContent = document.createElement("div");
-        var messageText = document.createElement("div");
-        var messageTime = document.createElement("div");
-
-        const time = message.timestamp || getCurrentTime();
-
-        if (message.type === "system") {
-            messageWrapper.className = "message-wrapper";
-            messageContent.className = "message-content system-message";
-            messageContent.textContent = message.content;
-        } else if (message.username === username) {
-            messageWrapper.className = "message-wrapper user-message-wrapper";
-            messageContent.className = "message-content user-message";
-            messageText.textContent = "You: " + message.content;
-            messageText.className = "message-text";
-            messageTime.textContent = time;
-            messageTime.className = "message-time";
-
-            messageContent.appendChild(messageText);
-            messageContent.appendChild(messageTime);
-        } else {
-            messageWrapper.className = "message-wrapper other-message-wrapper";
-            messageContent.className = "message-content other-message";
-            messageText.textContent = message.username + ": " + message.content;
-            messageText.className = "message-text";
-            messageTime.textContent = time;
-            messageTime.className = "message-time";
-
-            messageContent.appendChild(messageText);
-            messageContent.appendChild(messageTime);
         }
 
-        messageWrapper.appendChild(messageContent);
-        messagesDiv.appendChild(messageWrapper);
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    }
+        const usernameInput = document.getElementById('username');
+        const setUsernameBtn = document.getElementById('setUsername');
+        const messageInput = document.getElementById('message');
+        const sendMessageBtn = document.getElementById('sendMessage');
+        const messageContainer = document.getElementById('messageContainer');
 
-    function sendMessage() {
-        var messageInput = document.getElementById("message");
-        var message = messageInput.value.trim();
-        if (message) {
+        function connect() {
+            var socket = new SockJS('/ws/chat');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+
+                stompClient.subscribe('/topic/messages', function (message) {
+                    showMessage(JSON.parse(message.body));
+                });
+
+                // Send system message for user joining
+                sendSystemMessage(username + " 님이 채팅에 참여하셨습니다.");
+            });
+        }
+
+        function showMessage(message) {
+            const messageElem = document.createElement('div');
+
+            if (message.type === "system") {
+                messageElem.classList.add('system-message');
+                messageElem.textContent = message.content;
+            } else {
+                const isSelf = message.username === username;
+                messageElem.classList.add(isSelf ? 'user-message' : 'other-message');
+
+                const usernameSpan = document.createElement('strong');
+                usernameSpan.textContent = isSelf ? '' : message.username;
+
+                const messageText = document.createElement('div');
+                messageText.textContent = message.content;
+
+                messageElem.appendChild(usernameSpan);
+                messageElem.appendChild(messageText);
+
+                // If there's an attachment, show it for both sent and received messages
+                if (message.attachment) {
+                    const attachmentElem = document.createElement('div');
+                    attachmentElem.classList.add('attachment');
+                    const attachmentImage = document.createElement('img');
+                    attachmentImage.src = message.attachment; // URL 사용
+                    attachmentElem.appendChild(attachmentImage);
+                    messageElem.appendChild(attachmentElem);
+                }
+
+                // Add the time span at the end
+                const timeSpan = document.createElement('small');
+                timeSpan.textContent = message.timestamp || getCurrentTime();
+                timeSpan.style.display = 'block';
+                timeSpan.style.fontSize = '0.8em';
+                timeSpan.style.color = '#666';
+                timeSpan.style.marginTop = '5px';
+                timeSpan.style.textAlign = isSelf ? 'right' : 'left';
+
+                messageElem.appendChild(timeSpan);
+            }
+
+            messageContainer.appendChild(messageElem);
+            scrollToBottom();
+        }
+
+        function sendMessage() {
+            const message = messageInput.value.trim();
+            if (message || fileInput.files.length > 0) {
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('content', message);
+                let attachmentUrl = null;
+
+                if (fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    attachmentUrl = URL.createObjectURL(file); // 선택한 파일의 URL 생성
+                }
+
+                // Send the message via WebSocket
+                stompClient.send("/app/sendMessage", {}, JSON.stringify({
+                    username: username,
+                    content: message,
+                    type: "chat",
+                    timestamp: getCurrentTime(),
+                    attachment: attachmentUrl // 생성된 URL 사용
+                }));
+
+                fileInput.value = ''; // Clear the file input
+                messageInput.value = ''; // Clear the message input
+                filePreview.style.display = 'none'; // Hide the preview
+            }
+        }
+
+        function sendSystemMessage(content) {
             stompClient.send("/app/sendMessage", {}, JSON.stringify({
                 username: username,
-                content: message,
-                type: "chat",
+                content: content,
+                type: "system",
                 timestamp: getCurrentTime()
             }));
-            messageInput.value = "";
         }
-    }
 
-    function sendSystemMessage(content) {
-        stompClient.send("/app/sendMessage", {}, JSON.stringify({
-            username: username,
-            content: content,
-            type: "system",
-            timestamp: getCurrentTime()
-        }));
-    }
-
-    function updateConnectionStatus(connected) {
-        const messageInput = document.getElementById("message");
-        const sendButton = document.getElementById("send-button");
-        const fileButton = document.getElementById("file-button");
-
-        if (connected) {
-            messageInput.disabled = false;
-            sendButton.disabled = false;
-            fileButton.disabled = false;
-        } else {
-            messageInput.disabled = true;
-            sendButton.disabled = true;
-            fileButton.disabled = true;
+        function scrollToBottom() {
+            const chatList = document.querySelector('.chat-list');
+            chatList.scrollTop = chatList.scrollHeight;
         }
-    }
 
-    function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (file) {
-            // 파일 처리 로직 (예: 서버로 전송)
-            sendFileMessage(file);
-        }
-    }
+        // Username input handling
+        setUsernameBtn.addEventListener('click', () => {
+            const inputUsername = usernameInput.value.trim();
+            if (inputUsername) {
+                username = inputUsername;
+                usernameInput.disabled = true;
+                setUsernameBtn.disabled = true;
+                document.getElementById('usernameInput').style.display = 'none';
+                messageInput.disabled = false;
+                sendMessageBtn.style.display = 'block'; // Show send button
+                connect();
+            }
+        });
 
-    function sendFileMessage(file) {
-        const formData = new FormData();
-        formData.append("file", file);
-        // 여기에 파일을 전송할 서버 엔드포인트를 추가하세요.
-        // 예를 들어, Ajax를 사용하여 서버로 파일을 전송할 수 있습니다.
-        alert('파일이 첨부되었습니다: ' + file.name);
-    }
+        // Send message on Enter key
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
 
-    // 사용자 이름 입력 후 엔터 눌렀을 때 채팅 연결
-    document.getElementById("username").addEventListener("keypress", function (e) {
-        if (e.key === "Enter" && this.value.trim()) {
-            username = this.value.trim();
-            this.disabled = true;
-            connect();
-        }
-    });
-
-    // 메세지 입력 후 엔터 눌렀을 때 전송
-    document.getElementById("message").addEventListener("keypress", function (e) {
-        if (e.key === "Enter") {
+        // Send message when send button is clicked
+        sendMessageBtn.addEventListener('click', () => {
             sendMessage();
-        }
+        });
+
+        // File input handling (camera button)
+        document.getElementById('attachButton').addEventListener('click', () => {
+            fileInput.click();
+        });
+
+        // Handle file selection
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    previewImage.src = event.target.result; // Set the preview image source
+                    filePreview.style.display = 'flex'; // Show the preview
+                    messageInput.placeholder = ''; // Clear the placeholder
+                };
+                reader.readAsDataURL(file); // Read the file as a data URL
+            }
+        });
     });
 </script>
 </body>

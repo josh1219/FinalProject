@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PETOPIA 채팅 목록</title>
+  <style>
+    /* Reset and Global Styles */
+    a, button, input, select, h1, h2, h3, h4, h5, * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        border: none;
+        text-decoration: none;
+        background: none;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    menu, ol, ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Chat List UI Styles */
+    body {
+        font-family: 'Inter', sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f0f0f0;
+    }
+
+    .chat {
+        background: #ffffff;
+        padding: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+        justify-content: flex-start;
+        height: 852px;
+        width: 414px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .header {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .petopia {
+        color: #000000;
+        font-weight: 700;
+        font-size: 20px;
+        margin-bottom: 5px;
+    }
+
+    .subtitle {
+        color: #2C74D2;
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .header .icon-buttons {
+        position: absolute;
+        top: 30px;
+        right: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .chat-list {
+        background: rgba(136, 184, 246, 0.15);
+        flex-grow: 1;
+        width: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding: 10px;
+        scroll-behavior: smooth;
+        position: relative;
+    }
+
+    /* 스크롤바 스타일링 */
+    .chat-list::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .chat-list::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 3px;
+    }
+
+    .chat-list::-webkit-scrollbar-thumb {
+        background: rgba(44, 116, 210, 0.5);
+        border-radius: 3px;
+        transition: background 0.3s ease;
+    }
+
+    .chat-list::-webkit-scrollbar-thumb:hover {
+        background: rgba(44, 116, 210, 0.7);
+    }
+
+    .chat-list-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin: 12px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .chat-list-title span {
+        color: #2C74D2;
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+    }
+
+    .select-btn {
+        background: transparent;
+        color: #2C74D2;
+        border: none;
+        padding: 6px 0 6px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .select-actions {
+        display: none;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px 15px;
+        background: #fff;
+        border-bottom: 1px solid #eee;
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .select-actions.visible {
+        display: flex;
+    }
+
+    .select-all-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-left: -5px;
+    }
+
+    .select-all-container input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #2C74D2;
+    }
+
+    .select-all-container label {
+        font-size: 14px;
+        color: #444;
+        font-weight: 500;
+        user-select: none;
+        cursor: pointer;
+    }
+
+    .delete-selected {
+        background: transparent;
+        color: #ff4444;
+        padding: 6px 0;
+        margin-right: -5px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .delete-selected::before {
+        font-size: 14px;
+    }
+
+    /* 채팅 아이템의 체크박스도 동일한 스타일 적용 */
+    .chat-checkbox {
+        width: 18px;
+        height: 18px;
+        cursor: pointer;
+        accent-color: #2C74D2;
+    }
+
+    .chat-item.selected {
+        background-color: white;
+    }
+
+    .chat-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 5px;
+        border-bottom: 1px solid #eee;
+        position: relative;
+        background: white;
+        gap: 6px;
+    }
+
+    .chat-item .checkbox-wrapper {
+        display: none;
+        margin-left: 5px;
+    }
+
+    .chat-list.selection-mode .checkbox-wrapper {
+        display: flex;
+    }
+
+    .chat-item .profile-image {
+        width: 45px;
+        height: 45px;
+    }
+
+    .chat-item-details {
+        flex-grow: 1;
+        min-width: 0;
+    }
+
+    .chat-item-name {
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .chat-item-last-message {
+        color: #666;
+        font-size: 13px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .chat-item-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+    }
+
+    .chat-item-time {
+        color: #999;
+        font-size: 12px;
+        margin-bottom: 4px;
+    }
+
+    .chat-item-unread {
+        background-color: #2C74D2;
+        color: white;
+        border-radius: 50%;
+        width: 18px;
+        height: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+    }
+
+    .delete-btn {
+        position: absolute;
+        right: -80px;
+        top: 0;
+        height: 100%;
+        background: linear-gradient(135deg, #ff4d4f 0%, #f5222d 100%);
+        color: white;
+        border: none;
+        width: 80px;
+        font-size: 15px;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        transition: all 0.3s ease;
+        visibility: hidden;
+        opacity: 0;
+        box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .delete-btn .icon {
+        font-size: 24px;
+        margin-bottom: 2px;
+    }
+
+    .delete-btn .text {
+        font-size: 13px;
+        font-weight: 500;
+    }
+
+    .chat-item.swiped .delete-btn {
+        right: 0;
+        visibility: visible;
+        opacity: 1;
+    }
+
+    .delete-btn:active {
+        background: linear-gradient(135deg, #ff7875 0%, #ff4d4f 100%);
+        transform: scale(0.98);
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-2px) rotate(-1deg); }
+        75% { transform: translateX(2px) rotate(1deg); }
+    }
+
+    .chat-item.swiped .delete-btn:hover {
+        animation: shake 0.3s ease-in-out;
+    }
+
+    .chat-item.swiped .delete-btn .icon {
+        animation: bounce 0.6s ease infinite;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-3px); }
+    }
+
+    .footer {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        padding: 10px 0;
+    }
+
+    .footer-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+    }
+
+    .footer-item img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .footer-item-text {
+        font-size: 11px;
+        color: #000;
+    }
+
+    .icon-button {
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .icon-button img {
+        width: 24px;
+        height: 24px;
+    }
+
+    /* 스크롤 위치 표시기 */
+    .scroll-indicator {
+        position: absolute;
+        top: 50px;  /* chat-list-title 아래에 위치 */
+        left: 50%;
+        transform: translateX(-50%) translateY(-50%);
+        background: #2C74D2;
+        color: white;
+        padding: 8px 15px;
+        border-radius: 20px;
+        font-size: 13px;
+        opacity: 0;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        white-space: nowrap;
+    }
+
+    .scroll-indicator.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+
+    .scroll-indicator:hover {
+        background: #1e5bb0;
+    }
+
+    .no-chat-message {
+        display: none;
+        text-align: center;
+        padding: 30px 20px;
+        color: #666;
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    .no-chat-message .icon {
+        font-size: 40px;
+        color: #2C74D2;
+        margin-bottom: 12px;
+    }
+
+    .no-chat-message .main-text {
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+    }
+
+    .no-chat-message div {
+        font-size: 13px;
+    }
+
+    .no-chat-message.visible {
+        display: block;
+    }
+  </style>
+</head>
+<body>
+<div class="chat">
+  <div class="header">
+    <div class="petopia">PETOPIA</div>
+    <div class="icon-buttons">
+      <div class="icon-button">
+        <img src="/images/notification0.svg" alt="Notifications"/>
+      </div>
+      <div class="icon-button">
+        <img src="/images/group-500.svg" alt="Profile"/>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-list">
+    <div class="chat-list-title">
+      <span>채팅 목록</span>
+      <button class="select-btn">목록 선택</button>
+    </div>
+    <div class="select-actions">
+      <div class="select-all-container">
+        <input type="checkbox" id="selectAll">
+        <label for="selectAll">전체 선택</label>
+      </div>
+      <button class="delete-selected">삭제</button>
+    </div>
+    <div class="no-chat-message">
+      <div class="icon">💬</div>
+      <div class="main-text">진행 중인 채팅이 없습니다</div>
+      <div>새로운 채팅을 시작해보세요!</div>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">문훈교</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">짱구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    <div class="chat-item">
+      <div class="checkbox-wrapper">
+        <input type="checkbox" class="chat-checkbox">
+      </div>
+      <img src="/images/div0.png" alt="보리" class="profile-image">
+      <div class="chat-item-details">
+        <div class="chat-item-name">맹구</div>
+        <div class="chat-item-last-message">집 앞에서 봐요 기다릴게요^^</div>
+      </div>
+      <div class="chat-item-meta">
+        <div class="chat-item-time">오후 3:45</div>
+        <div class="chat-item-unread">1</div>
+      </div>
+      <button class="delete-btn">
+        <div class="icon">🗑️</div>
+        <div class="text">삭제</div>
+      </button>
+    </div>
+    
+    <!-- Add other chat items similarly -->
+  </div>
+  <div class="scroll-indicator">
+    새로운 메시지가 있습니다
+  </div>
+
+  <div class="footer">
+    <div class="footer-item" id="calendarBtn">
+      <img src="/images/calendar1.svg" alt="Calendar"/>
+      <div class="footer-item-text">캘린더</div>
+    </div>
+    <div class="footer-item" id="walkBtn">
+      <img src="/images/location0.svg" alt="Walk"/>
+      <div class="footer-item-text">산책</div>
+    </div>
+    <div class="footer-item" id="homeBtn">
+      <img src="/images/home1.svg" alt="Home"/>
+      <div class="footer-item-text">홈</div>
+    </div>
+    <div class="footer-item" id="communityBtn">
+      <img src="/images/_3-user0.svg" alt="Community"/>
+      <div class="footer-item-text">커뮤니티</div>
+    </div>
+    <div class="footer-item" id="menuBtn">
+      <img src="/images/category0.svg" alt="Menu"/>
+      <div class="footer-item-text">메뉴</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentSwipedItem = null;
+  let lastScrollTop = 0;
+  const chatList = document.querySelector('.chat-list');
+  const scrollIndicator = document.querySelector('.scroll-indicator');
+
+  // 스크롤 위치 감지 및 표시기 제어
+  chatList.addEventListener('scroll', () => {
+    const scrollTop = chatList.scrollTop;
+    const scrollHeight = chatList.scrollHeight;
+    const clientHeight = chatList.clientHeight;
+    
+    // 스크롤이 맨 아래가 아닐 때만 표시기 보이기
+    if (scrollHeight - scrollTop - clientHeight > 100) {
+      scrollIndicator.classList.add('visible');
+    } else {
+      scrollIndicator.classList.remove('visible');
+    }
+    
+    lastScrollTop = scrollTop;
+  });
+
+  // 스크롤 표시기 클릭 시 맨 아래로 스크롤
+  scrollIndicator.addEventListener('click', () => {
+    chatList.scrollTo({
+      top: chatList.scrollHeight,
+      behavior: 'smooth'
+    });
+  });
+
+  // 새 메시지 추가 시 자동 스크롤 (예시 함수)
+  function addNewMessage(messageHtml) {
+    const wasAtBottom = chatList.scrollHeight - chatList.clientHeight <= chatList.scrollTop + 1;
+    
+    // 새 메시지 추가
+    chatList.insertAdjacentHTML('beforeend', messageHtml);
+    
+    // 이전에 스크롤이 맨 아래였다면 자동 스크롤
+    if (wasAtBottom) {
+      chatList.scrollTo({
+        top: chatList.scrollHeight,
+        behavior: 'smooth'
+      });
+    } else {
+      scrollIndicator.classList.add('visible');
+    }
+  }
+
+  // 채팅 목록 상태 체크 함수
+  function checkChatList() {
+    const chatList = document.querySelector('.chat-list');
+    const chatItems = chatList.querySelectorAll('.chat-item');
+    const noChatMessage = chatList.querySelector('.no-chat-message');
+    const selectBtn = document.querySelector('.select-btn');
+    
+    if (chatItems.length === 0) {
+      noChatMessage.classList.add('visible');
+      selectBtn.style.display = 'none';
+      // 선택 모드였다면 해제
+      if (chatList.classList.contains('selection-mode')) {
+        chatList.classList.remove('selection-mode');
+        document.querySelector('.select-actions').style.display = 'none';
+      }
+    } else {
+      noChatMessage.classList.remove('visible');
+      selectBtn.style.display = 'block';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const selectBtn = document.querySelector('.select-btn');
+    const selectActions = document.querySelector('.select-actions');
+    const checkboxes = document.querySelectorAll('.chat-checkbox');
+    const selectAllCheckbox = document.querySelector('#selectAll');
+    const deleteSelectedBtn = document.querySelector('.delete-selected');
+    
+    let isSelectMode = false;
+
+    selectBtn.addEventListener('click', function() {
+      isSelectMode = !isSelectMode;
+      chatList.classList.toggle('selection-mode');
+      selectActions.style.display = isSelectMode ? 'flex' : 'none';
+      selectBtn.textContent = isSelectMode ? '취소' : '목록 선택';
+      
+      // Reset checkboxes when exiting selection mode
+      if (!isSelectMode) {
+        const checkboxes = document.querySelectorAll('.chat-item input[type="checkbox"]');
+        checkboxes.forEach(checkbox => checkbox.checked = false);
+        selectAllCheckbox.checked = false;
+      }
+    });
+
+    selectAllCheckbox.addEventListener('change', function() {
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = this.checked;
+      });
+    });
+
+    // Update selectAll checkbox state when individual checkboxes change
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+        selectAllCheckbox.checked = allChecked;
+      });
+    });
+
+    deleteSelectedBtn.addEventListener('click', function() {
+      const checkedItems = document.querySelectorAll('.chat-checkbox:checked');
+      if (checkedItems.length === 0) {
+        alert('선택된 채팅이 없습니다.');
+        return;
+      }
+      
+      if (confirm('선택한 채팅방을 삭제하시겠습니까?')) {
+        checkedItems.forEach(checkbox => {
+          checkbox.closest('.chat-item').remove();
+        });
+        selectAllCheckbox.checked = false;
+        // 삭제 후 채팅방 상태 체크
+        checkChatList();
+      }
+    });
+  });
+
+  document.querySelectorAll('.chat-item').forEach(item => {
+    let startX = 0, isSwiping = false;
+
+    item.addEventListener('touchstart', e => {
+      startX = e.touches[0].clientX;
+      // 다른 슬라이드된 항목이 있다면 원위치시킴
+      if (currentSwipedItem && currentSwipedItem !== item) {
+        currentSwipedItem.classList.remove('swiped');
+        currentSwipedItem = null;
+      }
+    });
+
+    item.addEventListener('touchmove', e => {
+      const diffX = e.touches[0].clientX - startX;
+
+      if (diffX < -30) {
+        isSwiping = true;
+        item.classList.add('swiped');
+        currentSwipedItem = item;
+        e.preventDefault();
+      } else if (diffX > 30 && isSwiping) {
+        isSwiping = false;
+        item.classList.remove('swiped');
+        currentSwipedItem = null;
+        e.preventDefault();
+      }
+    });
+
+    item.addEventListener('touchend', () => {
+      if (!isSwiping) {
+        item.classList.remove('swiped');
+        currentSwipedItem = null;
+      }
+    });
+
+    item.querySelector('.delete-btn').addEventListener('click', () => {
+      const userName = item.querySelector('.chat-item-name').textContent;
+      if (confirm(`${userName}님과의 채팅방을 삭제하시겠습니까?`)) {
+        item.remove();
+        currentSwipedItem = null;
+        checkChatList(); // 채팅방 삭제 후 상태 체크
+      } else {
+        // 삭제를 취소한 경우 슬라이드를 원위치시킴
+        item.classList.remove('swiped');
+        currentSwipedItem = null;
+      }
+    });
+  });
+
+  // 초기 채팅 목록 상태 체크
+  checkChatList();
+
+  // 스크롤 차단 방지 (항상 chat-list는 수직 스크롤만 유지)
+  document.querySelector('.chat-list').addEventListener('touchmove', e => {
+    const scrollTop = e.target.scrollTop;
+    const scrollHeight = e.target.scrollHeight;
+    const offsetHeight = e.target.offsetHeight;
+    const atTop = scrollTop === 0;
+    const atBottom = scrollTop + offsetHeight >= scrollHeight;
+
+    if (atTop && e.touches[0].clientY > 0 || atBottom && e.touches[0].clientY < 0) {
+      e.preventDefault();
+    }
+  });
+
+  // 채팅 목록 영역 외의 터치 시 슬라이드 닫기
+  document.addEventListener('touchstart', (e) => {
+    if (!e.target.closest('.chat-item') && currentSwipedItem) {
+      currentSwipedItem.classList.remove('swiped');
+      currentSwipedItem = null;
+    }
+  });
+</script>
+
+</body>
+</html>

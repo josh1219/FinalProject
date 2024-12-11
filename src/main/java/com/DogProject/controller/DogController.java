@@ -119,7 +119,7 @@ public class DogController {
             Dog dog = dogService.getDogById(dIdx);
             
             // 현재 로그인한 회원의 강아지인지 확인
-            if (!dog.getMember().getMIdx().equals(member.getMIdx())) {
+            if (dog.getMember().getMIdx() != member.getMIdx()) {
                 throw new AccessDeniedException("해당 강아지를 수정할 권한이 없습니다.");
             }
 
@@ -159,7 +159,7 @@ public class DogController {
             Dog existingDog = dogService.getDogById(dIdx);
 
             // 현재 로그인한 회원의 강아지인지 확인
-            if (!existingDog.getMember().getMIdx().equals(member.getMIdx())) {
+            if (existingDog.getMember().getMIdx() != member.getMIdx()) {
                 throw new AccessDeniedException("해당 강아지의 정보를 수정할 권한이 없습니다.");
             }
 

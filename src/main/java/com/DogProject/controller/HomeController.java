@@ -72,4 +72,10 @@ public class HomeController {
         
         return "home";
     }
+
+    @GetMapping("/")
+    public String root(Model model) {
+        // 루트 경로 접근 시 home 페이지로 리다이렉트
+        return "redirect:/home";
+    }
 }

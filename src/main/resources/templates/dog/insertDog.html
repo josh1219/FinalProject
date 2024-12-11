@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/dog.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 0rem;
+            border-bottom: 2px solid #eee;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .header img {
+            max-height: 24px;
+            width: auto;
+        }
+
+        .header a {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-button {
+            font-size: 1.5rem;
+            color: #333;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .page-title {
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .page-title h2 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .img-container {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .img-area {
+            flex: 1;
+            text-align: center;
+            padding: 1rem;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            margin: 1rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .img-preview-area {
+            min-height: 200px;
+        }
+
+        .img-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            padding-top: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .img-button {
+            padding: 0.5rem;
+            background-color: white;
+            border: 1px solid #000000;
+            color: #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .img-button:hover {
+            background-color: #f8f9fa;
+        }
+
+        .img-button img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .img-preview {
+            max-width: 100%;
+            max-height: 190px;
+            margin: 0.5rem auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            width: 100%;
+            position: relative;
+            z-index: 3;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .submit-button {
+            grid-column: 1 / -1;
+            width: 100%;
+            padding: 1rem;
+            background-color: #000000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .form-content {
+            padding-top: 2rem;
+            margin-top: 2rem;
+        }
+
+        .form-group h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            padding-top: 0rem;
+        }
+
+        /* 모바일 화면 (568px 미만) */
+        @media all and (max-width: 567px) {
+            .container {
+                padding: 0.8rem;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .header {
+                padding: 0 0.5rem;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .back-button {
+                padding: 0.5rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+            }
+
+            .img-area {
+                padding: 1rem;
+                min-height: 200px;
+                position: initial;
+            }
+
+            .form-control {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .submit-button {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 태블릿 및 중간 크기 화면 (568px - 1133px) */
+        @media all and (min-width: 568px) and (max-width: 1133px) {
+            .container {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+
+            .header {
+                padding: 0 1rem;
+            }
+
+            .form-content {
+                padding-top: 1.5rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.2rem;
+            }
+
+            .img-area {
+                padding: 1rem;
+                min-height: 200px;
+                position: initial;
+            }
+
+            .form-control {
+                padding: 0.7rem;
+            }
+        }
+
+        /* 큰 화면 (1133px 초과) */
+        @media all and (min-width: 1134px) {
+            .container {
+                max-width: 1200px;
+                padding: 2rem;
+                margin: 1rem auto;
+            }
+
+            .header {
+                padding: 0 2rem;
+            }
+
+            .form-content {
+                padding-top: 2rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .img-area {
+                padding: 1.5rem;
+                min-height: 250px;
+                position: initial;
+            }
+
+            .form-control {
+                padding: 1rem;
+            }
+            
+            .img-buttons {
+                gap: 3.5rem;
+            }
+
+            .img-preview {
+                max-height: 230px;
+            }
+        }
+    </style>
+    <title>PETOPIA - 강아지 등록</title>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-button">←</a>
+            <div class="logo">PETOPIA</div>
+            <a onclick="location.href='/member/login'"><img src="/images/home1.svg"></a>
+        </div>
+        
+        <form action="/dog/insert" method="post" enctype="multipart/form-data" class="dog-form">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <div class="form-content">
+                <div class="form-group">
+                    <h2>강아지 등록</h2>
+                </div>
+
+                <div class="form-group">
+                    <label>강아지 사진</label>
+                    <div class="img-container">
+                        <div class="img-area">
+                            <div class="img-preview-area">
+                                <img id="preview" class="img-preview" src="/images/dogdefault.png">
+                            </div>
+                        </div>
+                        <div class="img-buttons">
+                            <label for="camera-input" class="img-button">
+                                <img src="/images/camera-1.svg" alt="카메라">
+                            </label>
+                            <label for="photo-input" class="img-button">
+                                <img src="/images/photo-1.svg" alt="사진">
+                            </label>
+                            <button type="button" class="img-button" onclick="removeImage()">
+                                <img src="/images/trash.svg" alt="제거">
+                            </button>
+                        </div>
+                        <input type="file" id="camera-input" name="image" accept="image/*" capture="camera" class="file-input" onchange="previewImage(this)">
+                        <input type="file" id="photo-input" name="image" accept="image/*" class="file-input" onchange="previewImage(this)">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="dType">강아지 종류</label>
+                    <input type="text" id="dType" name="dType" class="form-control" required>
+                    <small class="text-muted">* 강아지 종류가 다를 경우 직접 입력해주세요.</small>
+                </div>
+
+                <div class="form-group">
+                    <label for="name">강아지 이름</label>
+                    <input type="text" id="name" name="name" class="form-control" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="birthday">강아지 생일</label>
+                    <input type="date" id="birthday" name="birthday" class="form-control" required onchange="calculateAge(this.value)">
+                </div>
+
+                <div class="form-group">
+                    <label for="age">강아지 나이</label>
+                    <input type="text" id="age" name="age" class="form-control" required min="0" readonly>
+                    <small class="text-muted">* 생일 선택 시 자동으로 계산됩니다.</small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="gender">강아지 성별</label>
+                    <select id="gender" name="gender" class="form-control" required>
+                        <option value="">선택하세요</option>
+                        <option value="male">남아</option>
+                        <option value="female">여아</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-button">마이펫 등록</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function previewImage(input) {
+            const preview = document.getElementById('preview');
+            const previewArea = document.querySelector('.img-preview-area');
+            
+            if (input.files && input.files[0]) {
+                // 파일 크기 체크 (50MB = 50 * 1024 * 1024 bytes)
+                const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+                if (input.files[0].size > maxSize) {
+                    alert('이미지 크기는 50MB 이하만 등록 가능합니다.');
+                    input.value = ''; // 파일 선택 초기화
+                    preview.src = '/images/dogdefault.png';
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                preview.src = '/images/dogdefault.png';
+            }
+        }
+
+        function removeImage() {
+            const preview = document.getElementById('preview');
+            const cameraInput = document.getElementById('camera-input');
+            const photoInput = document.getElementById('photo-input');
+            
+            // 이미지를 기본 이미지로 변경
+            preview.src = '/images/dogdefault.png';
+            
+            // 파일 입력 초기화
+            cameraInput.value = '';
+            photoInput.value = '';
+        }
+
+        function calculateAge(birthday) {
+            const birthDate = new Date(birthday);
+            const today = new Date();
+            
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            document.getElementById('age').value = age + 1;
+        }
+
+        document.getElementById('birthday').addEventListener('change', function() {
+            calculateAge(this.value);
+        });
+    </script>
+</body>
+</html>

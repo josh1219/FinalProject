@@ -3,13 +3,20 @@ package com.DogProject.entity;
 import javax.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.hibernate.annotations.Comment;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Dog {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,11 +43,8 @@ public class Dog {
     @Comment("강아지와 연결된 회원 고유 ID")
     private Member member;
 
-    @OneToMany(mappedBy = "dog")
-    @Comment("강아지의 예방 접종 기록")
-    private List<Vaccination> vaccinations;
-
-    @OneToMany(mappedBy = "dog")
+    @Builder.Default
+    @OneToMany(mappedBy = "dog", cascade = CascadeType.ALL)
     @Comment("강아지의 일정")
-    private List<Schedule> schedules;
+    private List<Schedule> schedules = new ArrayList<>();
 }

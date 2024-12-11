@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=chrome">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/dog.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 0rem;
+            border-bottom: 2px solid #eee;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .header img {
+            max-height: 24px;
+            width: auto;
+        }
+
+        .header a {
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .back-button {
+            font-size: 1.5rem;
+            color: #333;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            white-space: nowrap;
+        }
+
+        .page-title {
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .page-title h2 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .top-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .img-container {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .img-area {
+            flex: 1;
+            text-align: center;
+            padding: 1rem;
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+            margin: 1rem 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .img-preview-area {
+            min-height: 200px;
+        }
+
+        .img-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            padding-top: 1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .img-button {
+            padding: 0.5rem;
+            background-color: white;
+            border: 1px solid #000000;
+            color: #007bff;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .img-button:hover {
+            background-color: #f8f9fa;
+        }
+
+        .img-button img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .img-preview {
+            max-width: 100%;
+            max-height: 190px;
+            margin: 0.5rem auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: block;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+            width: 100%;
+            position: relative;
+            z-index: 3;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .submit-button {
+            grid-column: 1 / -1;
+            width: 100%;
+            padding: 1rem;
+            background-color: #000000;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+
+        .form-content {
+            padding-top: 2rem;
+            margin-top: 2rem;
+        }
+
+        .form-group h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            padding-top: 0rem;
+        }
+
+        /* 모바일 화면 (568px 미만) */
+        @media all and (max-width: 567px) {
+            .container {
+                padding: 0.8rem;
+                margin: 0;
+                border-radius: 0;
+            }
+
+            .header {
+                padding: 0 0.5rem;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .back-button {
+                padding: 0.5rem;
+            }
+
+            .form-group {
+                margin-bottom: 1rem;
+            }
+
+            .form-group label {
+                font-size: 0.9rem;
+            }
+
+            .img-area {
+                padding: 1rem;
+                min-height: 200px;
+                position: initial;
+            }
+
+            .form-control {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+
+            .submit-button {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+
+        /* 태블릿 및 중간 크기 화면 (568px - 1133px) */
+        @media all and (min-width: 568px) and (max-width: 1133px) {
+            .container {
+                padding: 1rem;
+                margin: 0.5rem;
+            }
+
+            .header {
+                padding: 0 1rem;
+            }
+
+            .form-content {
+                padding-top: 1.5rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.2rem;
+            }
+
+            .img-area {
+                padding: 1rem;
+                min-height: 200px;
+                position: initial;
+            }
+
+            .form-control {
+                padding: 0.7rem;
+            }
+        }
+
+        /* 큰 화면 (1133px 초과) */
+        @media all and (min-width: 1134px) {
+            .container {
+                max-width: 1200px;
+                padding: 2rem;
+                margin: 1rem auto;
+            }
+
+            .header {
+                padding: 0 2rem;
+            }
+
+            .form-content {
+                padding-top: 2rem;
+            }
+
+            .form-group {
+                margin-bottom: 1.5rem;
+            }
+
+            .img-area {
+                padding: 1.5rem;
+                min-height: 250px;
+                position: initial;
+            }
+
+            .form-control {
+                padding: 1rem;
+            }
+            
+            .img-buttons {
+                gap: 3.5rem;
+            }
+
+            .img-preview {
+                max-height: 230px;
+            }
+        }
+    </style>
+    <title>PETOPIA - 강아지 정보 수정</title>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-button">←</a>
+            <div class="logo">PETOPIA</div>
+            <a onclick="location.href='/member/login'"><img src="/images/home1.svg"></a>
+        </div>
+        
+        <div class="page-title">
+            <h2>강아지 정보 수정</h2>
+        </div>
+
+        <form th:action="@{/dog/update/{dIdx}(dIdx=${dog.DIdx})}" method="post" enctype="multipart/form-data">
+            <div class="top-section">
+                <div class="img-container">
+                    <div class="img-area">
+                        <img th:if="${file != null}" th:src="@{'/static/uploads/' + ${file.fileSaveName}}" id="preview" alt="강아지 사진" style="max-width: 300px;">
+                        <img th:unless="${file != null}" id="preview" style="display: none; max-width: 300px;">
+                        <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(this)">
+                        <button type="button" onclick="removeImage()" class="remove-btn">이미지 제거</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="name">이름</label>
+                <input type="text" id="name" name="name" th:value="${dog.name}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="birthday">생년월일</label>
+                <input type="date" id="birthday" name="birthday" th:value="${dog.birthday}" required onchange="calculateAge(this.value)">
+            </div>
+
+            <div class="form-group">
+                <label for="age">나이</label>
+                <input type="number" id="age" name="age" th:value="${dog.age}" required readonly>
+            </div>
+
+            <div class="form-group">
+                <label for="gender">성별</label>
+                <select id="gender" name="gender" required>
+                    <option value="수컷" th:selected="${dog.gender == '수컷'}">수컷</option>
+                    <option value="암컷" th:selected="${dog.gender == '암컷'}">암컷</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="dType">견종</label>
+                <input type="text" id="dType" name="dType" th:value="${dog.DType}" required>
+            </div>
+
+            <div class="button-group">
+                <button type="submit" class="submit-btn">수정하기</button>
+                <a href="/" class="cancel-btn">취소</a>
+            </div>
+        </form>
+
+        <div th:if="${errorMessage}" class="error-message" th:text="${errorMessage}"></div>
+        <div th:if="${successMessage}" class="success-message" th:text="${successMessage}"></div>
+    </div>
+
+    <script th:inline="javascript">
+        function previewImage(input) {
+            var preview = document.getElementById('preview');
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function removeImage() {
+            var preview = document.getElementById('preview');
+            var fileInput = document.getElementById('image');
+            preview.src = '';
+            preview.style.display = 'none';
+            fileInput.value = '';
+        }
+
+        function calculateAge(birthday) {
+            if (!birthday) return;
+            var birthDate = new Date(birthday);
+            var today = new Date();
+            var age = today.getFullYear() - birthDate.getFullYear();
+            var monthDiff = today.getMonth() - birthDate.getMonth();
+            
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            
+            document.getElementById('age').value = age;
+        }
+
+        // 페이지 로드 시 나이 계산
+        window.onload = function() {
+            var birthday = document.getElementById('birthday').value;
+            if (birthday) {
+                calculateAge(birthday);
+            }
+        };
+    </script>
+</body>
+</html>

@@ -12,6 +12,6 @@ import java.util.Optional;
 @Repository
 public interface FileRepository extends JpaRepository<File, Integer> {
 
-    Optional<File> findByTIdx(int tIdx);
+    Optional<File> findBytIdx(int tIdx);
     
 }

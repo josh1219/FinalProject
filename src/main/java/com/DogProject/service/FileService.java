@@ -94,7 +94,7 @@ public class FileService {
     }
 
     public File getFileByTIdx(int dIdx) {
-        return fileRepository.findByTIdx(dIdx)
+        return fileRepository.findBytIdx(dIdx)
                 .orElseThrow(() -> new RuntimeException("File not found with tIdx: " + dIdx));
     }
 }

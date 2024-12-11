@@ -3,6 +3,7 @@ package com.DogProject.service;
 import com.DogProject.entity.Member;
 import com.DogProject.repository.MemberRepository;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,9 +32,21 @@ public class MemberService implements UserDetailsService {
         Member member = memberRepository.findBymEmail(mEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 이메일이 존재하지 않습니다: " + mEmail));
 
+        // 계정 상태 업데이트
+        member.updateAccountStatus();
+        
+        // 계정이 비활성화된 경우
+        if (!member.isEnabled()) {
+            throw new DisabledException("6개월 이상 로그인하지 않아 비활성화된 계정입니다.");
+        }
+
+        // 로그인 성공 시 마지막 로그인 시간 업데이트
+        member.updateLastLoginDate();
+        memberRepository.save(member);
+
         return new User(member.getMEmail(),
                 member.getMPassword(),
-                true, // enabled
+                member.isEnabled(),
                 true, // account non expired
                 true, // credentials non expired
                 true, // account non locked
@@ -43,18 +56,14 @@ public class MemberService implements UserDetailsService {
     @Transactional
     public Member saveMember(Member member) {
         validateDuplicateMember(member);
+        validateRequiredFields(member);
         
-        
-        // 비밀번호가 있는 경우 암호화 (모든 회원 타입)
+        // 모든 회원가입에 대해 비밀번호 암호화
         if (member.getMPassword() != null) {
             member.setMPassword(passwordEncoder.encode(member.getMPassword()));
         }
         
-        // 필수 필드 검증
-        validateRequiredFields(member);
-        
-        Member savedMember = memberRepository.save(member);
-        return savedMember;
+        return memberRepository.save(member);
     }
 
     private void validateRequiredFields(Member member) {
@@ -76,24 +85,34 @@ public class MemberService implements UserDetailsService {
         if (member.getAddress() == null || member.getAddress().trim().isEmpty()) {
             throw new IllegalArgumentException("주소는 필수 입력값입니다.");
         }
-        // 모든 회원 타입에 대해 비밀번호 필수
-        if (member.getMPassword() == null || member.getMPassword().trim().isEmpty()) {
-            throw new IllegalArgumentException("비밀번호는 필수 입력값입니다.");
-        }
     }
 
     private void validateDuplicateMember(Member member) {
-        if (memberRepository.existsBymEmail(member.getMEmail())) {
-            throw new IllegalStateException("이미 가입된 이메일입니다.");
+        if (member.getProvider() != null && !member.getProvider().equals("local")) {
+            memberRepository.findByProviderAndSocialId(member.getProvider(), member.getSocialId())
+                    .ifPresent(m -> {
+                        throw new IllegalStateException("이미 가입된 회원입니다.");
+                    });
+        } else {
+            memberRepository.findByEmailIgnoreCase(member.getMEmail())
+                    .ifPresent(m -> {
+                        throw new IllegalStateException("이미 가입된 회원입니다.");
+                    });
         }
     }
 
     public boolean existsByEmail(String email) {
+        // local 회원과 소셜 로그인 회원의 이메일을 모두 확인
         return memberRepository.existsBymEmail(email);
     }
 
     public Member findBymEmail(String mEmail) {
         return memberRepository.findBymEmail(mEmail)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 이메일이 존재하지 않습니다: " + mEmail));
+    }
+
+    public Member findByMIdx(int mIdx) {
+        return memberRepository.findById(mIdx)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다. ID: " + mIdx));
     }
 }

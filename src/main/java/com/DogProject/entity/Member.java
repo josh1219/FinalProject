@@ -56,17 +56,21 @@ public class Member {
     @Comment("프로필 이미지 URL")
     private String picture;
 
-    @Column(length = 20)
-    @Comment("로그인 제공자 (local: 일반회원, kakao: 카카오, naver: 네이버, google: 구글)")
-    private String provider = "local";
+    @Column(length = 50)
+    @Comment("소셜 로그인 제공자")
+    private String provider;
+
+    @Column(length = 255)
+    @Comment("소셜 로그인 ID")
+    private String socialId;
 
     @Column(nullable = false, columnDefinition = "INT DEFAULT 0")
     @Comment("회원 포인트 (적립금)")
     private int point = 0;
 
     @Column(nullable = false)
-    @Comment("회원 활성화 상태")
-    private boolean enabled = true;
+    @Comment("계정 활성화 여부")
+    private boolean enabled;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -98,13 +102,21 @@ public class Member {
      * 소셜 로그인 회원을 위한 빌더
      */
     @Builder(builderMethodName = "socialBuilder")
-    public Member(String name, String mEmail, String picture, String provider, boolean enabled) {
+    public Member(String name, String mEmail, String mPassword, String picture, String provider, 
+                 boolean enabled, String socialId, String birthday, String phone, String gender, String address) {
         this.name = name;
         this.mEmail = mEmail;
+        this.mPassword = mPassword;
         this.picture = picture;
         this.provider = provider;
         this.enabled = enabled;
         this.role = Role.USER;
+        this.socialId = socialId;
+        this.birthday = birthday;
+        this.phone = phone;
+        this.gender = gender;
+        this.address = address;
+        this.point = 0;
     }
 
     /**
@@ -123,16 +135,42 @@ public class Member {
         this.enabled = true;
         this.point = 0;
         this.role = Role.USER;
-        this.provider = "local";
+        this.provider = "local";  // 명시적으로 provider를 'local'로 설정
     }
 
     /**
      * OAuth2 정보 업데이트
      */
-    public void updateOAuth2Info(String name, String picture, String provider) {
-        this.name = name;
-        this.picture = picture;
-        this.provider = provider;
+    public void updateOAuth2Info(String name, String picture, String provider, String socialId) {
+        if (name != null) this.name = name;
+        if (picture != null) this.picture = picture;
+        if (provider != null) this.provider = provider;
+        if (socialId != null) this.socialId = socialId;
+    }
+
+    /**
+     * 마지막 로그인 시간 업데이트
+     */
+    public void updateLastLoginDate() {
+        this.lastLoginDate = LocalDateTime.now().withSecond(0).withNano(0);
+    }
+
+    /**
+     * 계정 활성화 상태 확인 및 업데이트
+     * 6개월 이상 로그인하지 않은 계정은 비활성화
+     */
+    public void updateAccountStatus() {
+        if (this.lastLoginDate != null) {
+            LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
+            this.enabled = this.lastLoginDate.isAfter(sixMonthsAgo);
+        }
+    }
+
+    /**
+     * 계정 활성화 상태를 문자열로 반환
+     */
+    public String getAccountStatus() {
+        return this.enabled ? "활성화" : "비활성화";
     }
 
     public String getRoleKey() {

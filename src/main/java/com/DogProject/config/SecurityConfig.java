@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import javax.servlet.http.Cookie;
@@ -28,14 +28,14 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf()
-                .ignoringAntMatchers("/member/checkEmail")  // 이메일 중복 체크 API는 CSRF 검사 제외
+                .ignoringAntMatchers("/member/checkEmail", "/api/**", "/dog/insert", "/dog/update/**", "/ws/**", "/ws/chat/**")  // WebSocket 경로 CSRF 검사 제외
                 .and()
             .sessionManagement()
                 .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
@@ -51,8 +51,9 @@ public class SecurityConfig {
                 .and()
             .authorizeRequests()
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/member/**", "/error", 
-                        "/home", "/board/**", "/dog/**", "/shop/**", "/chat/**").permitAll()
-                .antMatchers("/admin/**").hasRole("ADMIN")
+                        "/home", "/board/**", "/dog/**", "/shop/**", "/chat/**", "/walk/**", "/api/**", 
+                        "/ws/**", "/ws/chat/**", "/topic/**").permitAll()
+                .antMatchers("/admin/**").hasRole("ADMIN")  
                 .antMatchers("/member/checkEmail").permitAll()  // 이메일 중복 체크 API 허용
                 .anyRequest().authenticated()
                 .and()
@@ -107,11 +108,16 @@ public class SecurityConfig {
                 .rememberMeParameter("remember-me")  
                 .userDetailsService(memberService)  
                 .and()
-            .oauth2Login()
+                .oauth2Login()
                 .loginPage("/member/login")
+                .defaultSuccessUrl("/home", true)
+                .failureUrl("/member/login?error=true")
                 .successHandler(oAuth2SuccessHandler)
                 .userInfoEndpoint()
-                .userService(customOAuth2UserService);
+                    .userService(customOAuth2UserService)
+                .and()
+                .authorizationEndpoint()
+                    .baseUri("/oauth2/authorization");
 
         return http.build();
     }

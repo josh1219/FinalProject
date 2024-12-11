@@ -218,6 +218,19 @@
     var totalDistance = 0; // 전체 거리
     var wsIdx = null;
     var watchId = null;  // GPS 워치 ID
+    var mIdx = [[${session.mIdx}]];
+    var csrfToken = [[${_csrf.token}]];
+    var csrfHeader = [[${_csrf.headerName}]];
+
+    // AJAX 전역 설정
+    $.ajaxSetup({
+        beforeSend: function(xhr) {
+            if (csrfHeader && csrfToken) {
+                xhr.setRequestHeader(csrfHeader, csrfToken);
+            }
+        }
+    });
+
     var isTracking = false;  // 산책 트래킹 상태
     var totalSeconds = 0;
     var timerInterval = null;
@@ -227,8 +240,6 @@
     var STATIONARY_THRESHOLD = 15000;  // 정지 감지 시간 (10초)
     var stationaryCheckInterval = null;  // 정지 상태 체크 인터벌
     var warningTimeout;
-
-    const mIdx = /*[[${session.mIdx}]]*/ null;  // Thymeleaf 문법으로 수정
 
     function initMap() {
         const mapOptions = {
@@ -380,7 +391,7 @@
             $.ajax({
                 url: '/api/walk/start',
                 type: 'POST',
-                data: { mIdx: 1 },
+                data: { mIdx: mIdx },
                 success: function(response) {
                     wsIdx = response.wsIdx;
 

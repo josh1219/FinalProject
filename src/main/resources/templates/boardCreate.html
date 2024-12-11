@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게시글 작성</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Pretendard Variable', sans-serif;
+      max-width: 414px;
+      margin: 0 auto;
+      background-color: #fff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      padding: 0 20px;
+      background: #ffffff;
+      border-bottom: 1px solid #eee;
+      z-index: 100;
+    }
+
+    .header img {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .category-select, .title-input, .content-textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-bottom: 15px;
+    }
+
+    .content-textarea {
+      height: 200px;
+      resize: none;
+    }
+
+    .image-upload {
+      margin-top: 20px;
+    }
+
+    .image-upload-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .image-preview {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .preview-image {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .image-preview-container {
+      position: relative;
+      display: inline-block;
+      margin: 5px;
+    }
+
+    .delete-button {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      width: 20px;
+      height: 20px;
+      cursor: pointer;
+      background: white;
+      border-radius: 50%;
+      padding: 2px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .footer {
+      height: 60px;
+      background: #ffffff;
+      border-top: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+    }
+
+    .footer img {
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <img src="/images/chevron-left.svg" alt="뒤로가기" onclick="history.back()"/>
+    <span class="header-title">게시글 작성</span>
+    <img src="/images/check.svg" alt="완료" onclick="submitPost()"/>
+  </div>
+
+  <div class="content">
+    <div class="form-group">
+      <select class="category-select" id="category">
+        <option value="">카테고리 선택</option>
+        <option value="notice">공지</option>
+        <option value="question">질문</option>
+        <option value="free">자유</option>
+        <option value="share">나눔</option>
+        <option value="event">이벤트</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <input type="text" class="title-input" id="title" placeholder="제목을 입력하세요">
+    </div>
+
+    <div class="form-group">
+      <textarea class="content-textarea" id="content" placeholder="내용을 입력하세요"></textarea>
+    </div>
+
+    <div class="image-upload">
+      <label class="image-upload-btn">
+        <img src="/images/image-upload-icon.svg" alt="이미지 업로드">
+        <input type="file" id="image-input" accept="image/*" multiple style="display: none;">
+      </label>
+      <div class="image-preview" id="image-preview"></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <img src="/images/home1.svg" alt="홈" onclick="location.href='/'"/>
+    <img src="/images/calendar0.svg" alt="캘린더" onclick="location.href='/calendar'"/>
+    <img src="/images/location0.svg" alt="산책" onclick="location.href='/walk'"/>
+    <img src="/images/_3-user0.svg" alt="커뮤니티" onclick="location.href='/community'"/>
+    <img src="/images/category0.svg" alt="메뉴" onclick="toggleMenu()"/>
+  </div>
+
+  <script>
+    function submitPost() {
+      const category = document.getElementById('category').value;
+      const title = document.getElementById('title').value;
+      const content = document.getElementById('content').value;
+
+      if (!category || !title || !content) {
+        alert('모든 필드를 입력해주세요.');
+        return;
+      }
+
+      // TODO: API 호출하여 게시글 저장
+      console.log('게시글 작성:', { category, title, content });
+    }
+
+    document.getElementById('image-input').addEventListener('change', function(e) {
+      const preview = document.getElementById('image-preview');
+      const maxFiles = 9;
+      const currentFiles = preview.querySelectorAll('.image-preview-container').length;
+      const newFiles = [...e.target.files];
+      
+      if (currentFiles + newFiles.length > maxFiles) {
+        alert(`이미지는 최대 ${maxFiles}개까지만 업로드할 수 있습니다.`);
+        this.value = ''; // 파일 선택 초기화
+        return;
+      }
+      
+      newFiles.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const container = document.createElement('div');
+          container.className = 'image-preview-container';
+          container.dataset.index = index;
+
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          img.className = 'preview-image';
+
+          const deleteBtn = document.createElement('img');
+          deleteBtn.src = '/images/deleteIcon.png';
+          deleteBtn.className = 'delete-button';
+          deleteBtn.onclick = function() {
+            container.remove();
+            // 파일 입력에서도 해당 파일 제거
+            const dt = new DataTransfer();
+            const input = document.getElementById('image-input');
+            const { files } = input;
+            
+            for(let i = 0; i < files.length; i++) {
+              if(i !== index) {
+                dt.items.add(files[i]);
+              }
+            }
+            
+            input.files = dt.files;
+          };
+
+          container.appendChild(img);
+          container.appendChild(deleteBtn);
+          preview.appendChild(container);
+        }
+        reader.readAsDataURL(file);
+      });
+    });
+
+    function toggleMenu() {
+      // TODO: 메뉴 토글 구현
+      console.log('메뉴 토글');
+    }
+  </script>
+</body>
+</html>

@@ -87,6 +87,7 @@
             <div class="user-info">
                 <div th:if="${isLoggedIn}">
                     <div class="welcome" th:text="|환영합니다, ${member.name}님!|"></div>
+                    <button onclick="location.href='/walk'">walk</button>>
                     <div class="member-info">
                         <p th:text="|이메일: ${member.mEmail}|"></p>
                         <p th:if="${member.provider != null}" th:text="|로그인 방식: ${member.provider}|"></p>

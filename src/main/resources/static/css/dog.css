@@ -1,0 +1,276 @@
+.insert-dog,
+.insert-dog * {
+  box-sizing: border-box;
+}
+.insert-dog {
+  background: #ffffff;
+  padding: 30px 20px 30px 20px;
+  height: 852px;
+  position: relative;
+  overflow: hidden;
+}
+.dog-insert-button {
+  background: rgba(44, 116, 210, 0.68);
+  border-radius: 2px;
+  padding: 1px 28px 1px 28px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  height: 66px;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 743px;
+}
+.div {
+  color: #ffffff;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dog-gender {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 600px;
+}
+.div2 {
+  color: #000000;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  align-self: stretch;
+}
+.dog-gender-select-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+.div3 {
+  color: #aeaeae;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  width: 256px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.dog-age {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 540px;
+}
+.dog-age-text-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+._4 {
+  color: #aeaeae;
+  text-align: left;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: relative;
+  width: 256px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.dog-gender2 {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 480px;
+}
+.dog-name {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  right: 65px;
+  left: 66px;
+  top: 420px;
+}
+.dog-name-text-box {
+  background: #ffffff;
+  border-radius: 2px;
+  border-style: solid;
+  border-color: #aeaeae;
+  border-width: 1px;
+  padding: 4px 3px 4px 3px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-start;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 25px;
+  position: relative;
+}
+.img-area {
+  border-style: solid;
+  border-color: #000000;
+  border-width: 1px;
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  height: 169px;
+  position: absolute;
+  right: 73px;
+  left: 72px;
+  top: 188px;
+}
+.frame-77 {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 60px;
+  position: relative;
+}
+.iconly-regular-light-camera {
+  flex: 1;
+  height: 60px;
+  position: relative;
+}
+.camera {
+  width: 77.08%;
+  height: 67.99%;
+  position: absolute;
+  right: 11.46%;
+  left: 11.46%;
+  bottom: 16.39%;
+  top: 15.62%;
+  overflow: visible;
+}
+.page-title {
+  padding: 10px 0px 10px 0px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  left: 66px;
+  top: 126px;
+}
+.div4 {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  position: relative;
+}
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  height: 49px;
+  position: absolute;
+  right: 20px;
+  left: 20px;
+  top: 30px;
+  overflow: hidden;
+}
+.frame-48 {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 86px;
+  position: relative;
+}
+.petopia {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  position: relative;
+}
+.frame-67 {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  width: 45px;
+  height: 49px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+.arrow-left {
+  flex: 1;
+  height: 24px;
+  position: relative;
+  overflow: visible;
+}

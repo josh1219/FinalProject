@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -18,6 +19,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 import com.DogProject.entity.Dog;
@@ -29,6 +33,8 @@ import com.DogProject.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.ResponseEntity;
 
 @Controller
 @RequestMapping("/dog")
@@ -127,6 +133,24 @@ public class DogController {
         }
     }
 
+    @GetMapping("/list")
+    public String dogList(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        Member member = memberService.findBymEmail(userDetails.getUsername());
+        List<Dog> dogs = dogService.findAllByMember(member);
+        
+        // 각 강아지의 이미지 정보를 맵으로 저장
+        Map<Integer, File> dogImages = new HashMap<>();
+        for (Dog dog : dogs) {
+            fileService.findByTypeAndIdx(3, dog.getDIdx())
+                      .ifPresent(file -> dogImages.put(dog.getDIdx(), file));
+        }
+        
+        model.addAttribute("dogs", dogs);
+        model.addAttribute("dogImages", dogImages);
+        model.addAttribute("member", member);
+        return "dog/dogList";
+    }
+
     @GetMapping("/update/{dIdx}")
     public String updateDogForm(
             @PathVariable int dIdx, 
@@ -147,7 +171,8 @@ public class DogController {
 
             model.addAttribute("dog", dog);
             model.addAttribute("member", member);
-            model.addAttribute("file", fileService.getFileByTIdx(dIdx));
+            fileService.findByTypeAndIdx(3, dIdx)
+                      .ifPresent(file -> model.addAttribute("file", file));
             return "dog/updateDog";
 
         } catch (Exception e) {
@@ -210,6 +235,45 @@ public class DogController {
         }
     }
 
+    @PostMapping("/remove/{dIdx}")
+    @ResponseBody
+    public ResponseEntity<?> deleteDog(@PathVariable int dIdx) {
+        try {
+            log.info("Deleting dog with ID: {}", dIdx);
+            dogService.softDeleteDog(dIdx);
+            log.info("Successfully deleted dog with ID: {}", dIdx);
+            return ResponseEntity.ok().body("/dog/deleted/list");
+        } catch (Exception e) {
+            log.error("Error deleting dog with ID: {}", dIdx, e);
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/deleted/list")
+    public String deletedDogList(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            Member member = memberService.findBymEmail(userDetails.getUsername());
+            List<Dog> deletedDogs = dogService.getDeletedDogsByMember(member);
+            model.addAttribute("dogs", deletedDogs);
+            model.addAttribute("member", member);
+            return "dog/deletedDogList";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/";
+        }
+    }
+
+    @PostMapping("/restore/{dIdx}")
+    @ResponseBody
+    public ResponseEntity<?> restoreDog(@PathVariable int dIdx) {
+        try {
+            dogService.restoreDog(dIdx);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     private void validateDogInput(String name, int age, String birthday, 
                                    String gender, String dType) {
         if (name == null || name.trim().isEmpty()) {
@@ -238,29 +302,5 @@ public class DogController {
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new IllegalArgumentException("Only image files can be uploaded.");
         }
-    }
-
-    private File processImageFile(MultipartFile image) throws IOException {
-        String originalFilename = image.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String savedFileName = UUID.randomUUID().toString() + extension;
-
-        // 디렉토리 생성
-        Path uploadPath = Paths.get(uploadDir);
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-        }
-
-        // 파일 저장
-        Path filePath = uploadPath.resolve(savedFileName);
-        Files.copy(image.getInputStream(), filePath);
-
-        // 파일 엔티티 생성
-        File imageFile = new File();
-        imageFile.setFType(3); // 강아지 이미지 타입
-        imageFile.setFileRealName(originalFilename);
-        imageFile.setFileSaveName(savedFileName);
-
-        return imageFile;
     }
 }

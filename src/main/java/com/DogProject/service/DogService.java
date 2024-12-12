@@ -2,6 +2,7 @@ package com.DogProject.service;
 
 import com.DogProject.entity.Dog;
 import com.DogProject.entity.File;
+import com.DogProject.entity.Member;
 import com.DogProject.repository.DogRepository;
 import com.DogProject.repository.FileRepository;
 
@@ -10,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -54,5 +57,34 @@ public class DogService {
                     log.warn("강아지를 찾을 수 없음 - ID: {}", dIdx);
                     return new RuntimeException("강아지를 찾을 수 없습니다.");
                 });
+    }
+
+    public List<Dog> findAllByMember(Member member) {
+        return dogRepository.findAllByMember(member);
+    }
+
+    public List<Dog> getDogsByMember(Member member) {
+        return dogRepository.findAllByMemberAndDelYN(member, "N");
+    }
+
+    public List<Dog> getDeletedDogsByMember(Member member) {
+        return dogRepository.findAllByMemberAndDelYN(member, "Y");
+    }
+
+    @Transactional
+    public void softDeleteDog(int dIdx) {
+        Dog dog = dogRepository.findBydIdx(dIdx)
+                .orElseThrow(() -> new RuntimeException("Dog not found with id: " + dIdx));
+        log.info("Found dog: {}", dog);
+        dog.setDelYN("Y");
+        Dog savedDog = dogRepository.save(dog);
+        log.info("Updated dog delYN to Y: {}", savedDog);
+    }
+
+    public void restoreDog(int dIdx) {
+        Dog dog = dogRepository.findBydIdx(dIdx)
+                .orElseThrow(() -> new RuntimeException("Dog not found with id: " + dIdx));
+        dog.setDelYN("N");
+        dogRepository.save(dog);
     }
 }

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/dog.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            color: #333;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #eee;
+        }
+
+        .header a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        .back-button {
+            font-size: 1.5rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .page-title {
+            margin: 0rem 0;
+            padding: 65px 0px 10px 0px;
+            position: initial;
+        }
+
+        .page-title h2 {
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .dog-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            padding: 1rem 0;
+        }
+
+        .dog-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .dog-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .dog-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .dog-info {
+            padding: 1rem;
+        }
+
+        .dog-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            position: initial;
+        }
+
+        .dog-detail {
+            color: #666;
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+
+        .dog-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .action-button {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .edit-button {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .add-dog-button {
+            display: inline-block;
+            padding: 1rem 1rem;
+            background-color: #000;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 1rem 0;
+            font-weight: 500;
+            justify-content: right;
+        }
+
+        .no-dogs {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .nav-button {
+            display: inline-block;
+            padding: 1rem 1rem;
+            background-color: #000;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 1rem 0;
+            font-weight: 500;
+            justify-content: right;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .dog-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>PETOPIA - 나의 반려견 목록</title>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="/" class="back-button">←</a>
+            <div class="logo">PETOPIA</div>
+            <a onclick="location.href='/member/login'"><img src="/images/home1.svg"></a>
+        </div>
+
+        <div class="page-title">
+            <h2>나의 반려견 목록</h2>
+        </div>
+
+        <div class="navigation-buttons">
+            <a href="/dog/insert" class="nav-button">새 반려견 등록</a>
+            <a href="/dog/deleted/list" class="nav-button">삭제된 반려견 목록</a>
+        </div>
+
+        <div th:if="${#lists.isEmpty(dogs)}" class="no-dogs">
+            <p>등록된 반려견이 없습니다.</p>
+            <p>새로운 반려견을 등록해보세요!</p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(dogs)}" class="dog-list">
+            <div th:each="dog : ${dogs}" class="dog-card">
+                <img th:if="${dogImages.containsKey(dog.DIdx)}" 
+                     th:src="@{'/uploads/' + ${dogImages.get(dog.DIdx).fileSaveName}}"
+                     class="dog-image" alt="강아지 사진">
+                <img th:unless="${dogImages.containsKey(dog.DIdx)}" 
+                     src="/images/dogdefault.png"
+                     class="dog-image" alt="기본 강아지 사진">
+                <div class="dog-info">
+                    <div class="dog-name" th:text="${dog.name}">강아지 이름</div>
+                    <div class="dog-detail" th:text="${dog.DType}">견종</div>
+                    <div class="dog-detail" th:text="${dog.age + '살'}">나이</div>
+                    <div class="dog-detail" th:text="${dog.gender == 'male' ? '남아' : '여아'}">성별</div>
+                </div>
+                <div class="dog-actions">
+                    <a th:href="@{'/dog/update/' + ${dog.DIdx}}" class="action-button edit-button">수정</a>
+                    <button type="button" th:onclick="'deleteDog(' + ${dog.DIdx} + ')'" class="action-button delete-button">삭제</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+        function deleteDog(dIdx) {
+            if (confirm('정말로 이 강아지를 삭제하시겠습니까?')) {
+                const token = document.querySelector('meta[name="_csrf"]').content;
+                const header = document.querySelector('meta[name="_csrf_header"]').content;
+
+                fetch(`/dog/remove/${dIdx}`, {
+                    method: 'POST',
+                    headers: {
+                        [header]: token
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.text();
+                    }
+                    throw new Error('삭제 중 오류가 발생했습니다.');
+                })
+                .then(redirectUrl => {
+                    alert('삭제되었습니다.');
+                    window.location.href = redirectUrl;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(error.message);
+                });
+            }
+        }
+    </script>
+</body>
+</html>

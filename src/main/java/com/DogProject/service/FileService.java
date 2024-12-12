@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 
@@ -89,14 +90,7 @@ public class FileService {
         }
     }
 
-    private String getFileExtension(String filename) {
-        if (filename == null) return "";
-        int lastDotIndex = filename.lastIndexOf(".");
-        return (lastDotIndex == -1) ? "" : filename.substring(lastDotIndex);
-    }
-
-    public File getFileByTIdx(int dIdx) {
-        return fileRepository.findBytIdx(dIdx)
-                .orElseThrow(() -> new RuntimeException("File not found with tIdx: " + dIdx));
+    public Optional<File> findByTypeAndIdx(int fType, int tIdx) {
+        return fileRepository.findByTypeAndIdx(fType, tIdx);
     }
 }

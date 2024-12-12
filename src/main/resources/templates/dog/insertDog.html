@@ -339,18 +339,17 @@
                             </div>
                         </div>
                         <div class="img-buttons">
-                            <label for="camera-input" class="img-button">
+                            <button type="button" class="img-button" onclick="openCamera()">
                                 <img src="/images/camera-1.svg" alt="카메라">
-                            </label>
-                            <label for="photo-input" class="img-button">
+                            </button>
+                            <label for="file-input" class="img-button">
                                 <img src="/images/photo-1.svg" alt="사진">
                             </label>
                             <button type="button" class="img-button" onclick="removeImage()">
                                 <img src="/images/trash.svg" alt="제거">
                             </button>
                         </div>
-                        <input type="file" id="camera-input" name="image" accept="image/*" capture="camera" class="file-input" onchange="previewImage(this)">
-                        <input type="file" id="photo-input" name="image" accept="image/*" class="file-input" onchange="previewImage(this)">
+                        <input type="file" id="file-input" name="image" accept="image/*" class="file-input" onchange="previewImage(this)" style="display: none;">
                     </div>
                 </div>
 
@@ -391,6 +390,12 @@
     </div>
 
     <script>
+        function openCamera() {
+            const input = document.getElementById('file-input');
+            input.setAttribute('capture', 'camera');
+            input.click();
+        }
+
         function previewImage(input) {
             const preview = document.getElementById('preview');
             const previewArea = document.querySelector('.img-preview-area');
@@ -410,6 +415,9 @@
                     preview.src = e.target.result;
                 }
                 reader.readAsDataURL(input.files[0]);
+                
+                // 파일 선택 후 capture 속성 제거
+                input.removeAttribute('capture');
             } else {
                 preview.src = '/images/dogdefault.png';
             }
@@ -417,15 +425,10 @@
 
         function removeImage() {
             const preview = document.getElementById('preview');
-            const cameraInput = document.getElementById('camera-input');
-            const photoInput = document.getElementById('photo-input');
+            const fileInput = document.getElementById('file-input');
             
-            // 이미지를 기본 이미지로 변경
             preview.src = '/images/dogdefault.png';
-            
-            // 파일 입력 초기화
-            cameraInput.value = '';
-            photoInput.value = '';
+            fileInput.value = '';
         }
 
         function calculateAge(birthday) {

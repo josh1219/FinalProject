@@ -1,0 +1,507 @@
+.walk,
+.walk * {
+  box-sizing: border-box;
+}
+.walk {
+  background: #ffffff;
+  padding: 10px 0px 10px 0px;
+  height: 852px;
+  position: relative;
+  overflow: hidden;
+}
+.footer {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  position: fixed; /* fixed로 설정해 항상 화면 하단에 고정 */
+  right: 0px;
+  left: 0px;
+  bottom: 0px; /* 화면 하단에 고정 */
+  background-color: white; /* 배경색으로 구글 저작권 텍스트 덮기 */
+  z-index: 1; /* 지도 위에 표시되도록 설정 */
+}
+.div {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 9.16%;
+  position: absolute;
+  right: 81.93%;
+  left: 8.91%;
+  bottom: 9px;
+}
+.frame-48 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+}
+.iconly-regular-outline-calendar {
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 34px;
+  position: relative;
+}
+.calendar {
+  width: 81.25%;
+  height: 89.58%;
+  position: absolute;
+  right: 10.42%;
+  left: 8.33%;
+  bottom: 6.25%;
+  top: 4.17%;
+  overflow: visible;
+}
+.frame-49 {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  flex-shrink: 0;
+  position: relative;
+}
+.div2 {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Regular", sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  position: relative;
+}
+.div3 {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 9.16%;
+  position: absolute;
+  right: 64.12%;
+  left: 26.72%;
+  bottom: 9px;
+}
+.iconly-regular-outline-location {
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 34px;
+  position: relative;
+}
+.location {
+  height: auto;
+  position: absolute;
+  left: 6.56px;
+  top: 2.83px;
+  overflow: visible;
+}
+.frame-492 {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.div4 {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 9.16%;
+  position: absolute;
+  right: 46.06%;
+  left: 44.78%;
+  bottom: 10px;
+}
+.iconly-regular-outline-home {
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 34px;
+  position: relative;
+}
+.home {
+  width: 85.42%;
+  height: 89.6%;
+  position: absolute;
+  right: 6.25%;
+  left: 8.33%;
+  bottom: 6.23%;
+  top: 4.17%;
+  overflow: visible;
+}
+.frame-482 {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.div5 {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 10.43%;
+  position: absolute;
+  right: 26.72%;
+  left: 62.85%;
+  bottom: 10px;
+}
+.iconly-regular-outline-3-user {
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 34px;
+  position: relative;
+}
+._3-user {
+  width: 90.72%;
+  height: 69.96%;
+  position: absolute;
+  right: 5.12%;
+  left: 4.17%;
+  bottom: 13.37%;
+  top: 16.67%;
+  overflow: visible;
+}
+.div6 {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 9.16%;
+  position: absolute;
+  right: 8.65%;
+  left: 82.19%;
+  bottom: 10px;
+}
+.iconly-regular-outline-category {
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 34px;
+  position: relative;
+}
+.category {
+  height: auto;
+  position: absolute;
+  left: 3.28px;
+  top: 2.83px;
+  overflow: visible;
+}
+.div7 {
+  padding: 21px 18px 21px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  height: 104px;
+  position: absolute;
+  right: 20px;
+  left: 19px;
+  top: 78px;
+  overflow: hidden;
+}
+.div8 {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 59.77px;
+  position: absolute;
+  left: 77.89px;
+  top: 24px;
+}
+.div9 {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  /* align-items: center;
+  justify-content: center; */
+  flex-shrink: 0;
+  width: 100%;
+  height: 42px;
+  position: absolute;
+  left: 77.89px;
+  top: 47px;
+}
+._0 {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  position: relative;
+}
+.mile {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 31.51px;
+  height: 42px;
+  position: absolute;
+  left: 163px;
+  top: 49px;
+}
+.mile2 {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 32px;
+  font-weight: 700;
+  position: relative;
+}
+.div10 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: flex-end;
+  flex-shrink: 0;
+  width: 70.63px;
+  position: absolute;
+  left: 0px;
+  top: 24px;
+}
+._2024-11-30-4-31-01 {
+  flex-shrink: 0;
+  width: 65px;
+  height: 62px;
+  position: relative;
+  object-fit: cover;
+}
+.frame-61 {
+  background: #bab9b9;
+  width: 430px;
+  height: calc(100% - 68px); /* 푸터 높이만큼 자동 조정 */
+  position: absolute;
+  left: 0px;
+  top: 292px;
+  bottom: 0px; /* 푸터와 자연스럽게 겹치도록 설정 */
+  overflow: hidden;
+}
+.frame-483 {
+  padding: 19px 21px 19px 21px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 87px;
+  height: 76px;
+  position: absolute;
+  left: 172px;
+  top: 373px;
+}
+.ellipse-1 {
+  background: rgba(0, 68, 151, 0.63);
+  border-radius: 50%;
+  flex-shrink: 0;
+  width: 87px;
+  height: 76px;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+}
+.go {
+  color: #ffffff;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 24px;
+  font-weight: 700;
+  position: relative;
+}
+.frame-60 {
+  background: #ffffff;
+  border-radius: 30px;
+  width: 73px;
+  height: 24px;
+  position: absolute;
+  left: 348px;
+  top: 10px;
+  box-shadow: 3px 2px 4px 0px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+}
+.div11 {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Regular", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  position: absolute;
+  left: 4px;
+  top: 4px;
+}
+.header {
+  padding: 6px 0px 6px 0px;
+  display: flex;
+  flex-direction: row;
+  gap: 300px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  position: absolute;
+  right: 20px;
+  left: 20px;
+  top: 16px;
+  overflow: hidden;
+}
+.frame-484 {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  position: relative;
+}
+.div12 {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  position: relative;
+}
+.frame-485 {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
+}
+.user-circle-single-circle-geometric-human-person-single-user {
+  flex-shrink: 0;
+  width: 26px;
+  height: 30px;
+  position: relative;
+  overflow: hidden;
+}
+.user-circle-single-circle-geometric-human-person-single-user2 {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  right: 0%;
+  left: 0%;
+  bottom: 0%;
+  top: 0%;
+  overflow: visible;
+}
+.frame-59 {
+  border-radius: 0px 0px 20px 20px;
+  width: 430px;
+  height: 110px;
+  position: absolute;
+  left: 0px;
+  top: 182px;
+  overflow: hidden;
+}
+.div13 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 192px;
+  position: absolute;
+  left: 218px;
+  top: 20px;
+}
+.frame-58 {
+  background: rgba(44, 116, 210, 0.37);
+  border-radius: 20px;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 69px;
+  position: relative;
+  overflow: hidden;
+}
+.div14 {
+  color: #2f65ab;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: absolute;
+  left: 21px;
+  top: 15px;
+}
+._0-m {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  position: absolute;
+  left: 22px;
+  top: 41px;
+}
+.div15 {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 192px;
+  position: absolute;
+  left: 20px;
+  top: 20px;
+}
+.frame-582 {
+  background: rgba(66, 176, 85, 0.28);
+  border-radius: 20px;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 69px;
+  position: relative;
+  overflow: hidden;
+}
+.div16 {
+  color: #499556;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  position: absolute;
+  left: 21px;
+  top: 15px;
+}
+._02 {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  position: absolute;
+  left: 21px;
+  top: 41px;
+}

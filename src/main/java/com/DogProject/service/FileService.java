@@ -31,7 +31,7 @@ public class FileService {
     private final FileRepository fileRepository;
 
     @Value("${file.upload.directory}")
-    private String uploadDir;
+    private String uploadDirectory;
 
     @Autowired
     private ResourceLoader resourceLoader;
@@ -39,7 +39,7 @@ public class FileService {
     @PostConstruct
     public void init() {
         try {
-            Resource resource = resourceLoader.getResource(uploadDir);
+            Resource resource = resourceLoader.getResource(uploadDirectory);
             Path uploadPath = Paths.get(resource.getFile().getAbsolutePath());
             if (!Files.exists(uploadPath)) {
                 Files.createDirectories(uploadPath);
@@ -51,31 +51,33 @@ public class FileService {
 
     @Transactional
     public File saveFile(File file, MultipartFile multipartFile) throws IOException {
-        if (multipartFile == null || multipartFile.isEmpty()) {
-            return null;
-        }
-
         String originalFilename = multipartFile.getOriginalFilename();
-        String fileExtension = getFileExtension(originalFilename);
-        String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String savedFileName = UUID.randomUUID().toString() + extension;
 
-        Resource resource = resourceLoader.getResource(uploadDir);
-        Path uploadPath = Paths.get(resource.getFile().getAbsolutePath());
-        Path filePath = uploadPath.resolve(uniqueFilename);
+        Path uploadPath = Paths.get(uploadDirectory);
+        Path filePath = uploadPath.resolve(savedFileName);
         
-        Files.copy(multipartFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        log.debug("Saving file: {} to path: {}", originalFilename, filePath);
 
-        file.setFileSaveName(uniqueFilename);
-        file.setFileRealName(originalFilename);
-
-        return fileRepository.save(file);
+        try {
+            Files.copy(multipartFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            
+            file.setFileRealName(originalFilename);
+            file.setFileSaveName(savedFileName);
+            
+            return fileRepository.save(file);
+        } catch (IOException e) {
+            log.error("Failed to save file: {}", e.getMessage());
+            throw e;
+        }
     }
 
     @Transactional
     public void deleteFile(File file) {
         if (file != null) {
             try {
-                Resource resource = resourceLoader.getResource(uploadDir);
+                Resource resource = resourceLoader.getResource(uploadDirectory);
                 Path uploadPath = Paths.get(resource.getFile().getAbsolutePath());
                 Path filePath = uploadPath.resolve(file.getFileSaveName());
                 Files.deleteIfExists(filePath);

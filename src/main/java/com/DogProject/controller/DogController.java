@@ -85,22 +85,44 @@ public class DogController {
             // 강아지와 이미지 함께 저장
             Dog savedDog = dogService.saveDog(dog);
             int d_idx = savedDog.getDIdx();
-            File saveFile = new File();
-            saveFile.setFType(3);
-            saveFile.setTIdx(d_idx);
-            fileService.saveFile(saveFile,image);
+            
+            log.info("Dog saved successfully. dIdx: {}", d_idx);
+            
+            // 이미지 파일이 존재하는 경우에만 파일 저장 처리
+            if (image != null && !image.isEmpty()) {
+                log.info("Image file exists. Filename: {}, Size: {}", image.getOriginalFilename(), image.getSize());
+                try {
+                    File saveFile = new File();
+                    saveFile.setFType(3);
+                    saveFile.setTIdx(d_idx);
+                    log.info("Attempting to save file. dIdx: {}, fType: {}", d_idx, saveFile.getFType());
+                    
+                    File savedFile = fileService.saveFile(saveFile, image);
+                    
+                    if (savedFile == null) {
+                        log.warn("File save failed: dIdx={}", d_idx);
+                    } else {
+                        log.info("File saved successfully: dIdx={}, fileName={}, savedFileName={}", 
+                            d_idx, savedFile.getFileRealName(), savedFile.getFileSaveName());
+                    }
+                } catch (IOException e) {
+                    log.error("Error occurred while saving file: {}", e.getMessage(), e);
+                    // 파일 저장 실패해도 강아지 등록은 완료된 것으로 처리
+                }
+            } else {
+                log.info("No image file or empty file");
+            }
 
-
-            redirectAttributes.addFlashAttribute("successMessage", "강아지 등록 성공!");
+            redirectAttributes.addFlashAttribute("successMessage", "Dog registration successful!");
             return "redirect:/";
 
         } catch (IllegalArgumentException e) {
-            log.warn("강아지 등록 실패: {}", e.getMessage());
+            log.warn("Dog registration failed: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/dog/insert";
         } catch (Exception e) {
-            log.error("강아지 등록 중 예기치 못한 오류 발생", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "서버 오류가 발생했습니다.");
+            log.error("An unexpected error occurred during dog registration", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "A server error occurred.");
             return "redirect:/dog/insert";
         }
     }
@@ -119,8 +141,8 @@ public class DogController {
             Dog dog = dogService.getDogById(dIdx);
             
             // 현재 로그인한 회원의 강아지인지 확인
-            if (!dog.getMember().getMIdx().equals(member.getMIdx())) {
-                throw new AccessDeniedException("해당 강아지를 수정할 권한이 없습니다.");
+            if (dog.getMember().getMIdx() != (member.getMIdx())) {
+                throw new AccessDeniedException("You do not have permission to modify this dog.");
             }
 
             model.addAttribute("dog", dog);
@@ -129,7 +151,7 @@ public class DogController {
             return "dog/updateDog";
 
         } catch (Exception e) {
-            log.error("강아지 수정 폼 로딩 중 오류 발생", e);
+            log.error("An error occurred while loading the dog update form", e);
             return "redirect:/";
         }
     }
@@ -159,8 +181,8 @@ public class DogController {
             Dog existingDog = dogService.getDogById(dIdx);
 
             // 현재 로그인한 회원의 강아지인지 확인
-            if (!existingDog.getMember().getMIdx().equals(member.getMIdx())) {
-                throw new AccessDeniedException("해당 강아지의 정보를 수정할 권한이 없습니다.");
+            if (existingDog.getMember().getMIdx() != (member.getMIdx())) {
+                throw new AccessDeniedException("You do not have permission to modify this dog's information.");
             }
 
             // 강아지 정보 업데이트
@@ -173,16 +195,16 @@ public class DogController {
             // 강아지와 이미지 함께 업데이트
             dogService.updateDog(existingDog, image);
 
-            redirectAttributes.addFlashAttribute("successMessage", "강아지 정보가 수정되었습니다.");
+            redirectAttributes.addFlashAttribute("successMessage", "Dog information has been updated.");
             return "redirect:/";
 
         } catch (IllegalArgumentException | AccessDeniedException e) {
-            log.warn("강아지 수정 실패: {}", e.getMessage());
+            log.warn("Dog update failed: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/dog/update/" + dIdx;
         } catch (Exception e) {
-            log.error("강아지 수정 중 예기치 못한 오류 발생", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "서버 오류가 발생했습니다.");
+            log.error("An unexpected error occurred during dog update", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "A server error occurred.");
             return "redirect:/dog/update/" + dIdx;
         }
     }
@@ -190,19 +212,19 @@ public class DogController {
     private void validateDogInput(String name, int age, String birthday, 
                                    String gender, String dType) {
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("이름은 필수입니다.");
+            throw new IllegalArgumentException("Name is required.");
         }
         if (age < 0) {
-            throw new IllegalArgumentException("나이는 0 이상이어야 합니다.");
+            throw new IllegalArgumentException("Age must be 0 or greater.");
         }
         if (birthday == null || birthday.trim().isEmpty()) {
-            throw new IllegalArgumentException("생일은 필수입니다.");
+            throw new IllegalArgumentException("Birthday is required.");
         }
         if (gender == null || gender.trim().isEmpty()) {
-            throw new IllegalArgumentException("성별은 필수입니다.");
+            throw new IllegalArgumentException("Gender is required.");
         }
         if (dType == null || dType.trim().isEmpty()) {
-            throw new IllegalArgumentException("종류는 필수입니다.");
+            throw new IllegalArgumentException("Type is required.");
         }
     }
 
@@ -213,7 +235,7 @@ public class DogController {
         
         String contentType = image.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
-            throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
+            throw new IllegalArgumentException("Only image files can be uploaded.");
         }
     }
 

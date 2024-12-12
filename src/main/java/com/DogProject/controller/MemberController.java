@@ -45,26 +45,29 @@ public class MemberController {
         
         if (socialMember != null) {
             // 소셜 로그인 정보가 있으면 DTO에 설정
+            System.out.println("Social Member found in session:");
+            System.out.println("Name: " + socialMember.getName());
+            System.out.println("Email: " + socialMember.getMEmail());
+            System.out.println("Provider: " + socialMember.getProvider());
+            System.out.println("SocialId: " + socialMember.getSocialId());
+            
             memberDTO.setName(socialMember.getName());
             memberDTO.setMEmail(socialMember.getMEmail());
             memberDTO.setPicture(socialMember.getPicture());
             memberDTO.setProvider(socialMember.getProvider());
+            memberDTO.setSocialId(socialMember.getSocialId());
             
-            // 소셜 로그인 제공자별로 다르게 처리
-            if ("kakao".equals(socialMember.getProvider())) {
-                // 카카오는 이메일 입력 가능하도록 비워둠
-                memberDTO.setMEmail("");
-            }
-            
-            model.addAttribute("isSocialLogin", true);
-            model.addAttribute("picture", socialMember.getPicture());
-            model.addAttribute("provider", socialMember.getProvider());
+            System.out.println("MemberDTO after conversion:");
+            System.out.println("Name: " + memberDTO.getName());
+            System.out.println("Email: " + memberDTO.getMEmail());
+            System.out.println("Provider: " + memberDTO.getProvider());
+            System.out.println("SocialId: " + memberDTO.getSocialId());
             
             // 세션에서 소셜 로그인 정보 제거
             session.removeAttribute("socialMember");
         } else {
+            System.out.println("No social member found in session, using local provider");
             memberDTO.setProvider("local"); // 일반 회원가입
-            model.addAttribute("isSocialLogin", false);
         }
         
         model.addAttribute("memberDTO", memberDTO);
@@ -73,57 +76,36 @@ public class MemberController {
 
     @PostMapping("/join")
     public String joinProcess(@Valid MemberDTO memberDTO, BindingResult bindingResult, Model model) {
-        try {
-            // 유효성 검사 실패 시
-            if (bindingResult.hasErrors()) {
-                return "member/join";
-            }
+        if (bindingResult.hasErrors()) {
+            return "member/join";
+        }
 
-            // 비밀번호 유효성 검사
-            if (!memberDTO.isPasswordValid()) {
+        try {
+            // 일반 회원가입일 경우 비밀번호 유효성 검사
+            if ("local".equals(memberDTO.getProvider()) && !memberDTO.isPasswordValid()) {
                 bindingResult.rejectValue("mPassword", "error.mPassword", 
                     "비밀번호는 8자 이상이며, 영문/숫자/특수문자를 모두 포함해야 합니다.");
                 return "member/join";
             }
 
-            // DTO를 Entity로 변환
-            Member member = new Member();
-            member.setName(memberDTO.getName());
-            member.setMEmail(memberDTO.getMEmail());
-            member.setMPassword(memberDTO.getMPassword());
-            member.setBirthday(memberDTO.getBirthday());
-            member.setPhone(memberDTO.getPhone());
-            member.setGender(memberDTO.getGender());
-            member.setAddress(memberDTO.getAddress());
-            member.setPicture(memberDTO.getPicture());
-            // provider 값을 폼에서 전달받은 값으로 설정
-            member.setProvider(memberDTO.getProvider() != null ? memberDTO.getProvider() : "local");
-            member.setEnabled(true);
-            member.setRole(Role.USER);  
-            member.setPoint(0);
-            member.setLastLoginDate(LocalDateTime.now());
-
-            System.out.println("회원가입 - Provider 설정: " + member.getProvider());  // 로그 추가
-
-            // 회원 저장
+            Member member = memberDTO.toEntity();
             memberService.saveMember(member);
-            
             return "redirect:/member/login";
         } catch (IllegalStateException e) {
             model.addAttribute("errorMessage", e.getMessage());
-            return "member/join";
-        } catch (Exception e) {
-            model.addAttribute("errorMessage", "회원가입 중 오류가 발생했습니다.");
             return "member/join";
         }
     }
 
     @PostMapping("/checkEmail")
     @ResponseBody
-    public ResponseEntity<Map<String, Boolean>> checkEmail(@RequestParam String email) {
-        boolean isDuplicate = memberService.existsByEmail(email);
-        Map<String, Boolean> response = new HashMap<>();
-        response.put("isDuplicate", isDuplicate);
+    public ResponseEntity<Map<String, Object>> checkEmail(@RequestParam String email) {
+        Map<String, Object> response = new HashMap<>();
+        
+        // 이메일 중복 체크
+        boolean exists = memberService.existsByEmail(email);
+        
+        response.put("exists", exists);
         return ResponseEntity.ok(response);
     }
 

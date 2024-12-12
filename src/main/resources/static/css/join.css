@@ -110,8 +110,28 @@ form {
 }
 
 .input-box:focus {
-  border-color: #2c74d2;
-  outline: none;
+  border-color: #86b7fe;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.input-box.is-invalid {
+  border-color: #dc3545;
+  background-color: #fff;
+}
+
+.input-box.is-valid {
+  border-color: #198754;
+  background-color: #fff;
+}
+
+.input-box.is-invalid:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.input-box.is-valid:focus {
+  border-color: #198754;
+  box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25);
 }
 
 .input-box.valid {
@@ -123,9 +143,14 @@ form {
 }
 
 .error-message {
-  font-size: 12px;
-  margin-top: 4px;
   display: none;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  color: #dc3545;
+}
+
+.error-message.valid-email {
+  color: #198754;
 }
 
 .error-message.error {

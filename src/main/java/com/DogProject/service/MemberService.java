@@ -59,9 +59,7 @@ public class MemberService implements UserDetailsService {
         validateRequiredFields(member);
         
         // 모든 회원가입에 대해 비밀번호 암호화
-        if (member.getMPassword() != null) {
-            member.setMPassword(passwordEncoder.encode(member.getMPassword()));
-        }
+        member.setMPassword(passwordEncoder.encode(member.getMPassword()));
         
         return memberRepository.save(member);
     }
@@ -107,8 +105,11 @@ public class MemberService implements UserDetailsService {
     }
 
     public Member findBymEmail(String mEmail) {
-        return memberRepository.findBymEmail(mEmail)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일이 존재하지 않습니다: " + mEmail));
+        return memberRepository.findBymEmail(mEmail).orElse(null);
+    }
+
+    public Member findByProviderAndSocialId(String provider, String socialId) {
+        return memberRepository.findByProviderAndSocialId(provider, socialId).orElse(null);
     }
 
     public Member findByMIdx(int mIdx) {

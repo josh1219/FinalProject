@@ -1,5 +1,7 @@
 package com.DogProject.dto;
 
+import com.DogProject.entity.Member;
+import com.DogProject.constant.Role;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -9,6 +11,8 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -41,9 +45,52 @@ public class MemberDTO {
 
     private String picture;
     private String provider;
+    private String socialId;
 
     public boolean isPasswordValid() {
         // 비밀번호는 8자 이상, 영문, 숫자, 특수문자를 포함해야 함
         return mPassword != null && mPassword.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$");
+    }
+
+    public Member toEntity() {
+        // 모든 회원가입에 대해 비밀번호 필수 체크
+        if (mPassword == null || mPassword.trim().isEmpty()) {
+            throw new IllegalArgumentException("비밀번호는 필수 입력값입니다.");
+        }
+
+        Member member;
+        if (provider != null && !provider.equals("local")) {
+            member = Member.socialBuilder()
+                .name(name)
+                .mEmail(mEmail.toLowerCase())
+                .mPassword(mPassword)
+                .picture(picture)
+                .provider(provider)
+                .socialId(socialId)
+                .birthday(birthday)
+                .phone(phone)
+                .gender(gender)
+                .address(address)
+                .enabled(true)
+                .build();
+        } else {
+            member = Member.userBuilder()
+                .name(name)
+                .mEmail(mEmail.toLowerCase())
+                .mPassword(mPassword)
+                .birthday(birthday)
+                .phone(phone)
+                .gender(gender)
+                .address(address)
+                .build();
+            
+            member.setProvider("local"); // 명시적으로 provider를 'local'로 설정
+        }
+        
+        member.setRole(Role.USER);
+        member.setPoint(0);
+        member.setLastLoginDate(LocalDateTime.now());
+        
+        return member;
     }
 }

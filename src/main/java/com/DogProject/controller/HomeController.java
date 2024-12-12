@@ -42,13 +42,11 @@ public class HomeController {
                 }
                 // Kakao 로그인
                 else if (oauth2User.getAttributes().containsKey("kakao_account")) {
-                    Map<String, Object> kakaoAccount = (Map<String, Object>) oauth2User.getAttribute("kakao_account");
-                    if (kakaoAccount.containsKey("email")) {
-                        email = kakaoAccount.get("email").toString();
-                    }
+                    String socialId = oauth2User.getAttribute("id").toString();
+                    member = memberService.findByProviderAndSocialId("kakao", socialId);
                 }
                 
-                if (email != null) {
+                if (member == null && email != null) {
                     member = memberService.findBymEmail(email);
                 }
             }

@@ -5,9 +5,32 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PETOPIA - 회원가입</title>
-  <meta name="_csrf" content="your_csrf_token" />
-  <meta name="_csrf_header" content="X-CSRF-TOKEN" />
+  <meta name="_csrf" th:content="${_csrf.token}" />
+  <meta name="_csrf_header" th:content="${_csrf.headerName}" />
   <link rel="stylesheet" href="/css/join.css">
+  <style>
+    /* 이메일 에러 메시지 스타일 */
+    #emailError.error-message {
+        color: #e01013 !important;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: none;
+    }
+
+    /* 이메일 입력 필드 스타일 */
+    .input-box.is-invalid {
+        border-color: #e01013 !important;
+    }
+
+    .input-box.is-valid {
+        border-color: #28a745 !important;
+    }
+
+    /* 유효한 이메일 메시지 스타일 */
+    #emailError.valid-email {
+        color: #28a745 !important;
+    }
+  </style>
 </head>
 <body>
   <div class="page-wrapper">
@@ -24,26 +47,28 @@
             </a>
           </div>
         </div>
-        <h1 class="form-title">회원가입</h1>
+        <h1 class="form-title" th:text="${memberDTO.provider != 'local' ? (memberDTO.provider == 'google' ? '구글 계정으로 회원가입' : memberDTO.provider == 'naver' ? '네이버 계정으로 회원가입' : memberDTO.provider == 'kakao' ? '카카오 계정으로 회원가입' : '소셜 계정으로 회원가입') : '회원가입'}">회원가입</h1>
       </div>
 
       <form th:action="@{/member/join}" method="post" id="joinForm">
         <!-- 소셜 로그인 정보 hidden 필드 -->
-        <input type="hidden" name="picture" th:value="${picture}">
-        <input type="hidden" name="provider" th:value="${provider}">
-        <input type="hidden" name="mType" th:value="${mType}">
+        <input type="hidden" name="picture" th:value="${memberDTO.picture}">
+        <input type="hidden" name="provider" th:value="${memberDTO.provider}" id="providerInput">
+        <input type="hidden" name="socialId" th:value="${memberDTO.socialId}">
 
         <!-- 소셜 로그인 정보 표시 -->
-        <div th:if="${isSocialLogin}" class="social-info">
-            <img th:if="${picture}" th:src="${picture}" class="profile-image" alt="프로필 이미지">
-            <p class="provider-text">
-                <span th:text="${
-                    provider == 'google' ? '구글' : 
-                    provider == 'naver' ? '네이버' :
-                    provider == 'kakao' ? '카카오' : '소셜'
-                }">소셜</span> 계정으로 회원가입
-            </p>
+        <div th:if="${memberDTO.provider != 'local'}" class="social-info">
+            <img th:if="${memberDTO.picture}" th:src="${memberDTO.picture}" class="profile-image" alt="프로필 이미지">
         </div>
+
+        <script th:inline="javascript">
+            // provider 값 콘솔 출력
+            document.addEventListener('DOMContentLoaded', function() {
+                const provider = /*[[${memberDTO.provider}]]*/ null;
+                console.log('Provider Value:', provider);
+                console.log('Provider from input:', document.getElementById('providerInput').value);
+            });
+        </script>
 
         <div class="input-container">
           <label class="input-label">
@@ -51,24 +76,14 @@
           </label>
           <div class="input-group">
             <input type="text" 
-                   th:if="${memberDTO != null and memberDTO.provider == 'kakao'}"
-                   id="kakaoEmail"
-                   class="input-box kakao-email"
-                   th:value="${(memberDTO != null and memberDTO.mEmail != null and #strings.contains(memberDTO.mEmail, '@')) ? 
-                             #strings.substring(memberDTO.mEmail, 0, #strings.indexOf(memberDTO.mEmail, '@')) : ''}"
-                   placeholder="카카오 계정 입력"
-                   required>
-            <input type="email" 
-                   th:unless="${memberDTO != null and memberDTO.provider == 'kakao'}"
                    name="mEmail" 
-                   th:value="${memberDTO != null ? memberDTO.mEmail : ''}" 
+                   id="mEmail" 
                    class="input-box" 
-                   th:readonly="${memberDTO != null and memberDTO.provider != null and memberDTO.provider != 'local'}"
-                   placeholder="예) abc@gmail.com" 
+                   th:value="${memberDTO != null and memberDTO.provider == 'kakao' ? #strings.replace(memberDTO.mEmail, '@kakao.com', '') : memberDTO.mEmail}"
+                   placeholder="원하는 이메일을 입력해주세요."
                    required>
-            <input type="hidden" name="mEmail" id="fullKakaoEmail" th:if="${memberDTO != null and memberDTO.provider == 'kakao'}">
+            <div class="error-message" id="emailError"></div>
           </div>
-          <div class="error-message" id="mEmailError"></div>
         </div>
 
         <div class="input-container">
@@ -76,7 +91,7 @@
             비밀번호<span class="required">*</span>
           </label>
           <input type="password" name="mPassword" id="mPassword" class="input-box" 
-                 placeholder="8자 이상 영문, 숫자, 특수문자 포함" required>
+                 placeholder="8자 이상 영문, 숫자, 특수문자를 포함해주세요." required>
           <div class="error-message" id="mPasswordError"></div>
         </div>
 
@@ -93,7 +108,7 @@
           <label class="input-label">
             이름<span class="required">*</span>
           </label>
-          <input type="text" name="name" th:value="${name}" class="input-box" 
+          <input type="text" name="name" th:value="${memberDTO.name}" class="input-box" 
                  placeholder="예) 홍길동" required>
           <div class="error-message" id="nameError"></div>
         </div>
@@ -362,8 +377,7 @@
         const emailError = document.getElementById('emailError');
         let emailCheckTimeout;
 
-        emailInput.addEventListener('input', function() {
-            clearTimeout(emailCheckTimeout);
+        emailInput.addEventListener('blur', function() {
             const email = this.value.trim();
             
             // 이메일 형식 검사
@@ -374,37 +388,36 @@
                 emailInput.style.borderColor = '#e01013';
                 return;
             }
-
+            
             // 타이핑 후 0.5초 뒤에 중복 체크 실행
-            emailCheckTimeout = setTimeout(() => {
-                fetch('/member/checkEmail', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                        [csrfHeader]: csrfToken
-                    },
-                    body: `email=${encodeURIComponent(email)}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.isDuplicate) {
-                        emailError.textContent = '이미 사용 중인 이메일입니다.';
-                        emailError.style.display = 'block';
-                        emailInput.style.borderColor = '#e01013';
-                    } else {
-                        emailError.textContent = '사용 가능한 이메일입니다.';
-                        emailError.style.color = '#28a745';
-                        emailError.style.display = 'block';
-                        emailInput.style.borderColor = '#28a745';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    emailError.textContent = '이메일 확인 중 오류가 발생했습니다.';
+            fetch('/member/checkEmail', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    [csrfHeader]: csrfToken
+                },
+                body: `email=${encodeURIComponent(email)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.isDuplicate) {
+                    emailError.textContent = '이미 사용 중인 이메일입니다.';
                     emailError.style.display = 'block';
+                    emailError.style.color = '#e01013';
                     emailInput.style.borderColor = '#e01013';
-                });
-            }, 500);
+                } else {
+                    emailError.textContent = '사용 가능한 이메일입니다.';
+                    emailError.style.color = '#28a745';
+                    emailError.style.display = 'block';
+                    emailInput.style.borderColor = '#28a745';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                emailError.textContent = '이메일 확인 중 오류가 발생했습니다.';
+                emailError.style.display = 'block';
+                emailInput.style.borderColor = '#e01013';
+            });
         });
 
         // 약관동의 체크박스 처리
@@ -464,6 +477,150 @@
             });
         }
     });
+  </script>
+
+  <script th:inline="javascript">
+    /*<![CDATA[*/
+    const isKakao = [[${memberDTO != null and memberDTO.provider == 'kakao'}]];
+    const kakaoEmail = [[${memberDTO != null ? memberDTO.mEmail : ''}]];
+    /*]]>*/
+    
+    function handleKakaoEmail(input) {
+        if (!input.value.includes('@kakao.com')) {
+            input.value = input.value.replace('@kakao.com', '') + '@kakao.com';
+        }
+        validateEmail(input);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const emailInput = document.querySelector('input[name="mEmail"]');
+        
+        if (emailInput && isKakao) {
+            // 초기 값 설정
+            if (!emailInput.value.includes('@kakao.com')) {
+                emailInput.value = emailInput.value + '@kakao.com';
+            }
+
+            // 포커스 시 커서 위치 조정
+            emailInput.addEventListener('focus', function() {
+                const atIndex = this.value.indexOf('@');
+                if (atIndex !== -1) {
+                    this.setSelectionRange(0, atIndex);
+                }
+            });
+
+            // 입력 중 @kakao.com 유지 및 커서 위치 조정
+            emailInput.addEventListener('input', function(e) {
+                const cursorPosition = this.selectionStart;
+                const atIndex = this.value.indexOf('@');
+                
+                // @ 이후에 입력하려고 할 때 방지
+                if (cursorPosition > atIndex && atIndex !== -1) {
+                    e.preventDefault();
+                    return;
+                }
+
+                const withoutKakao = this.value.replace('@kakao.com', '');
+                this.value = withoutKakao + '@kakao.com';
+                
+                // 커서 위치 유지 (단, @ 이전까지만)
+                const newPosition = Math.min(cursorPosition, this.value.indexOf('@'));
+                this.setSelectionRange(newPosition, newPosition);
+            });
+
+            // 클릭 시 커서 위치 조정
+            emailInput.addEventListener('click', function(e) {
+                const clickPosition = this.selectionStart;
+                const atIndex = this.value.indexOf('@');
+                
+                if (clickPosition > atIndex) {
+                    this.setSelectionRange(atIndex, atIndex);
+                }
+            });
+        }
+        
+        // 이메일 유효성 검사
+        emailInput.addEventListener('blur', function() {
+            validateEmail(this);
+        });
+    });
+  </script>
+
+  <script>
+    // 이메일 입력창 이벤트 리스너
+    function validateEmail(input) {
+        const email = input.value;
+        const errorDiv = document.getElementById('emailError');
+        const isKakaoEmail = email.endsWith('@kakao.com');
+        
+        // 모든 상태에서 우선 메시지를 숨김
+        errorDiv.style.display = 'none';
+        errorDiv.classList.remove('valid-email');
+        input.classList.remove('is-valid', 'is-invalid');
+        
+        if (!email) {
+            input.classList.add('is-invalid');
+            errorDiv.textContent = '이메일을 입력해주세요.';
+            errorDiv.style.display = 'block';
+            errorDiv.style.color = '#e01013';
+            return;
+        }
+        
+        // 이메일 형식 검사
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            input.classList.add('is-invalid');
+            errorDiv.textContent = '올바른 이메일 형식이 아닙니다.';
+            errorDiv.style.display = 'block';
+            errorDiv.style.color = '#e01013';
+            return;
+        }
+        
+        // CSRF 토큰 가져오기
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+        
+        // 서버에 이메일 중복 체크 요청
+        fetch('/member/checkEmail?email=' + encodeURIComponent(email), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                [csrfHeader]: csrfToken
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.exists) {  // 이메일이 존재하면 (중복이면)
+                input.classList.add('is-invalid');
+                input.style.borderColor = '#e01013';
+                errorDiv.classList.remove('valid-email');
+                errorDiv.textContent = '이미 사용중인 이메일입니다.';
+                errorDiv.style.color = '#e01013';
+            } else {  // 이메일이 존재하지 않으면 (사용 가능하면)
+                input.classList.remove('is-invalid');
+                input.classList.add('is-valid');
+                input.style.borderColor = '#28a745';
+                errorDiv.classList.add('valid-email');
+                errorDiv.textContent = '사용 가능한 이메일입니다.';
+                errorDiv.style.color = '#28a745';
+            }
+            errorDiv.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            input.classList.add('is-invalid');
+            input.style.borderColor = '#e01013';
+            errorDiv.classList.remove('valid-email');
+            errorDiv.textContent = '이메일 확인 중 오류가 발생했습니다.';
+            errorDiv.style.display = 'block';
+            errorDiv.style.color = '#e01013';
+        });
+    }
   </script>
 
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>

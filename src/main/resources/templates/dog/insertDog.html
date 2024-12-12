@@ -396,30 +396,50 @@
             input.click();
         }
 
-        function previewImage(input) {
-            const preview = document.getElementById('preview');
-            const previewArea = document.querySelector('.img-preview-area');
-            
+        async function previewImage(input) {
             if (input.files && input.files[0]) {
-                // 파일 크기 체크 (50MB = 50 * 1024 * 1024 bytes)
-                const maxSize = 50 * 1024 * 1024; // 50MB in bytes
-                if (input.files[0].size > maxSize) {
-                    alert('이미지 크기는 50MB 이하만 등록 가능합니다.');
-                    input.value = ''; // 파일 선택 초기화
-                    preview.src = '/images/dogdefault.png';
-                    return;
-                }
-
-                const reader = new FileReader();
+                var reader = new FileReader();
                 reader.onload = function(e) {
-                    preview.src = e.target.result;
+                    document.getElementById('preview').src = e.target.result;
+                    document.getElementById('preview').style.display = 'block';
+                    // 이미지가 로드되면 견종 식별 실행
+                    identifyBreed(input.files[0]);
                 }
                 reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function identifyBreed(imageFile) {
+            try {
+                const formData = new FormData();
+                formData.append('image', imageFile);
                 
-                // 파일 선택 후 capture 속성 제거
-                input.removeAttribute('capture');
-            } else {
-                preview.src = '/images/dogdefault.png';
+                console.log('이미지 업로드 시작');
+                const response = await fetch('/api/identify-breed', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                console.log('서버 응답 상태:', response.status);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('서버 오류 응답:', errorText);
+                    throw new Error(errorText || '견종 식별에 실패했습니다.');
+                }
+
+                const breedName = await response.text();
+                console.log('서버 응답 데이터:', breedName);
+                
+                if (breedName && breedName.trim() !== '') {
+                    document.getElementById('dType').value = breedName.trim();
+                    console.log('견종이 자동으로 입력되었습니다:', breedName);
+                } else {
+                    throw new Error('견종을 식별할 수 없습니다.');
+                }
+            } catch (error) {
+                console.error('견종 식별 중 오류 발생:', error);
+                document.getElementById('dType').value = '';
+                alert('견종 식별에 실패했습니다. 수동으로 입력해주세요.\n오류: ' + error.message);
             }
         }
 

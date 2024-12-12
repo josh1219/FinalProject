@@ -181,13 +181,9 @@ public class DogController {
             Dog existingDog = dogService.getDogById(dIdx);
 
             // 현재 로그인한 회원의 강아지인지 확인
-<<<<<<< HEAD
-            if (existingDog.getMember().getMIdx() != (member.getMIdx())) {
-                throw new AccessDeniedException("You do not have permission to modify this dog's information.");
-=======
             if (existingDog.getMember().getMIdx() != member.getMIdx()) {
                 throw new AccessDeniedException("해당 강아지의 정보를 수정할 권한이 없습니다.");
->>>>>>> 2b3301a49efa38da52e60809f40ed9bde36b3753
+
             }
 
             // 강아지 정보 업데이트

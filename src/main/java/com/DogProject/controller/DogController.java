@@ -158,7 +158,16 @@ public class DogController {
         try {
             Member member = memberService.findBymEmail(userDetails.getUsername());
             List<Dog> deletedDogs = dogService.getDeletedDogsByMember(member);
+            
+            // 강아지 이미지 정보 추가
+            Map<Integer, File> dogImages = new HashMap<>();
+            for(Dog dog : deletedDogs){
+                fileService.findByTypeAndIdx(3, dog.getDIdx())
+                      .ifPresent(file -> dogImages.put(dog.getDIdx(), file));
+            }
+            
             model.addAttribute("dogs", deletedDogs);
+            model.addAttribute("dogImages", dogImages);
             model.addAttribute("member", member);
             return "dog/deletedDogList";
         } catch (Exception e) {

@@ -12,6 +12,11 @@
             box-sizing: border-box;
         }
 
+        .navigation-buttons{
+            display: flex;
+            justify-content: space-between;
+        }
+
         body {
             font-family: 'Arial', sans-serif;
             background-color: #f5f5f5;
@@ -202,20 +207,23 @@
         <div th:unless="${#lists.isEmpty(dogs)}" class="dog-list">
             <div th:each="dog : ${dogs}" class="dog-card">
                 <img th:if="${dogImages.containsKey(dog.DIdx)}" 
-                     th:src="@{'/uploads/' + ${dogImages.get(dog.DIdx).fileSaveName}}"
-                     class="dog-image" alt="강아지 사진">
+                     th:src="@{'/uploads/' + ${dogImages.get(dog.DIdx).fileSaveName}}" 
+                     class="dog-image" 
+                     alt="강아지 이미지">
                 <img th:unless="${dogImages.containsKey(dog.DIdx)}" 
-                     src="/images/dogdefault.png"
-                     class="dog-image" alt="기본 강아지 사진">
+                     src="/images/dogdefault.png" 
+                     class="dog-image" 
+                     alt="기본 이미지">
                 <div class="dog-info">
                     <div class="dog-name" th:text="${dog.name}">강아지 이름</div>
-                    <div class="dog-detail" th:text="${dog.DType}">견종</div>
+                    <div class="dog-detail" th:text="${dog.dType}">견종</div>
                     <div class="dog-detail" th:text="${dog.age + '살'}">나이</div>
+                    <div class="dog-detail" th:text="${dog.birthday}">생일</div>
                     <div class="dog-detail" th:text="${dog.gender == 'male' ? '남아' : '여아'}">성별</div>
                 </div>
                 <div class="dog-actions">
-                    <a th:href="@{'/dog/update/' + ${dog.DIdx}}" class="action-button edit-button">수정</a>
-                    <button type="button" th:onclick="'deleteDog(' + ${dog.DIdx} + ')'" class="action-button delete-button">삭제</button>
+                    <a th:href="@{'/dog/update/' + ${dog.dIdx}}" class="action-button edit-button">수정</a>
+                    <button type="button" th:onclick="'deleteDog(' + ${dog.dIdx} + ')'" class="action-button delete-button">삭제</button>
                 </div>
             </div>
         </div>

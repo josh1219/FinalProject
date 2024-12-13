@@ -135,20 +135,36 @@ public class DogController {
 
     @GetMapping("/list")
     public String dogList(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        Member member = memberService.findBymEmail(userDetails.getUsername());
-        List<Dog> dogs = dogService.findAllByMember(member);
-        
-        // 각 강아지의 이미지 정보를 맵으로 저장
-        Map<Integer, File> dogImages = new HashMap<>();
-        for (Dog dog : dogs) {
-            fileService.findByTypeAndIdx(3, dog.getDIdx())
+        try {
+            Member member = memberService.findBymEmail(userDetails.getUsername());
+            List<Dog> dogs = dogService.getDogsByMember(member);
+            Map<Integer, File> dogImages = new HashMap<>();
+            for(Dog dog : dogs){
+                fileService.findByTypeAndIdx(3, dog.getDIdx())
                       .ifPresent(file -> dogImages.put(dog.getDIdx(), file));
+            }
+            model.addAttribute("dogs", dogs);
+            model.addAttribute("dogImages", dogImages);
+            model.addAttribute("member", member);
+            return "dog/dogList";
+        } catch (Exception e) {
+            log.error("Error in dogList", e);
+            return "redirect:/";
         }
-        
-        model.addAttribute("dogs", dogs);
-        model.addAttribute("dogImages", dogImages);
-        model.addAttribute("member", member);
-        return "dog/dogList";
+    }
+
+    @GetMapping("/deleted/list")
+    public String deletedDogList(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            Member member = memberService.findBymEmail(userDetails.getUsername());
+            List<Dog> deletedDogs = dogService.getDeletedDogsByMember(member);
+            model.addAttribute("dogs", deletedDogs);
+            model.addAttribute("member", member);
+            return "dog/deletedDogList";
+        } catch (Exception e) {
+            log.error("Error in deletedDogList", e);
+            return "redirect:/";
+        }
     }
 
     @GetMapping("/update/{dIdx}")
@@ -249,27 +265,16 @@ public class DogController {
         }
     }
 
-    @GetMapping("/deleted/list")
-    public String deletedDogList(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        try {
-            Member member = memberService.findBymEmail(userDetails.getUsername());
-            List<Dog> deletedDogs = dogService.getDeletedDogsByMember(member);
-            model.addAttribute("dogs", deletedDogs);
-            model.addAttribute("member", member);
-            return "dog/deletedDogList";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "redirect:/";
-        }
-    }
-
     @PostMapping("/restore/{dIdx}")
     @ResponseBody
     public ResponseEntity<?> restoreDog(@PathVariable int dIdx) {
         try {
+            log.info("Restoring dog with ID: {}", dIdx);
             dogService.restoreDog(dIdx);
-            return ResponseEntity.ok().build();
+            log.info("Successfully restored dog with ID: {}", dIdx);
+            return ResponseEntity.ok().body("/dog/list");
         } catch (Exception e) {
+            log.error("Error restoring dog with ID: {}", dIdx, e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

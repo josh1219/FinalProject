@@ -42,6 +42,20 @@ public class DogService {
         log.debug("강아지 정보 수정 시작 - ID: {}", dog.getDIdx());
         try {
             Dog updatedDog = dogRepository.save(dog);
+            
+            // 새 이미지가 있는 경우
+            if (image != null && !image.isEmpty()) {
+                // 기존 이미지 삭제
+                fileService.findByTypeAndIdx(3, dog.getDIdx())
+                    .ifPresent(existingFile -> fileService.deleteFile(existingFile));
+                
+                // 새 이미지 저장
+                File saveFile = new File();
+                saveFile.setFType(3);
+                saveFile.setTIdx(dog.getDIdx());
+                fileService.saveFile(saveFile, image);
+            }
+            
             log.debug("강아지 정보 수정 완료 - ID: {}", updatedDog.getDIdx());
             return updatedDog;
         } catch (Exception e) {
@@ -81,10 +95,13 @@ public class DogService {
         log.info("Updated dog delYN to Y: {}", savedDog);
     }
 
+    @Transactional
     public void restoreDog(int dIdx) {
         Dog dog = dogRepository.findBydIdx(dIdx)
                 .orElseThrow(() -> new RuntimeException("Dog not found with id: " + dIdx));
+        log.info("Found dog to restore: {}", dog);
         dog.setDelYN("N");
-        dogRepository.save(dog);
+        Dog savedDog = dogRepository.save(dog);
+        log.info("Updated dog delYN to N: {}", savedDog);
     }
 }

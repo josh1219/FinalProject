@@ -211,11 +211,51 @@
             }
             
             .img-buttons {
-                gap: 3.5rem;
+                gap: 2.2rem;
+
+            }
+
+            .img-area {
+                padding: 1rem;
+                min-height: 200px;
+                position: initial;
+            }
+
+            .img-preview {
+                max-height: 190px;
+            }
+        }
+
+        /* 태블릿 및 중간 크기 화면 (568px - 1133px) */
+        @media all and (min-width: 568px) and (max-width: 1133px) {
+            .img-area {
+                padding: 1rem;
+                min-height: 200px;
+                position: initial;
+            }
+
+        }
+
+        /* 큰 화면 (1133px 이상) */
+        @media all and (min-width: 1133px) {
+            .container {
+                max-width: 1200px;
+                padding: 2rem;
+                margin: 1rem auto;
+            }
+
+            .img-area {
+                padding: 1.5rem;
+                min-height: 250px;
+                position: initial;
             }
 
             .img-preview {
                 max-height: 230px;
+            }
+
+            .img-buttons {
+                gap: 3.5rem;
             }
         }
     </style>

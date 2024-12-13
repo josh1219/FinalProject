@@ -1,0 +1,266 @@
+.calendar,
+.calendar * {
+  box-sizing: border-box;
+}
+.calendar {
+  background: #ffffff;
+  padding: 30px 20px 30px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: flex-start;
+  height: 852px;
+  position: relative;
+  overflow: hidden;
+}
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 49px;
+  position: relative;
+  overflow: hidden;
+}
+.frame-48 {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 86px;
+  position: relative;
+}
+.petopia {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Bold", sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  position: relative;
+}
+.alram {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 46px;
+  height: 49px;
+  position: absolute;
+  right: 46px;
+  top: 0px;
+}
+.iconly-regular-outline-notification {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  position: relative;
+}
+.notification {
+  height: auto;
+  position: absolute;
+  left: 3.75px;
+  top: 1.25px;
+  overflow: visible;
+}
+.profile {
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 49px;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+}
+.group-50 {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  position: relative;
+  overflow: visible;
+}
+.calendar-frame {
+  background: #d9d9d9;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 315px;
+  position: relative;
+}
+.calendar-subtitle {
+  background: #d9d9d9;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 51px;
+  position: relative;
+}
+.schedule {
+  background: #d9d9d9;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 282px;
+  position: relative;
+}
+.footer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  align-self: stretch;
+  flex-shrink: 0;
+  height: 77px;
+  position: absolute;
+  right: 20px;
+  left: 20px;
+  bottom: 14px;
+}
+.div {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 65px;
+  height: 65px;
+  position: relative;
+}
+.calendar2 {
+  flex-shrink: 0;
+  width: 34px;
+  height: 29px;
+  position: static;
+}
+.iconly-regular-light-calendar {
+  width: 34px;
+  height: 29px;
+  position: absolute;
+  left: 15.5px;
+  top: 10px;
+}
+.calendar3 {
+  width: 75%;
+  height: 83.33%;
+  position: absolute;
+  right: 12.5%;
+  left: 12.5%;
+  bottom: 8.33%;
+  top: 8.33%;
+  overflow: visible;
+}
+.div2 {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Regular", sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  position: relative;
+  align-self: stretch;
+}
+.walk {
+  flex-shrink: 0;
+  width: 32.34px;
+  height: 29px;
+  position: static;
+}
+.iconly-regular-outline-location {
+  width: 32.34px;
+  height: 29px;
+  position: absolute;
+  left: 16.33px;
+  top: 10px;
+}
+.location {
+  height: auto;
+  position: absolute;
+  left: 5.39px;
+  top: 2.42px;
+  overflow: visible;
+}
+.home {
+  flex-shrink: 0;
+  width: 30px;
+  height: 26.5px;
+  position: static;
+}
+.iconly-regular-outline-home {
+  width: 30px;
+  height: 26.5px;
+  position: absolute;
+  left: 17.5px;
+  top: 11.25px;
+}
+.home2 {
+  width: 85.42%;
+  height: 89.6%;
+  position: absolute;
+  right: 6.25%;
+  left: 8.33%;
+  bottom: 6.23%;
+  top: 4.17%;
+  overflow: visible;
+}
+.group-48 {
+  flex-shrink: 0;
+  width: 36.83px;
+  height: 27px;
+  position: static;
+}
+.iconly-regular-outline-3-user {
+  width: 36.83px;
+  height: 27px;
+  position: absolute;
+  left: 14.09px;
+  top: 11px;
+}
+._3-user {
+  width: 90.72%;
+  height: 69.96%;
+  position: absolute;
+  right: 5.12%;
+  left: 4.17%;
+  bottom: 13.37%;
+  top: 16.67%;
+  overflow: visible;
+}
+.div3 {
+  color: #000000;
+  text-align: center;
+  font-family: "IstokWeb-Regular", sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  position: relative;
+  width: 56px;
+}
+.group-49 {
+  flex-shrink: 0;
+  width: 32.34px;
+  height: 29px;
+  position: static;
+}
+.iconly-regular-outline-category {
+  width: 32.34px;
+  height: 29px;
+  position: absolute;
+  left: 16.33px;
+  top: 10px;
+}
+.category {
+  height: auto;
+  position: absolute;
+  left: 2.69px;
+  top: 2.42px;
+  overflow: visible;
+}

@@ -27,15 +27,20 @@ public class WalkSession {
     @Comment("총 산책 거리")
     private double totalDistance;
 
-    @Column(nullable = false)
-    @Comment("산책 날짜")
+    @Column(nullable = false, columnDefinition = "DATETIME(0)")
+    @Comment("산책 시작 날짜")
     private LocalDateTime walkDate;
+
+    @Column(nullable = false, columnDefinition = "DATETIME(0)")
+    @Comment("산책 종료 날짜")
+    private LocalDateTime walkEndDate;
 
     @OneToMany(mappedBy = "walkSession", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Path> paths = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
-        walkDate = LocalDateTime.now();
+        walkDate = LocalDateTime.now().withNano(0);
+        walkEndDate = LocalDateTime.now().withNano(0);
     }
 }

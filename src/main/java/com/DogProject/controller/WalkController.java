@@ -90,6 +90,7 @@ public class WalkController {
             walkSession.setMember(member);
             walkSession.setTotalDistance(totalDistance);
             walkSession.setWalkDate(LocalDateTime.now());
+            walkSession.setWalkEndDate(LocalDateTime.now()); // 종료 시간 설정
             walkSession = walkSessionRepository.save(walkSession);
 
             // Path 데이터 일괄 저장
@@ -106,19 +107,21 @@ public class WalkController {
                 pathRepository.save(path);
             }
 
-            // 마일리지 계산 및 업데이트
-            int earnedPoints = (int) Math.floor(totalDistance * 0.005);
+            // 포인트 적립 (100m당 1포인트, 최소 1포인트)
+            int earnedPoints = Math.max(1, (int) (totalDistance / 100));
             member.setPoint(member.getPoint() + earnedPoints);
             memberRepository.save(member);
 
             Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
             response.put("message", "산책 데이터가 저장되었습니다.");
             response.put("earnedPoints", earnedPoints);
-            response.put("totalPoints", member.getPoint());
-            
+            response.put("currentPoint", member.getPoint());
+            response.put("wsIdx", walkSession.getWsIdx());
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("데이터 저장 중 오류가 발생했습니다: " + e.getMessage());
+            return ResponseEntity.badRequest().body("산책 데이터 저장에 실패했습니다: " + e.getMessage());
         }
     }
 

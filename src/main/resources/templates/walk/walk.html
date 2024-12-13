@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Maps: Route with 300 Points</title>
+    <title>PETOPIA 산책</title>
     <link rel="stylesheet" href="/css/walk.css">
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAyQygBh-3yT1w9IwEOALZVRr3833ZaD-8&libraries=geometry"></script>
     <script src="/js/jquery-3.7.1.min.js"></script>
@@ -45,17 +45,6 @@
             background-color: #f4f4f4;
         }
 
-        .ellipse-1:hover {
-            background: blue;
-            border-radius: 50%;
-            flex-shrink: 0;
-            width: 87px;
-            height: 76px;
-            position: absolute;
-            left: 0px;
-            top: 0px;
-        }
-
         .warning-message {
             position: fixed;
             top: 50%;
@@ -76,6 +65,30 @@
         .warning-message.show {
             opacity: 1;
         }
+
+            @media (max-width: 768px) {
+                .div9 {
+                    display: flex;
+                    /* align-items: center; */
+                }
+                .plusMile {
+                    font-size: small;
+                }
+            
+            .point-value {
+                margin-left: 10px;
+                font-size: 14px;
+                color: #007bff;
+                font-weight: bold;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .point-value {
+                display: none;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -180,31 +193,6 @@
         </div>
     </div>
 </div>
-
-<style>
-    @media (max-width: 768px) {
-        .div9 {
-            display: flex;
-            /* align-items: center; */
-        }
-        .plusMile {
-            font-size: small;
-        }
-        
-        .point-value {
-            margin-left: 10px;
-            font-size: 14px;
-            color: #007bff;
-            font-weight: bold;
-        }
-    }
-
-    @media (min-width: 769px) {
-        .point-value {
-            display: none;
-        }
-    }
-</style>
 
 <div id="warningMessage" class="warning-message"></div>
 
@@ -406,8 +394,10 @@
                         }
                     );
 
-                    // 타이머 시작
+                    // 새로운 산책 시작 시 거리와 시간 초기화
                     totalSeconds = 0;
+                    $('#distance').text('0m');
+                    $('._02').text('00:00:00');
                     startTimer();
 
                     isTracking = true;
@@ -436,60 +426,58 @@
 
         // 타이머 중지
         stopTimer();
+
+        // 산책 데이터 저장
+        const formData = new FormData();
+        formData.append('totalDistance', totalDistance);
         
-        // 최종 산책 세션 정보 저장 (Ajax)
+        // 모든 위치 데이터 추가
+        const latitudes = pathCoordinates.map(coord => coord.lat);
+        const longitudes = pathCoordinates.map(coord => coord.lng);
+        
+        latitudes.forEach((lat, index) => {
+            formData.append('latitudes[]', lat);
+        });
+        
+        longitudes.forEach((lng, index) => {
+            formData.append('longitudes[]', lng);
+        });
+
+        // 서버에 데이터 전송
         $.ajax({
-            url: '/api/walk/stop',
+            url: '/walk/save',
             type: 'POST',
-            data: {
-                wsIdx: wsIdx,
-                totalDistance: totalDistance
-            },
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function(response) {
                 isTracking = false;
                 $('.go').text('GO!');
                 $('.ellipse-1').css('background', 'rgba(0, 68, 151, 0.63)');
                 
-                // 획득한 마일리지 표시
-                const earnedPoint = response.earnedPoint;
-                const totalPoint = response.totalPoint;
+                // 획득한 포인트 표시
+                const earnedPoints = response.earnedPoints;
+                const currentPoint = response.currentPoint;
                 
-                // 마일리지 표시 업데이트
-                $('.mileage').text(totalPoint + ' mile (+ ' + earnedPoint + ' mile)');
+                // 포인트 표시 업데이트
+                $('.point-value').text(currentPoint + ' P (+ ' + earnedPoints + ' P)');
                 
-                // 최근 산책 기록 불러오기 (Ajax)
-                $.ajax({
-                    url: '/api/walk/recent',
-                    type: 'GET',
-                    success: function(walks) {
-                        if (walks && walks.length > 0) {
-                            const latestWalk = walks[0];
-                            $('#distance').text(
-                                latestWalk.totalDistance 
-                                    ? `${Math.round(latestWalk.totalDistance)}m` 
-                                    : '0m'
-                            );
-                            const walkHours = Math.floor(totalSeconds / 3600);
-                            const walkMinutes = Math.floor((totalSeconds % 3600) / 60);
-                            const walkSeconds = totalSeconds % 60;
-                            $('._02').text(
-                                `${walkHours.toString().padStart(2, '0')}:` +
-                                `${walkMinutes.toString().padStart(2, '0')}:` +
-                                `${walkSeconds.toString().padStart(2, '0')}`
-                            );
-                        } else {
-                            $('#distance').text('0m');
-                            $('._02').text('00:00:00');
-                        }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error fetching recent walks:', error);
-                        $('._02').text('00:00:00');
-                    }
-                });
+                // 경로 초기화
+                pathCoordinates = [];
+                if (walkPath) {
+                    walkPath.setMap(null);
+                }
+                
+                // 거리와 시간 표시 초기화
+                $('#distance').text('0m');
+                $('._02').text('00:00:00');
+                
+                // 성공 메시지 표시
+                showWarningMessage('산책이 완료되었습니다! ' + earnedPoints + 'P가 적립되었습니다.');
             },
             error: function(xhr, status, error) {
-                console.error('Error stopping walk:', error);
+                console.error('Error saving walk data:', error);
+                showWarningMessage('산책 데이터 저장에 실패했습니다.');
             }
         });
     }

@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PETOPIA - Schedule</title>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAyQygBh-3yT1w9IwEOALZVRr3833ZaD-8&libraries=geometry"></script>
+    <!-- TOAST UI Calendar CSS -->
+    <link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: #f5f6fa;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 430px;
+            margin: 0 auto;
+            background: white;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: white;
+            border-bottom: 1px solid #eee;
+        }
+
+        .petopia {
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        .header-icons img {
+            width: 24px;
+            height: 24px;
+            margin-left: 1rem;
+        }
+
+        .calendar-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            margin: 1rem;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .calendar-header {
+            padding: 1.25rem 1.25rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .view-buttons {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .view-buttons button {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background: rgba(136, 184, 246, 0.15);
+            color: #1a73e8;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .view-buttons button.active {
+            background: rgba(136, 184, 246, 0.15);
+            color: #1a73e8;
+            border-color: #1a73e8;
+            font-weight: bold;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            cursor: pointer;
+            background: rgba(136, 184, 246, 0.15);
+            color: #1a73e8;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+
+        .btn.nav-btn {
+            background: white;
+            color: #1a73e8;
+            border: 1px solid #1a73e8;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        #calendar {
+            flex: 1;
+            background: white;
+            padding: 1rem;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-around;
+            padding: 0.75rem;
+            background: white;
+            border-top: 1px solid #eee;
+        }
+
+        .nav-item {
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .nav-item img {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-item.active {
+            color: #1a73e8;
+        }
+
+        /* TOAST UI Calendar 커스텀 스타일 */
+        .toastui-calendar-layout {
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .toastui-calendar-day-name {
+            font-weight: 600;
+            color: #333;
+            padding: 8px 0;
+        }
+
+        .toastui-calendar-grid-cell {
+            background: white;
+            border: none !important;
+        }
+
+        .toastui-calendar-grid-cell-date {
+            font-weight: 500;
+            padding: 4px;
+        }
+
+        .toastui-calendar-weekday-grid-date {
+            color: #333;
+            font-weight: normal;
+        }
+
+        .toastui-calendar-weekday-grid-date.toastui-calendar-weekday-grid-date-sunday {
+            color: #FF0000;
+        }
+
+        .toastui-calendar-weekday-grid-date.toastui-calendar-weekday-grid-date-saturday {
+            color: #0000FF;
+        }
+
+        .toastui-calendar-weekday-grid-date.toastui-calendar-weekday-grid-date-today {
+            color: #1a73e8;
+            font-weight: bold;
+        }
+
+        .toastui-calendar-events.toastui-calendar-events-time {
+            margin-top: 4px;
+        }
+
+        .toastui-calendar-event {
+            border-radius: 4px;
+            margin-bottom: 2px;
+        }
+
+        .toastui-calendar-more-events {
+            background-color: #f1f3f4;
+            border-radius: 12px;
+            padding: 2px 8px;
+            margin-top: 4px;
+            color: #1a73e8;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            width: 70%;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close-btn:hover {
+            color: #000;
+        }
+
+        .schedule-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+
+        .schedule-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .schedule-time {
+            min-width: 80px;
+            font-weight: bold;
+            color: #1a73e8;
+        }
+
+        .schedule-title {
+            flex: 1;
+            margin-left: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="petopia">PETOPIA</div>
+            <div class="header-icons">
+                <img src="/images/notification0.svg" alt="알림" />
+                <img src="/images/group-500.svg" alt="프로필" />
+            </div>
+        </div>
+
+        <div class="calendar-container">
+            <div class="calendar-header">
+                <div class="view-buttons">
+                    <button id="monthView" class="active">월</button>
+                    <button id="weekView">주</button>
+                    <button id="dayView">일</button>
+                </div>
+                <div class="calendar-nav">
+                    <div class="current-month" id="currentMonth"></div>
+                    <div>
+                        <button id="prevBtn" class="btn nav-btn">&lt;</button>
+                        <button id="todayBtn" class="btn">오늘</button>
+                        <button id="nextBtn" class="btn nav-btn">&gt;</button>
+                    </div>
+                </div>
+                <button id="addScheduleBtn" class="btn">일정 추가</button>
+            </div>
+            <div id="calendar"></div>
+        </div>
+
+        <div class="footer">
+            <div class="nav-item">
+                <img src="/images/calendar1.svg" alt="캘린더" />
+                <div>캘린더</div>
+            </div>
+            <div class="nav-item">
+                <img src="/images/location0.svg" alt="산책" />
+                <div>산책</div>
+            </div>
+            <div class="nav-item">
+                <img src="/images/home1.svg" alt="홈" />
+                <div>홈</div>
+            </div>
+            <div class="nav-item">
+                <img src="/images/_3-user0.svg" alt="커뮤니티" />
+                <div>커뮤니티</div>
+            </div>
+            <div class="nav-item">
+                <img src="/images/category0.svg" alt="메뉴" />
+                <div>메뉴</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 일정 목록 모달 -->
+    <div id="scheduleListModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalDate"></h3>
+                <button class="close-btn" onclick="closeModal('scheduleListModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <ul id="scheduleList" class="schedule-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 상세 보기 모달 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="detailTitle"></h3>
+                <button class="close-btn" onclick="closeModal('detailModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="detailContent"></div>
+                <div id="mapContainer" style="display: none; height: 300px; margin-top: 16px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST UI Calendar JS -->
+    <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+    <script>
+        const Calendar = tui.Calendar;
+        let map;
+        let currentPath;
+        
+        // 캘린더 초기화
+        const calendar = new Calendar('#calendar', {
+            defaultView: 'month',
+            isReadOnly: false,
+            usageStatistics: false,
+            month: {
+                dayNames: ['일', '월', '화', '수', '목', '금', '토'],
+                visibleEventCount: 1,
+                isAlways6Weeks: false,
+                gridSelection: false
+            },
+            template: {
+                time(event) {
+                    const start = new Date(event.start);
+                    return `${start.getHours()}:${String(start.getMinutes()).padStart(2, '0')}`;
+                },
+                monthGridHeader(model) {
+                    const date = parseInt(model.date.split('-')[2], 10);
+                    const day = model.day;
+                    const isToday = model.isToday;
+                    const style = day === 0 ? 'color: #FF0000;' : 
+                                day === 6 ? 'color: #0000FF;' : '';
+                    return `<span class="${isToday ? 'today' : ''}" style="${style}">${date}</span>`;
+                }
+            }
+        });
+
+        // Google Maps 초기화 함수
+        function initMap(eventId) {
+            if (!map) {
+                map = new google.maps.Map(document.getElementById('mapContainer'), {
+                    zoom: 15,
+                    center: { lat: 37.5665, lng: 126.9780 } // 기본 중심점
+                });
+            }
+
+            // 기존 경로 제거
+            if (currentPath) {
+                currentPath.setMap(null);
+            }
+
+            // 산책 경로 데이터 가져오기
+            fetch(`/walk/path/${eventId}`)
+                .then(response => response.json())
+                .then(pathData => {
+                    const path = pathData.map(point => ({
+                        lat: point.latitude,
+                        lng: point.longitude
+                    }));
+
+                    currentPath = new google.maps.Polyline({
+                        path: path,
+                        geodesic: true,
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2
+                    });
+
+                    currentPath.setMap(map);
+
+                    if (path.length > 0) {
+                        map.setCenter(path[0]);
+                    }
+                })
+                .catch(error => {
+                    console.error('산책 경로를 불러오는 중 오류가 발생했습니다:', error);
+                });
+        }
+
+        // 일정 데이터 가져오기
+        fetch('/schedule/events')
+            .then(response => response.json())
+            .then(events => {
+                calendar.createEvents(events.map(event => ({
+                    id: event.id,
+                    title: event.title,
+                    body: event.content,
+                    start: new Date(event.start),
+                    end: new Date(event.end),
+                    category: 'time',
+                    calendarId: event.type || 'default'
+                })));
+            })
+            .catch(error => {
+                console.error('일정을 불러오는 중 오류가 발생했습니다:', error);
+            });
+
+        // 뷰 변경 버튼 이벤트 핸들러
+        document.getElementById('monthView').addEventListener('click', () => {
+            calendar.changeView('month');
+            updateViewButtons('monthView');
+        });
+        document.getElementById('weekView').addEventListener('click', () => {
+            calendar.changeView('week');
+            updateViewButtons('weekView');
+        });
+        document.getElementById('dayView').addEventListener('click', () => {
+            calendar.changeView('day');
+            updateViewButtons('dayView');
+        });
+
+        // 뷰 버튼 상태 업데이트
+        function updateViewButtons(activeId) {
+            ['monthView', 'weekView', 'dayView'].forEach(id => {
+                document.getElementById(id).classList.toggle('active', id === activeId);
+            });
+        }
+
+        // 네비게이션 버튼 이벤트 핸들러
+        document.getElementById('prevBtn').addEventListener('click', () => calendar.prev());
+        document.getElementById('nextBtn').addEventListener('click', () => calendar.next());
+        document.getElementById('todayBtn').addEventListener('click', () => calendar.today());
+
+        // 현재 월 표시 업데이트
+        function updateCurrentMonth() {
+            const date = calendar.getDate();
+            document.getElementById('currentMonth').textContent = date.toLocaleString('ko-KR', {
+                year: 'numeric',
+                month: 'long'
+            });
+        }
+
+        calendar.on('afterRenderSchedule', updateCurrentMonth);
+        updateCurrentMonth();
+
+        // 일정 클릭 시 상세 보기
+        calendar.on('clickEvent', (event) => {
+            showDetailModal(event.event);
+        });
+
+        // more 버튼 클릭 시 목록 보기
+        calendar.on('clickMoreEventsBtn', (event) => {
+            const date = event.date;
+            const events = calendar.getEventsByDate(date);
+            showScheduleList(date, events);
+        });
+
+        // 날짜 클릭 시 해당 날짜의 일정 목록 보기
+        calendar.on('clickDate', (event) => {
+            const date = event.date;
+            const events = calendar.getEventsByDate(date);
+            
+            if (events.length === 1) {
+                // 일정이 1개면 바로 상세 보기
+                showDetailModal(events[0]);
+            } else if (events.length > 1) {
+                // 일정이 2개 이상이면 목록 보기
+                showScheduleList(date, events);
+            }
+        });
+
+        // 모달 닫기 함수
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            
+            // 지도 초기화
+            if (modalId === 'detailModal' && currentPath) {
+                currentPath.setMap(null);
+                currentPath = null;
+            }
+        }
+
+        // 상세 보기 모달 표시
+        function showDetailModal(event) {
+            const modal = document.getElementById('detailModal');
+            const title = document.getElementById('detailTitle');
+            const content = document.getElementById('detailContent');
+            const mapContainer = document.getElementById('mapContainer');
+
+            title.textContent = event.title;
+            
+            let contentHtml = `
+                <p><strong>시간:</strong> ${formatTime(event.start)} ~ ${formatTime(event.end)}</p>
+            `;
+
+            if (event.calendarId === 'walk') {
+                contentHtml += `
+                    <p><strong>총 거리:</strong> ${event.body || '기록 없음'}</p>
+                `;
+                mapContainer.style.display = 'block';
+                // Google Maps 초기화 및 경로 표시
+                initMap(event.id);
+            } else {
+                mapContainer.style.display = 'none';
+                if (event.body) {
+                    contentHtml += `<p><strong>내용:</strong> ${event.body}</p>`;
+                }
+            }
+
+            content.innerHTML = contentHtml;
+            modal.style.display = 'block';
+        }
+
+        // 일정 목록 표시
+        function showScheduleList(date, events) {
+            const modal = document.getElementById('scheduleListModal');
+            const modalDate = document.getElementById('modalDate');
+            const scheduleList = document.getElementById('scheduleList');
+            
+            modalDate.textContent = date.toLocaleDateString('ko-KR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                weekday: 'long'
+            });
+
+            scheduleList.innerHTML = events.map(event => `
+                <li class="schedule-item" onclick="showDetailModal(${JSON.stringify(event).replace(/"/g, '&quot;')})">
+                    <div class="schedule-time">${formatTime(event.start)}</div>
+                    <div class="schedule-title">${event.title}</div>
+                </li>
+            `).join('');
+
+            modal.style.display = 'block';
+        }
+
+        // 시간 포맷 함수
+        function formatTime(date) {
+            const hours = date.getHours();
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+                
+                // 지도 초기화
+                if (currentPath) {
+                    currentPath.setMap(null);
+                    currentPath = null;
+                }
+            }
+        };
+    </script>
+</body>
+</html>

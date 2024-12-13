@@ -51,8 +51,8 @@ public class SecurityConfig {
                 .and()
             .authorizeRequests()
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/member/**", "/error", 
-                        "/home", "/board/**", "/dog/**", "/shop/**", "/chat/**", "/walk/**", "/api/**", 
-                        "/ws/**", "/ws/chat/**", "/topic/**").permitAll()
+                        "/home", "/board/**", "/dog/**", "/shop/**", "/chat/**", "/walk/**", "/api/**",
+                        "/ws/**", "/ws/chat/**", "/topic/**", "/schedule/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")  
                 .antMatchers("/member/checkEmail").permitAll()  // 이메일 중복 체크 API 허용
                 .anyRequest().authenticated()

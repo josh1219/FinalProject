@@ -66,30 +66,30 @@
             opacity: 1;
         }
 
-            @media (max-width: 768px) {
-                .div9 {
-                    display: flex;
-                    /* align-items: center; */
-                }
-                .plusMile {
-                    font-size: small;
-                }
-            
-            .point-value {
-                margin-left: 10px;
-                font-size: 14px;
-                color: #007bff;
-                font-weight: bold;
+        @media (max-width: 768px) {
+            .div9 {
+                display: flex;
+                /* align-items: center; */
             }
-        }
-
-        @media (min-width: 769px) {
-            .point-value {
-                display: none;
+            .plusMile {
+                font-size: small;
             }
+        
+        .point-value {
+            margin-left: 10px;
+            font-size: 14px;
+            color: #007bff;
+            font-weight: bold;
         }
+    }
 
-    </style>
+    @media (min-width: 769px) {
+        .point-value {
+            display: none;
+        }
+    }
+
+</style>
 </head>
 <body>
 <div class="walk">
@@ -346,7 +346,7 @@
 
     // 타이머 중지 함수
     function stopTimer() {
-        if (timerInterval !== null) {
+        if (timerInterval) {
             clearInterval(timerInterval);
             timerInterval = null;
         }
@@ -370,10 +370,23 @@
     function startWalk() {
         // 위치 권한 요청
         navigator.permissions.query({ name: 'geolocation' }).then(permission => {
-            if (permission.state === 'denied') {
-                alert('위치 권한이 필요합니다.');
+            if (isTracking) {
+                stopWalk();
                 return;
             }
+            // 새로운 산책 시작 시 변수 초기화
+            totalDistance = 0;
+            totalSeconds = 0;
+            pathCoordinates = [];
+            lastPosition = null;
+            if (polyline) {
+                polyline.setMap(null);
+            }
+
+            // 초기 UI 상태 설정
+            $('#distance').text('0m');
+            $('._02').text('00:00:00');
+            $('.plusMile').text('( + 0 mile)');
 
             // 워크 세션 시작 요청 (Ajax)
             $.ajax({
@@ -395,9 +408,6 @@
                     );
 
                     // 새로운 산책 시작 시 거리와 시간 초기화
-                    totalSeconds = 0;
-                    $('#distance').text('0m');
-                    $('._02').text('00:00:00');
                     startTimer();
 
                     isTracking = true;
@@ -419,6 +429,7 @@
 
     // 산책 종료
     function stopWalk() {
+        // GPS 추적 중지
         if (watchId !== null) {
             navigator.geolocation.clearWatch(watchId);
             watchId = null;
@@ -426,6 +437,33 @@
 
         // 타이머 중지
         stopTimer();
+
+        // 정지 상태 체크 인터벌 중지
+        if (stationaryCheckInterval) {
+            clearInterval(stationaryCheckInterval);
+            stationaryCheckInterval = null;
+        }
+
+        // 100m 미만이면 포인트 적립 안함
+        if (totalDistance < 100) {
+            isTracking = false;
+            $('.go').text('GO!');
+            $('.ellipse-1').css('background', 'rgba(0, 68, 151, 0.63)');
+            
+            // 경로 초기화
+            pathCoordinates = [];
+            if (polyline) {
+                polyline.setMap(null);
+            }
+            
+            // 거리와 시간 표시 초기화
+            $('#distance').text('0m');
+            $('._02').text('00:00:00');
+            $('.plusMile').text('( + 0 mile)');
+            
+            showWarningMessage('최소 100m 이상 걸어야 포인트가 적립됩니다.');
+            return;
+        }
 
         // 산책 데이터 저장
         const formData = new FormData();
@@ -455,8 +493,8 @@
                 $('.go').text('GO!');
                 $('.ellipse-1').css('background', 'rgba(0, 68, 151, 0.63)');
                 
-                // 획득한 포인트 표시
-                const earnedPoints = response.earnedPoints;
+                // 획득한 포인트 표시 (100m당 1포인트로 계산, 100m 미만은 버림)
+                const earnedPoints = Math.floor(totalDistance / 100);
                 const currentPoint = response.currentPoint;
                 
                 // 포인트 표시 업데이트
@@ -464,8 +502,8 @@
                 
                 // 경로 초기화
                 pathCoordinates = [];
-                if (walkPath) {
-                    walkPath.setMap(null);
+                if (polyline) {
+                    polyline.setMap(null);
                 }
                 
                 // 거리와 시간 표시 초기화
@@ -508,41 +546,33 @@
         // 현재 시간
         const currentTime = new Date().getTime();
 
-        // 이전 위치가 있는 경우 속도 계산
+        // 이전 위치가 있는 경우 거리 계산
         if (lastPosition) {
-            const timeDiff = (currentTime - lastMoveTime) / 1000; // 초 단위
             const distance = calculateDistance(
                 lastPosition.lat,
                 lastPosition.lng,
-                location.lat,
-                location.lng
+                currentLocation.lat,
+                currentLocation.lng
             );
 
-            // 속도 계산 (m/s)
-            const speed = distance / timeDiff;
+            console.log('Distance from last position:', distance); // 디버깅용
 
-            // 속도가 너무 빠른 경우
-            if (speed > MAX_SPEED) {
-                showWarningMessage('속도가 너무 빠릅니다! 걷는 속도로 진행해주세요.');
-                return; // 현재 위치 업데이트 무시
-            }
+            // 실제 이동이 있고 속도가 적절한 경우에만 거리 추가
+            if (distance > 0 && distance <= MAX_SPEED) {
+                totalDistance += distance;
+                console.log('Total distance updated:', totalDistance); // 디버깅용
+                $('#distance').text(Math.round(totalDistance) + 'm');
 
-            // 실제 이동이 있는 경우 lastMoveTime 업데이트
-            if (distance > 0) {
+                // 실시간 마일리지 계산 및 표시 (100m당 1포인트)
+                const earnedPoints = Math.floor(totalDistance / 100);
+                $('.plusMile').text('( + ' + earnedPoints + ' mile)');
+
                 lastMoveTime = currentTime;
                 
                 // 움직임이 감지되면 타이머 재시작
                 if (!timerInterval) {
                     startTimer();
                 }
-
-                totalDistance += distance;
-                document.getElementById('distance').textContent = Math.round(totalDistance) + 'm';
-                
-                // 실시간 마일리지 계산 및 표시
-                const earnedPoint = Math.floor(totalDistance * 0.01);
-                const currentMileage = $('.mileage').text().split(' mile')[0];
-                $('.plusMile').text('(+ ' + earnedPoint + ' mile)');
             }
         } else {
             lastMoveTime = currentTime;
@@ -594,7 +624,7 @@
             const prevLng = pathCoordinates[pathCoordinates.length - 1].lng;
             const newDistance = calculateDistance(prevLat, prevLng, lat, lng);
             totalDistance += newDistance;
-            
+
             // 실시간으로 거리 업데이트 (정수로 표시)
             $('#distance').text(`${Math.round(totalDistance)}m`);
             

@@ -7,8 +7,17 @@
   <title>PETOPIA - 회원가입</title>
   <meta name="_csrf" th:content="${_csrf.token}" />
   <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/join.css">
   <style>
+    * {
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+    }
     /* 이메일 에러 메시지 스타일 */
     #emailError.error-message {
         color: #e01013 !important;
@@ -88,25 +97,7 @@
 
         <div class="input-container">
           <label class="input-label">
-            비밀번호<span class="required">*</span>
-          </label>
-          <input type="password" name="mPassword" id="mPassword" class="input-box" 
-                 placeholder="8자 이상 영문, 숫자, 특수문자를 포함해주세요." required>
-          <div class="error-message" id="mPasswordError"></div>
-        </div>
-
-        <div class="input-container">
-          <label class="input-label">
-            비밀번호 확인<span class="required">*</span>
-          </label>
-          <input type="password" id="passwordCheck" class="input-box" 
-                 placeholder="비밀번호를 한 번 더 입력해주세요." required>
-          <div class="error-message" id="passwordCheckError"></div>
-        </div>
-
-        <div class="input-container">
-          <label class="input-label">
-            이름<span class="required">*</span>
+            이름(닉네임)<span class="required">*</span>
           </label>
           <input type="text" name="name" th:value="${memberDTO.name}" class="input-box" 
                  placeholder="예) 홍길동" required>
@@ -203,67 +194,7 @@
   </div>
 
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('joinForm');
-        
-        // 비밀번호 유효성 검사
-        const passwordInput = document.getElementById('mPassword');
-        const passwordError = document.getElementById('mPasswordError');
-        const passwordCheck = document.getElementById('passwordCheck');
-        const passwordCheckError = document.getElementById('passwordCheckError');
-
-        // 비밀번호 입력 필드 이벤트 리스너
-        passwordInput.addEventListener('input', function() {
-            const password = this.value;
-            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-            
-            if (password === '') {
-                this.classList.remove('valid', 'invalid');
-                passwordError.style.display = 'none';
-            } else if (passwordRegex.test(password)) {
-                this.classList.remove('invalid');
-                this.classList.add('valid');
-                passwordError.textContent = '안전한 비밀번호입니다.';
-                passwordError.style.color = '#28a745';
-                passwordError.style.display = 'block';
-            } else {
-                this.classList.remove('valid');
-                this.classList.add('invalid');
-                passwordError.textContent = '비밀번호는 8자 이상이며, 영문/숫자/특수문자를 모두 포함해야 합니다.';
-                passwordError.style.color = '#e01013';
-                passwordError.style.display = 'block';
-            }
-
-            // 비밀번호 확인 필드가 비어있지 않다면 일치 여부 다시 체크
-            if (passwordCheck.value !== '') {
-                passwordCheck.dispatchEvent(new Event('input'));
-            }
-        });
-
-        // 비밀번호 확인 필드 이벤트 리스너
-        passwordCheck.addEventListener('input', function() {
-            const password = passwordInput.value;
-            const confirmPassword = this.value;
-
-            if (confirmPassword === '') {
-                this.classList.remove('valid', 'invalid');
-                passwordCheckError.style.display = 'none';
-            } else if (password === confirmPassword) {
-                this.classList.remove('invalid');
-                this.classList.add('valid');
-                passwordCheckError.textContent = '비밀번호가 일치합니다.';
-                passwordCheckError.style.color = '#28a745';
-                passwordCheckError.style.display = 'block';
-            } else {
-                this.classList.remove('valid');
-                this.classList.add('invalid');
-                passwordCheckError.textContent = '비밀번호가 일치하지 않습니다.';
-                passwordCheckError.style.color = '#e01013';
-                passwordCheckError.style.display = 'block';
-            }
-        });
-
-        // 나머지 입력 필드 유효성 검사 규칙
+        // 입력 필드 유효성 검사 규칙
         const validationRules = {
             mEmail: {
                 regex: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
@@ -349,11 +280,6 @@
                     }
                 }
             });
-
-            // 비밀번호 확인 검증
-            if (passwordCheck && !passwordCheck.classList.contains('valid')) {
-                isValid = false;
-            }
 
             // 성별 선택 검증
             const genderInput = document.getElementById('genderInput');
@@ -690,6 +616,26 @@
         });
     });
 
+    // 약관 동의 체크박스 이벤트
+    const agreeAllCheckbox = document.getElementById('agreeAll');
+    const agreementCheckboxes = document.querySelectorAll('.agreement');
+
+    // 전체 동의 체크박스 이벤트
+    agreeAllCheckbox.addEventListener('change', function() {
+        const isChecked = this.checked;
+        agreementCheckboxes.forEach(checkbox => {
+            checkbox.checked = isChecked;
+        });
+    });
+
+    // 개별 체크박스 이벤트
+    agreementCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const allChecked = Array.from(agreementCheckboxes).every(cb => cb.checked);
+            agreeAllCheckbox.checked = allChecked;
+        });
+    });
+
     // 폼 제출 전 유효성 검사
     document.getElementById('joinForm').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -705,7 +651,6 @@
         }
 
         // 휴대폰 번호 검사
-
         const phone = document.querySelector('input[name="phone"]');
         if (!/^[0-9]{10,11}$/.test(phone.value)) {
             document.getElementById('phoneError').textContent = '올바른 휴대폰 번호 형식이 아닙니다.';
@@ -723,6 +668,14 @@
         // 주소 검사
         if (!document.getElementById('fullAddress').value) {
             document.getElementById('addressError').textContent = '주소를 입력해주세요.';
+            isValid = false;
+            return;
+        }
+
+        // 약관 동의 검사
+        const allAgreed = Array.from(agreementCheckboxes).every(cb => cb.checked);
+        if (!allAgreed) {
+            alert('모든 필수 약관에 동의해주세요.');
             isValid = false;
             return;
         }

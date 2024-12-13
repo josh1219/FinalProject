@@ -32,9 +32,9 @@ public class Member {
     @Comment("회원 이메일")
     private String mEmail;
 
-    @Column(length = 255)  
-    @Comment("회원 비밀번호")
-    private String mPassword;
+    // @Column(length = 255)  
+    // @Comment("회원 비밀번호")
+    // private String mPassword;
 
     @Column(length = 10)  
     @Comment("회원 생년월일 (yyyy-MM-dd)")
@@ -76,7 +76,7 @@ public class Member {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-    @Column
+    @Column(columnDefinition = "TIMESTAMP(0)")
     @Comment("마지막 로그인 날짜")
     private LocalDateTime lastLoginDate;
 
@@ -106,7 +106,7 @@ public class Member {
                  boolean enabled, String socialId, String birthday, String phone, String gender, String address) {
         this.name = name;
         this.mEmail = mEmail;
-        this.mPassword = mPassword;
+        //this.mPassword = mPassword;
         this.picture = picture;
         this.provider = provider;
         this.enabled = enabled;
@@ -127,7 +127,7 @@ public class Member {
                  String gender, String address) {
         this.name = name;
         this.mEmail = mEmail;
-        this.mPassword = mPassword;
+        //this.mPassword = mPassword;
         this.birthday = birthday;
         this.phone = phone;
         this.gender = gender;
@@ -152,7 +152,7 @@ public class Member {
      * 마지막 로그인 시간 업데이트
      */
     public void updateLastLoginDate() {
-        this.lastLoginDate = LocalDateTime.now().withSecond(0).withNano(0);
+        this.lastLoginDate = LocalDateTime.now().withNano(0);
     }
 
     /**

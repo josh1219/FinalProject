@@ -57,10 +57,6 @@ public class MemberService implements UserDetailsService {
     public Member saveMember(Member member) {
         validateDuplicateMember(member);
         validateRequiredFields(member);
-        
-        // 모든 회원가입에 대해 비밀번호 암호화
-        member.setMPassword(passwordEncoder.encode(member.getMPassword()));
-        
         return memberRepository.save(member);
     }
 
@@ -86,17 +82,10 @@ public class MemberService implements UserDetailsService {
     }
 
     private void validateDuplicateMember(Member member) {
-        if (member.getProvider() != null && !member.getProvider().equals("local")) {
-            memberRepository.findByProviderAndSocialId(member.getProvider(), member.getSocialId())
-                    .ifPresent(m -> {
-                        throw new IllegalStateException("이미 가입된 회원입니다.");
-                    });
-        } else {
-            memberRepository.findByEmailIgnoreCase(member.getMEmail())
-                    .ifPresent(m -> {
-                        throw new IllegalStateException("이미 가입된 회원입니다.");
-                    });
-        }
+        memberRepository.findByProviderAndSocialId(member.getProvider(), member.getSocialId())
+                .ifPresent(m -> {
+                    throw new IllegalStateException("이미 가입된 회원입니다.");
+                });
     }
 
     public boolean existsByEmail(String email) {

@@ -81,13 +81,6 @@ public class MemberController {
         }
 
         try {
-            // 일반 회원가입일 경우 비밀번호 유효성 검사
-            if ("local".equals(memberDTO.getProvider()) && !memberDTO.isPasswordValid()) {
-                bindingResult.rejectValue("mPassword", "error.mPassword", 
-                    "비밀번호는 8자 이상이며, 영문/숫자/특수문자를 모두 포함해야 합니다.");
-                return "member/join";
-            }
-
             Member member = memberDTO.toEntity();
             memberService.saveMember(member);
             return "redirect:/member/login";

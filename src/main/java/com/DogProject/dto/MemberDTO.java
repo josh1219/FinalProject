@@ -10,7 +10,6 @@ import javax.validation.constraints.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 
@@ -26,8 +25,6 @@ public class MemberDTO {
     @NotBlank(message = "이메일은 필수 입력값입니다.")
     @Email(message = "이메일 형식이 올바르지 않습니다.")
     private String mEmail;
-
-    private String mPassword;
 
     @NotBlank(message = "생년월일은 필수 입력값입니다.")
     @Pattern(regexp = "^\\d{8}$", message = "생년월일은 8자리 숫자여야 합니다.")
@@ -47,45 +44,19 @@ public class MemberDTO {
     private String provider;
     private String socialId;
 
-    public boolean isPasswordValid() {
-        // 비밀번호는 8자 이상, 영문, 숫자, 특수문자를 포함해야 함
-        return mPassword != null && mPassword.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&])[A-Za-z\\d@$!%*#?&]{8,}$");
-    }
-
     public Member toEntity() {
-        // 모든 회원가입에 대해 비밀번호 필수 체크
-        if (mPassword == null || mPassword.trim().isEmpty()) {
-            throw new IllegalArgumentException("비밀번호는 필수 입력값입니다.");
-        }
-
-        Member member;
-        if (provider != null && !provider.equals("local")) {
-            member = Member.socialBuilder()
-                .name(name)
-                .mEmail(mEmail.toLowerCase())
-                .mPassword(mPassword)
-                .picture(picture)
-                .provider(provider)
-                .socialId(socialId)
-                .birthday(birthday)
-                .phone(phone)
-                .gender(gender)
-                .address(address)
-                .enabled(true)
-                .build();
-        } else {
-            member = Member.userBuilder()
-                .name(name)
-                .mEmail(mEmail.toLowerCase())
-                .mPassword(mPassword)
-                .birthday(birthday)
-                .phone(phone)
-                .gender(gender)
-                .address(address)
-                .build();
-            
-            member.setProvider("local"); // 명시적으로 provider를 'local'로 설정
-        }
+        Member member = Member.socialBuilder()
+            .name(name)
+            .mEmail(mEmail.toLowerCase())
+            .picture(picture)
+            .provider(provider)
+            .socialId(socialId)
+            .birthday(birthday)
+            .phone(phone)
+            .gender(gender)
+            .address(address)
+            .enabled(true)
+            .build();
         
         member.setRole(Role.USER);
         member.setPoint(0);

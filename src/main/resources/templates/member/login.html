@@ -2,10 +2,177 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PETOPIA - 로그인</title>
-    <link rel="stylesheet" href="/css/login.css">
+    <title>PETOPIA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #fff;
+        }
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .home-icon {
+            width: 24px;
+            height: 24px;
+        }
+        .main-content {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .main-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .sub-title {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        .brand-title {
+            font-size: 32px;
+            color: #1E88E5;
+            font-weight: bold;
+        }
+        .welcome-text {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .welcome-text h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+        .sns-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 0 20px;
+        }
+        .sns-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            border: none;
+            cursor: pointer;
+            height: 65px;
+            transition: all 0.2s ease-in-out;
+        }
+        .sns-button:hover {
+            transform: scale(1.02);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+        .sns-button img {
+            width: 45px;
+            height: 45px;
+            margin-right: 12px;
+            object-fit: contain;
+        }
+        .google-login {
+            background-color: #f5f5f5;
+            color: rgba(0, 0, 0, 0.87);
+            border: 1px solid #dadce0;
+        }
+        .google-login:hover {
+            background-color: #ffffff;
+        }
+        .kakao-login {
+            background-color: #FEE500;
+            color: rgba(0, 0, 0, 0.87);
+        }
+        .kakao-login:hover {
+            background-color: #fada0a;
+        }
+        .naver-login {
+            background-color: #03C75A;
+            color: rgba(0, 0, 0, 0.87);
+        }
+        .naver-login:hover {
+            background-color: #02b351;
+        }
+        .bottom-text {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+        .bottom-text a {
+            color: #1a16fa;
+            text-decoration: underline;
+        }
+        .recent-login {
+            margin-bottom: 20px;
+            padding: 0 20px;
+        }
+        .recent-login-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .recent-account {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+        }
+        .recent-account:hover {
+            background-color: #f1f3f5;
+        }
+        .recent-account img {
+            width: 45px;
+            height: 45px;
+            margin-right: 25px;
+            border-radius: 50%;
+            object-fit: contain;
+        }
+        .recent-account-info {
+            flex: 1;
+        }
+        .recent-account-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        .recent-account-provider {
+            font-size: 14px;
+            color: #666;
+        }
+        .divider {
+            height: 1px;
+            background-color: #e9ecef;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -23,50 +190,103 @@
                 <div class="brand-title">PETOPIA</div>
             </div>
 
-            <h2 class="login-title">회원 로그인</h2>
-
-            <div th:if="${param.error}" class="alert alert-danger" style="color: red; text-align: center; margin-bottom: 15px;">
-                아이디 또는 비밀번호가 올바르지 않습니다.
+            <div class="welcome-text">
+                <h2>반가워요!</h2>
+                <p>계정을 선택해주세요.</p>
             </div>
 
-            <form class="login-form" action="/member/login" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <div class="input-group">
-                    <input type="email" name="email" class="input-field" placeholder="이메일을 입력하세요." required>
+            <!-- 최근 로그인 계정 섹션 -->
+            <div class="recent-login" id="recentLoginSection" style="display: none;">
+                <p class="recent-login-title">최근 로그인</p>
+                <div class="recent-account" id="recentAccount">
+                    <img id="recentAccountImg" src="" alt="프로필">
+                    <div class="recent-account-info">
+                        <div class="recent-account-name" id="recentAccountName"></div>
+                        <div class="recent-account-provider" id="recentAccountProvider"></div>
+                    </div>
                 </div>
-                <div class="input-group">
-                    <input type="password" name="password" class="input-field" placeholder="비밀번호를 입력하세요." required>
-                </div>
-                <button type="submit" class="login-button">로그인</button>
-            </form>
-
-            <div class="login-options">
-                <label class="keep-login">
-                    <input type="checkbox" name="remember-me">  
-                    <span>로그인 상태 유지</span>
-                </label>
-                <a href="#" class="find-password">비밀번호 찾기</a>
+                <div class="divider"></div>
             </div>
 
-            <div class="account-links" style="text-align: center; margin-bottom: 32px;">
-                <a href="/member/join" style="color: #1a16fa; font-size: 16px; text-decoration: underline;">아직 회원이 아니세요? 회원가입</a>
+            <div class="sns-buttons">
+                <a href="/oauth2/authorization/google" class="sns-button google-login" onclick="saveLoginInfo('google')">
+                    <img src="/images/google.png" alt="Google">
+                    Google로 시작하기
+                </a>
+                <a href="/oauth2/authorization/kakao" class="sns-button kakao-login" onclick="saveLoginInfo('kakao')">
+                    <img src="/images/kakao.svg" alt="Kakao">
+                    Kakao로 시작하기
+                </a>
+                <a href="/oauth2/authorization/naver" class="sns-button naver-login" onclick="saveLoginInfo('naver')">
+                    <img src="/images/naver.png" alt="Naver">
+                    Naver로 시작하기
+                </a>
             </div>
 
-            <div class="sns-login">
-                <p class="sns-title">SNS계정 로그인</p>
-                <div class="sns-buttons">
-                    <a href="/oauth2/authorization/google" class="sns-button">
-                        <img src="/images/google.png" alt="Google 로그인">
-                    </a>
-                    <a href="/oauth2/authorization/naver" class="sns-button">
-                        <img src="/images/naver.png" alt="Naver 로그인">
-                    </a>
-                    <a href="/oauth2/authorization/kakao" class="sns-button">
-                        <img src="/images/kakao.svg" alt="Kakao 로그인">
-                    </a>
-                </div>
+            <div class="bottom-text">
+                아이디를 잊으셨나요? <a href="#">아이디 찾기</a>
             </div>
         </main>
     </div>
+
+    <script>
+        // 로그인 정보 저장
+        function saveLoginInfo(provider) {
+            const providerInfo = {
+                google: {
+                    name: 'Google',
+                    icon: '/images/google.png'
+                },
+                kakao: {
+                    name: 'Kakao',
+                    icon: '/images/kakao.svg'
+                },
+                naver: {
+                    name: 'Naver',
+                    icon: '/images/naver.png'
+                }
+            };
+
+            localStorage.setItem('lastLoginProvider', provider);
+            localStorage.setItem('lastLoginTime', new Date().toISOString());
+        }
+
+        // 최근 로그인 정보 표시
+        function showRecentLogin() {
+            const lastProvider = localStorage.getItem('lastLoginProvider');
+            if (!lastProvider) return;
+
+            const providerInfo = {
+                google: {
+                    name: 'Google',
+                    icon: '/images/google.png'
+                },
+                kakao: {
+                    name: 'Kakao',
+                    icon: '/images/kakao.svg'
+                },
+                naver: {
+                    name: 'Naver',
+                    icon: '/images/naver.png'
+                }
+            };
+
+            const info = providerInfo[lastProvider];
+            if (!info) return;
+
+            document.getElementById('recentLoginSection').style.display = 'block';
+            document.getElementById('recentAccountImg').src = info.icon;
+            document.getElementById('recentAccountName').textContent = `${info.name} 계정으로 계속하기`;
+            document.getElementById('recentAccountProvider').textContent = `마지막 로그인: ${info.name}`;
+
+            // 최근 계정 클릭 시 해당 소셜 로그인으로 이동
+            document.getElementById('recentAccount').onclick = function() {
+                window.location.href = `/oauth2/authorization/${lastProvider}`;
+            };
+        }
+
+        // 페이지 로드 시 최근 로그인 정보 표시
+        document.addEventListener('DOMContentLoaded', showRecentLogin);
+    </script>
 </body>
 </html>

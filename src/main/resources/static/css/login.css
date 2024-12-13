@@ -155,3 +155,105 @@ body {
       padding: 20px 16px;
   }
 }
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: #fff;
+}
+.container {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 40px;
+}
+.logo {
+  font-size: 24px;
+  font-weight: bold;
+}
+.home-icon {
+  width: 24px;
+  height: 24px;
+}
+.main-content {
+  text-align: center;
+  margin-bottom: 40px;
+}
+.main-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+.sub-title {
+  color: #666;
+  margin-bottom: 20px;
+}
+.brand-title {
+  font-size: 32px;
+  color: #1E88E5;
+  font-weight: bold;
+}
+.welcome-text {
+  text-align: center;
+  margin-bottom: 30px;
+}
+.welcome-text h2 {
+  font-size: 20px;
+  margin-bottom: 5px;
+}
+.sns-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 0 20px;
+}
+.sns-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 15px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.5px;
+  border: none;
+  cursor: pointer;
+}
+.sns-button img {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+.google-login {
+  background-color: #f5f5f5;
+  color: rgba(0, 0, 0, 0.87);
+  border: 1px solid #dadce0;
+}
+.kakao-login {
+  background-color: #FEE500;
+  color: rgba(0, 0, 0, 0.87);
+}
+.naver-login {
+  background-color: #03C75A;
+  color: rgba(0, 0, 0, 0.87);
+}
+.bottom-text {
+  text-align: center;
+  margin-top: 20px;
+  color: #666;
+}
+.bottom-text a {
+  color: #1a16fa;
+  text-decoration: underline;
+}

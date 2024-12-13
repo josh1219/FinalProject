@@ -1,28 +1,21 @@
 package com.DogProject.controller;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.DogProject.entity.Dog;
 import com.DogProject.entity.File;
@@ -34,8 +27,6 @@ import com.DogProject.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.springframework.http.ResponseEntity;
-
 @Controller
 @RequestMapping("/dog")
 @RequiredArgsConstructor
@@ -43,18 +34,67 @@ import org.springframework.http.ResponseEntity;
 public class DogController {
 
     private final DogService dogService;
-    private final MemberService memberService;
     private final FileService fileService;
+    private final MemberService memberService;
 
     @Value("${file.upload.directory}")
     private String uploadDir;
 
+    private Member getMemberFromPrincipal(Object principal) {
+        if (principal instanceof UserDetails) {
+            return memberService.findBymEmail(((UserDetails) principal).getUsername());
+        } else if (principal instanceof OAuth2User) {
+            OAuth2User oauth2User = (OAuth2User) principal;
+            String email = null;
+            String provider = null;
+            String socialId = null;
+            
+            // Google 로그인
+            if (oauth2User.getAttributes().containsKey("email")) {
+                email = oauth2User.getAttribute("email");
+                provider = "google";
+                socialId = oauth2User.getAttribute("sub");
+            }
+            // Naver 로그인
+            else if (oauth2User.getAttributes().containsKey("response")) {
+                Map<String, Object> response = (Map<String, Object>) oauth2User.getAttribute("response");
+                email = (String) response.get("email");
+                provider = "naver";
+                socialId = String.valueOf(response.get("id"));
+            }
+            // Kakao 로그인
+            else if (oauth2User.getAttributes().containsKey("kakao_account")) {
+                provider = "kakao";
+                Object id = oauth2User.getAttribute("id");
+                socialId = id != null ? id.toString() : null;
+                
+                if (socialId != null) {
+                    return memberService.findByProviderAndSocialId(provider, socialId);
+                }
+            }
+            
+            if (email != null) {
+                return memberService.findBymEmail(email);
+            } else if (provider != null && socialId != null) {
+                return memberService.findByProviderAndSocialId(provider, socialId);
+            }
+        }
+        return null;
+    }
+
     @GetMapping("/insert")
-    public String insertDogForm(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        // 현재 로그인한 회원 정보 전달
-        Member member = memberService.findBymEmail(userDetails.getUsername());
-        model.addAttribute("member", member);
-        return "dog/insertDog";
+    public String insertDogForm(Model model, @AuthenticationPrincipal Object principal) {
+        try {
+            Member member = getMemberFromPrincipal(principal);
+            if (member == null) {
+                return "redirect:/member/login";
+            }
+            model.addAttribute("member", member);
+            return "dog/insertDog";
+        } catch (Exception e) {
+            log.error("Error in insertDogForm", e);
+            return "redirect:/";
+        }
     }
 
     @PostMapping("/insert")
@@ -65,20 +105,20 @@ public class DogController {
             @RequestParam("gender") String gender,
             @RequestParam("dType") String dType,
             @RequestParam(value = "image", required = false) MultipartFile image,
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal Object principal,
             RedirectAttributes redirectAttributes
     ) {
         try {
-            // 입력값 검증
             validateDogInput(name, age, birthday, gender, dType);
             if (image != null && !image.isEmpty()) {
                 validateImageFile(image);
             }
 
-            // 현재 로그인한 회원 조회
-            Member member = memberService.findBymEmail(userDetails.getUsername());
+            Member member = getMemberFromPrincipal(principal);
+            if (member == null) {
+                return "redirect:/member/login";
+            }
 
-            // Dog 엔티티 생성
             Dog dog = Dog.builder()
                     .name(name)
                     .age(age)
@@ -88,60 +128,46 @@ public class DogController {
                     .member(member)
                     .build();
 
-            // 강아지와 이미지 함께 저장
             Dog savedDog = dogService.saveDog(dog);
             int d_idx = savedDog.getDIdx();
             
-            log.info("Dog saved successfully. dIdx: {}", d_idx);
-            
-            // 이미지 파일이 존재하는 경우에만 파일 저장 처리
             if (image != null && !image.isEmpty()) {
-                log.info("Image file exists. Filename: {}, Size: {}", image.getOriginalFilename(), image.getSize());
                 try {
                     File saveFile = new File();
                     saveFile.setFType(3);
                     saveFile.setTIdx(d_idx);
-                    log.info("Attempting to save file. dIdx: {}, fType: {}", d_idx, saveFile.getFType());
-                    
-                    File savedFile = fileService.saveFile(saveFile, image);
-                    
-                    if (savedFile == null) {
-                        log.warn("File save failed: dIdx={}", d_idx);
-                    } else {
-                        log.info("File saved successfully: dIdx={}, fileName={}, savedFileName={}", 
-                            d_idx, savedFile.getFileRealName(), savedFile.getFileSaveName());
-                    }
+                    fileService.saveFile(saveFile, image);
                 } catch (IOException e) {
-                    log.error("Error occurred while saving file: {}", e.getMessage(), e);
-                    // 파일 저장 실패해도 강아지 등록은 완료된 것으로 처리
+                    log.error("Error saving file: {}", e.getMessage());
                 }
-            } else {
-                log.info("No image file or empty file");
             }
 
-            redirectAttributes.addFlashAttribute("successMessage", "Dog registration successful!");
-            return "redirect:/";
+            redirectAttributes.addFlashAttribute("successMessage", "강아지가 등록되었습니다!");
+            return "redirect:/dog/list";
 
         } catch (IllegalArgumentException e) {
-            log.warn("Dog registration failed: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/dog/insert";
         } catch (Exception e) {
-            log.error("An unexpected error occurred during dog registration", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "A server error occurred.");
+            log.error("Error in insertDog", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "서버 오류가 발생했습니다.");
             return "redirect:/dog/insert";
         }
     }
 
     @GetMapping("/list")
-    public String dogList(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String dogList(Model model, @AuthenticationPrincipal Object principal) {
         try {
-            Member member = memberService.findBymEmail(userDetails.getUsername());
+            Member member = getMemberFromPrincipal(principal);
+            if (member == null) {
+                return "redirect:/member/login";
+            }
+
             List<Dog> dogs = dogService.getDogsByMember(member);
             Map<Integer, File> dogImages = new HashMap<>();
             for(Dog dog : dogs){
                 fileService.findByTypeAndIdx(3, dog.getDIdx())
-                      .ifPresent(file -> dogImages.put(dog.getDIdx(), file));
+                        .ifPresent(file -> dogImages.put(dog.getDIdx(), file));
             }
             model.addAttribute("dogs", dogs);
             model.addAttribute("dogImages", dogImages);
@@ -154,21 +180,21 @@ public class DogController {
     }
 
     @GetMapping("/deleted/list")
-    public String deletedDogList(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String deletedDogList(Model model, @AuthenticationPrincipal Object principal) {
         try {
-            Member member = memberService.findBymEmail(userDetails.getUsername());
+            Member member = getMemberFromPrincipal(principal);
+            if (member == null) {
+                return "redirect:/member/login";
+            }
+
             List<Dog> deletedDogs = dogService.getDeletedDogsByMember(member);
-            
-            // 강아지 이미지 정보 추가
             Map<Integer, File> dogImages = new HashMap<>();
             for(Dog dog : deletedDogs){
                 fileService.findByTypeAndIdx(3, dog.getDIdx())
-                      .ifPresent(file -> dogImages.put(dog.getDIdx(), file));
+                        .ifPresent(file -> dogImages.put(dog.getDIdx(), file));
             }
-            
             model.addAttribute("dogs", deletedDogs);
             model.addAttribute("dogImages", dogImages);
-            model.addAttribute("member", member);
             return "dog/deletedDogList";
         } catch (Exception e) {
             log.error("Error in deletedDogList", e);
@@ -180,28 +206,27 @@ public class DogController {
     public String updateDogForm(
             @PathVariable int dIdx, 
             Model model,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal Object principal
     ) {
         try {
-            // 현재 로그인한 회원 정보
-            Member member = memberService.findBymEmail(userDetails.getUsername());
+            Member member = getMemberFromPrincipal(principal);
+            if (member == null) {
+                return "redirect:/member/login";
+            }
             
-            // 강아지 조회
             Dog dog = dogService.getDogById(dIdx);
-            
-            // 현재 로그인한 회원의 강아지인지 확인
             if (dog.getMember().getMIdx() != member.getMIdx()) {
                 throw new AccessDeniedException("해당 강아지를 수정할 권한이 없습니다.");
-            }            
+            }
 
             model.addAttribute("dog", dog);
             model.addAttribute("member", member);
             fileService.findByTypeAndIdx(3, dIdx)
-                      .ifPresent(file -> model.addAttribute("file", file));
+                    .ifPresent(file -> model.addAttribute("file", file));
             return "dog/updateDog";
 
         } catch (Exception e) {
-            log.error("An error occurred while loading the dog update form", e);
+            log.error("Error in updateDogForm", e);
             return "redirect:/";
         }
     }
@@ -215,106 +240,112 @@ public class DogController {
             @RequestParam("gender") String gender,
             @RequestParam("dType") String dType,
             @RequestParam(value = "image", required = false) MultipartFile image,
-            @AuthenticationPrincipal UserDetails userDetails,
+            @AuthenticationPrincipal Object principal,
             RedirectAttributes redirectAttributes
     ) {
         try {
-            // 입력값 검증
             validateDogInput(name, age, birthday, gender, dType);
             if (image != null && !image.isEmpty()) {
                 validateImageFile(image);
             }
 
-            Member member = memberService.findBymEmail(userDetails.getUsername());
+            Member member = getMemberFromPrincipal(principal);
+            if (member == null) {
+                return "redirect:/member/login";
+            }
             
-            // 기존 강아지 조회
             Dog existingDog = dogService.getDogById(dIdx);
-
-            // 현재 로그인한 회원의 강아지인지 확인
             if (existingDog.getMember().getMIdx() != member.getMIdx()) {
-                throw new AccessDeniedException("해당 강아지의 정보를 수정할 권한이 없습니다.");
-
+                throw new AccessDeniedException("해당 강아지를 수정할 권한이 없습니다.");
             }
 
-            // 강아지 정보 업데이트
             existingDog.setName(name);
             existingDog.setAge(age);
             existingDog.setBirthday(birthday);
             existingDog.setGender(gender);
             existingDog.setDType(dType);
 
-            // 강아지와 이미지 함께 업데이트
             dogService.updateDog(existingDog, image);
 
-            redirectAttributes.addFlashAttribute("successMessage", "Dog information has been updated.");
-            return "redirect:/";
+            redirectAttributes.addFlashAttribute("successMessage", "강아지 정보가 수정되었습니다.");
+            return "redirect:/dog/list";
 
         } catch (IllegalArgumentException | AccessDeniedException e) {
-            log.warn("Dog update failed: {}", e.getMessage());
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             return "redirect:/dog/update/" + dIdx;
         } catch (Exception e) {
-            log.error("An unexpected error occurred during dog update", e);
-            redirectAttributes.addFlashAttribute("errorMessage", "A server error occurred.");
+            log.error("Error in updateDog", e);
+            redirectAttributes.addFlashAttribute("errorMessage", "서버 오류가 발생했습니다.");
             return "redirect:/dog/update/" + dIdx;
         }
     }
 
     @PostMapping("/remove/{dIdx}")
     @ResponseBody
-    public ResponseEntity<?> deleteDog(@PathVariable int dIdx) {
+    public ResponseEntity<?> deleteDog(@PathVariable int dIdx, @AuthenticationPrincipal Object principal) {
         try {
-            log.info("Deleting dog with ID: {}", dIdx);
+            Member member = getMemberFromPrincipal(principal);
+            if (member == null) {
+                return ResponseEntity.badRequest().body("로그인이 필요합니다.");
+            }
+
+            Dog dog = dogService.getDogById(dIdx);
+            if (dog.getMember().getMIdx() != member.getMIdx()) {
+                return ResponseEntity.badRequest().body("해당 강아지를 삭제할 권한이 없습니다.");
+            }
+
             dogService.softDeleteDog(dIdx);
-            log.info("Successfully deleted dog with ID: {}", dIdx);
             return ResponseEntity.ok().body("/dog/list");
         } catch (Exception e) {
-            log.error("Error deleting dog with ID: {}", dIdx, e);
+            log.error("Error deleting dog", e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @PostMapping("/restore/{dIdx}")
     @ResponseBody
-    public ResponseEntity<?> restoreDog(@PathVariable int dIdx) {
+    public ResponseEntity<?> restoreDog(@PathVariable int dIdx, @AuthenticationPrincipal Object principal) {
         try {
-            log.info("Restoring dog with ID: {}", dIdx);
+            Member member = getMemberFromPrincipal(principal);
+            if (member == null) {
+                return ResponseEntity.badRequest().body("로그인이 필요합니다.");
+            }
+
+            Dog dog = dogService.getDogById(dIdx);
+            if (dog.getMember().getMIdx() != member.getMIdx()) {
+                return ResponseEntity.badRequest().body("해당 강아지를 복구할 권한이 없습니다.");
+            }
+
             dogService.restoreDog(dIdx);
-            log.info("Successfully restored dog with ID: {}", dIdx);
             return ResponseEntity.ok().body("/dog/list");
         } catch (Exception e) {
-            log.error("Error restoring dog with ID: {}", dIdx, e);
+            log.error("Error restoring dog", e);
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    private void validateDogInput(String name, int age, String birthday, 
-                                   String gender, String dType) {
+    private void validateDogInput(String name, int age, String birthday, String gender, String dType) {
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Name is required.");
+            throw new IllegalArgumentException("강아지 이름을 입력해주세요.");
         }
-        if (age < 0) {
-            throw new IllegalArgumentException("Age must be 0 or greater.");
+        if (age <= 0) {
+            throw new IllegalArgumentException("올바른 나이를 입력해주세요.");
         }
         if (birthday == null || birthday.trim().isEmpty()) {
-            throw new IllegalArgumentException("Birthday is required.");
+            throw new IllegalArgumentException("생년월일을 입력해주세요.");
         }
         if (gender == null || gender.trim().isEmpty()) {
-            throw new IllegalArgumentException("Gender is required.");
+            throw new IllegalArgumentException("성별을 선택해주세요.");
         }
         if (dType == null || dType.trim().isEmpty()) {
-            throw new IllegalArgumentException("Type is required.");
+            throw new IllegalArgumentException("견종을 입력해주세요.");
         }
     }
 
     private void validateImageFile(MultipartFile image) {
-        if (image == null || image.isEmpty()) {
-            return;
-        }
-        
         String contentType = image.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
-            throw new IllegalArgumentException("Only image files can be uploaded.");
+            throw new IllegalArgumentException("이미지 파일만 업로드 가능합니다.");
         }
     }
 }

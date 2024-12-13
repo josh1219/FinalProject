@@ -267,7 +267,7 @@ public class DogController {
             log.info("Deleting dog with ID: {}", dIdx);
             dogService.softDeleteDog(dIdx);
             log.info("Successfully deleted dog with ID: {}", dIdx);
-            return ResponseEntity.ok().body("/dog/deleted/list");
+            return ResponseEntity.ok().body("/dog/list");
         } catch (Exception e) {
             log.error("Error deleting dog with ID: {}", dIdx, e);
             return ResponseEntity.badRequest().body(e.getMessage());

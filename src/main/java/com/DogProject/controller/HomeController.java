@@ -68,7 +68,7 @@ public class HomeController {
             model.addAttribute("isLoggedIn", false);
         }
         
-        return "home/home";
+        return "home/homeex";
     }
 
     @GetMapping("/home01")

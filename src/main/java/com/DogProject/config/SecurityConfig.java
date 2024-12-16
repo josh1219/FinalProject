@@ -50,7 +50,7 @@ public class SecurityConfig {
                 .frameOptions().sameOrigin()
                 .and()
             .authorizeRequests()
-                .antMatchers("/", "/css/**", "/images/**", "/js/**", "/member/**", "/error", 
+                .antMatchers("/", "/css/**", "/images/**", "/js/**", "/video/**","/member/**", "/error", 
                         "/home", "/board/**", "/dog/**", "/shop/**", "/chat/**", "/walk/**", "/api/**",
                         "/ws/**", "/ws/chat/**", "/topic/**", "/schedule/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")  

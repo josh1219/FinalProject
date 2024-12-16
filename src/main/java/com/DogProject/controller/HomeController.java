@@ -68,12 +68,22 @@ public class HomeController {
             model.addAttribute("isLoggedIn", false);
         }
         
-        return "home";
+        return "home/home";
+    }
+
+    @GetMapping("/home01")
+    public String home01() {
+        return "home/home01";
+    }
+
+    @GetMapping("/homeEx")
+    public String homeEx() {
+        return "home/homeEx";
     }
 
     @GetMapping("/")
     public String root(Model model) {
         // 루트 경로 접근 시 home 페이지로 리다이렉트
-        return "redirect:/home";
+        return "redirect:/home/home";
     }
 }

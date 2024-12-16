@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PETOPIA</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0px;  /* 아이콘 사이 간격 */
+        }
+
+        .alram, .mypage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 0;
+        }
+
+        .alram button, .mypage button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .alram img, .mypage img {
+            width: 24px;
+            height: 24px;
+            display: block;
+            margin: auto;
+        }
+
+        .icons {
+            display: flex;
+            gap: 20px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-gap: 10px;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+        .grid-item {
+            background-color: #D3D3D3;
+            width: 100%;
+            min-height: 200px;
+        }
+        .large-item {
+            grid-row: span 2;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+            min-height: 200px;
+            margin: 10px 20px;
+            background-color: #D3D3D3;
+        }
+        .navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 1px solid #eee;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .nav-icon {
+            width: 24px;
+            height: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-icon img {
+            width: 100%;
+            height: 100%;
+        }
+
+        .nav-item span {
+            margin-top: 4px;
+        }
+        .walk-button {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            overflow: hidden;
+            background: none;
+            transition: transform 0.3s ease;
+            grid-row: span 2;
+        }
+
+        .insertDog-button, .dogList-button {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            overflow: hidden;
+            background: none;
+            transition: transform 0.3s ease;
+        }
+
+        .walk-button:hover, .insertDog-button:hover, .dogList-button:hover {
+            transform: scale(1.02);
+        }
+
+        .walk-button img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .insertDog-button img, .dogList-button img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            padding: 10px;
+            background-color: white;
+        }
+
+        .overlay {
+            position: absolute;
+            transform: none;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-size: 0.9em;
+            transition: transform 0.2s ease;
+        }
+
+        /* 산책하기 버튼의 overlay - 상단 오른쪽 */
+        .walk-button .overlay {
+            top: 20px;
+            right: 20px;
+        }
+
+        /* 등록하기와 목록 버튼의 overlay - 하단 오른쪽 */
+        .insertDog-button .overlay,
+        .dogList-button .overlay {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        .walk-button:hover .overlay,
+        .insertDog-button:hover .overlay,
+        .dogList-button:hover .overlay {
+            transform: scale(1.05);
+        }
+
+        .withDogWalkButton {
+            grid-row: span 2;
+            height: 400px;
+        }
+
+        .insertDogButton, .dogListButton {
+            height: 195px;
+            background-color: white;
+        }
+
+ 
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="logo">PETOPIA</div>
+        <div class="header-right">
+            <div class="alram">
+                <button onclick="location.href='/community'" class="alram-button">
+                    <img th:src="@{/images/alram.svg}" alt="알림">
+                </button>
+            </div>
+            <div class="mypage">
+                <button onclick="location.href='/member/login'">
+                    <img th:src="@{/images/mypage.svg}" alt="마이페이지">
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="grid-container">
+        <div class="withDogWalkButton">
+            <button onclick="location.href='/walk'" class="walk-button">
+                <img th:src="@{/images/withDogWalk.gif}" alt="산책하기">
+                <div class="overlay">산책하러 가기</div>
+            </button>
+        </div>
+        <div class="insertDogButton">
+            <button onclick="location.href='/dog/insert'" class="insertDog-button">
+                <img th:src="@{/images/doginsert.png}" alt="강아지 등록하기">
+                <div class="overlay">강아지 등록하기</div>
+            </button>
+        </div>
+        <div class="dogListButton">
+            <button onclick="location.href='/dog/list'" class="dogList-button">
+                <img th:src="@{/images/dogList.png}" alt="강아지 목록">
+                <div class="overlay">강아지 목록</div>
+            </button>
+        </div>
+    </div>
+
+    <div class="advertisement"></div>
+    <div class="boardTop5"></div>
+
+    <nav class="navigation">
+        <a href="/calendar" class="nav-item">
+            <div class="nav-icon">
+                <img th:src="@{/images/calendar1.svg}">
+            </div>
+            <span>캘린더</span>
+        </a>
+        <a href="/walk" class="nav-item">
+            <div class="nav-icon">
+                <img th:src="@{/images/walk1.svg}">
+            </div>
+            <span>산책</span>
+        </a>
+        <a href="/home" class="nav-item">
+            <div class="nav-icon">
+                <img th:src="@{/images/home1.svg}">
+            </div>
+            <span>홈</span>
+        </a>
+        <a href="/community" class="nav-item">
+            <div class="nav-icon">
+                <img th:src="@{/images/community.svg}">
+            </div>
+            <span>커뮤니티</span>
+        </a>
+        <a href="/menu" class="nav-item">
+            <div class="nav-icon">
+                <img th:src="@{/images/menu.svg}">
+            </div>
+            <span>메뉴</span>
+        </a>
+    </nav>
+</body>
+</html>

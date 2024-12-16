@@ -39,6 +39,21 @@
     #emailError.valid-email {
         color: #28a745 !important;
     }
+
+    /* 프로필 이미지 스타일 */
+    .social-info {
+        text-align: center;
+        margin: 20px 0;
+    }
+    
+    .profile-image {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
   </style>
 </head>
 <body>
@@ -68,6 +83,7 @@
         <!-- 소셜 로그인 정보 표시 -->
         <div th:if="${memberDTO.provider != 'local'}" class="social-info">
             <img th:if="${memberDTO.picture}" th:src="${memberDTO.picture}" class="profile-image" alt="프로필 이미지">
+            <p th:if="${memberDTO.provider}" class="provider-info" th:text="${memberDTO.provider == 'kakao' ? '카카오 계정 프로필' : memberDTO.provider == 'naver' ? '네이버 계정 프로필' : '구글 계정 프로필'}"></p>
         </div>
 
         <script th:inline="javascript">

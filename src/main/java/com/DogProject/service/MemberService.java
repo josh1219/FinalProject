@@ -45,7 +45,7 @@ public class MemberService implements UserDetailsService {
         memberRepository.save(member);
 
         return new User(member.getMEmail(),
-                member.getMPassword(),
+                "{noop}socialLoginUser", // 소셜 로그인용 더미 비밀번호
                 member.isEnabled(),
                 true, // account non expired
                 true, // credentials non expired

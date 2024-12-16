@@ -102,7 +102,7 @@ public class Member {
      * 소셜 로그인 회원을 위한 빌더
      */
     @Builder(builderMethodName = "socialBuilder")
-    public Member(String name, String mEmail, String mPassword, String picture, String provider, 
+    public Member(String name, String mEmail, String picture, String provider, 
                  boolean enabled, String socialId, String birthday, String phone, String gender, String address) {
         this.name = name;
         this.mEmail = mEmail;
@@ -123,7 +123,7 @@ public class Member {
      * 일반 회원가입을 위한 빌더
      */
     @Builder(builderMethodName = "userBuilder")
-    public Member(String name, String mEmail, String mPassword, String birthday, String phone,
+    public Member(String name, String mEmail, String birthday, String phone,
                  String gender, String address) {
         this.name = name;
         this.mEmail = mEmail;

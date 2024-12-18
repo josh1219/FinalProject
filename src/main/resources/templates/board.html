@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title th:text="${isAdmin ? 'PETOPIA - 관리자 로그인' : 'PETOPIA'}">자유게시판</title>
+  <!-- <title th:text="${isAdmin ? 'PETOPIA - 관리자 로그인' : 'PETOPIA'}">자유게시판</title> -->
+  <title th:text="${session.member != null && session.member.role.name() == 'ADMIN'} ? 'PETOPIA - 관리자 로그인' : 'PETOPIA 자유게시판'">PETOPIA 자유게시판</title>
   <style>
     /* Reset and Global Styles */
     a, button, input, select, h1, h2, h3, h4, h5, * {
@@ -314,7 +315,7 @@
         position: relative;
         background-color: #fffbea;
         border-left: 4px solid #ffcc00;
-        padding: 10px 20px 10px 50px;
+        padding: 10px 20px;
         margin-bottom: 10px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         overflow: hidden;
@@ -347,6 +348,27 @@
       height: 70px;
     }
 
+    .board-item.admin-post {
+      background-color: #fff9e6;
+      border-left: 4px solid #fd0000;
+    }
+
+    .board-item.admin-post .board-category {
+      background-color: #ff0000;
+      color: rgb(255, 255, 255);
+      font-weight: 500;
+    }
+
+    .admin-badge {
+      background-color: #ff4757;
+      color: white;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-left: 8px;
+    }
+
+
     /* 관리자 공지사항 스타일 */
     .board-item.notice {
       background-color: #fff9e6;
@@ -378,7 +400,7 @@
                 <img src="/images/notification0.svg" alt="알림" onclick="location.href='/'">
             </div>
             <div class="icon-button">
-                <img src="/images/group-500.svg" alt="마이페이지" onclick="location.href='/'">
+                <img src="/images/mypage.svg" alt="마이페이지" onclick="location.href='/'">
             </div>
         </div>
     </div>
@@ -414,14 +436,18 @@
         <div id="boardList">
             <!-- 게시글 목록이 여기에 표시됩니다 -->
             <th:block th:each="board : ${boardList}">
-                <div class="board-item" th:onclick="'location.href=\'/board/detail?id=' + ${board.bIdx} + '\''">
+                <div class="board-item" 
+                     th:classappend="${board.member != null && board.member.role != null && board.member.role.name() == 'ADMIN'} ? 'admin-post'" 
+                     th:onclick="'location.href=\'/board/detail?id=' + ${board.bIdx} + '\''">
                     <div class="board-content">
                         <div class="board-info">
                             <span class="board-category" th:text="${board.bType}">카테고리</span>
                         </div>
                         <h3 class="board-title" th:text="${board.title}">제목</h3>
                         <div class="board-meta">
-                            <span th:text="${board.member.name}">작성자</span>
+                            <span>
+                                <span th:text="${board.member.name}">작성자</span>
+                            </span>
                             <span th:text="${board.insertDate}">작성일</span>
                             <span class="has-image" th:if="${board.content.contains('[첨부파일]')}">
                                 <img src="/images/image.svg" alt="이미지">

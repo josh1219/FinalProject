@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header th:fragment="shop-header">
+    <!-- 상단 메뉴 -->
+    <div class="shop-header">
+        <div class="header-content">
+            <button class="menu-button" onclick="toggleNav()">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="logo">
+                <a href="/shop">
+                    <img src="/images/PETOPIA_LOGO.png" alt="PETOPIA" style="height: 40px;">
+                </a>
+            </div>
+            <div class="cart">
+                <a href="/shop/cart">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span class="cart-count" th:text="${cartCount ?: '0'}">0</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 사이드 네비게이션 -->
+    <div class="nav-overlay"></div>
+    <div class="side-nav">
+        <div class="nav-header">
+            <button class="close-btn" onclick="toggleNav()">×</button>
+            <h2>안녕하세요 !</h2>
+            <h3>PETOPIA 입니다</h3>
+            <div class="welcome-info">
+                <div th:if="${userName != null}">
+                    <p><span th:text="${userName}"></span>님</p>
+                    <p>포인트 : <span th:text="${point}"></span>원</p>
+                    <p style="font-size: 9px; color: #0a0000;">*PETOPIA 산책 서비스를 통해 포인트를 얻으실수 있습니다.</p>
+                </div>
+                <div th:unless="${userName != null}" style="text-align: center;">
+                    <a href="/member/login" class="login-btn" style="
+                        display: inline-block;
+                        padding: 10px 20px;
+                        background-color: #4CAF50;
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 5px;
+                        font-weight: bold;
+                        margin: 10px 0;
+                    ">로그인</a>
+                </div>
+            </div>
+            <div class="menu-icons">
+                <a href="/shop/mypage" class="icon-item">
+                    <i class="fas fa-user"></i>
+                    <span>MY PAGE</span>
+                </a>
+                <a href="/shop/order" class="icon-item">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span>ORDER</span>
+                </a>
+            </div>
+        </div>
+        <div class="nav-menu">
+            <div class="menu-section">
+                <div class="menu-header">
+                    <span>전체상품</span>
+                    <button class="view-btn">VIEW</button>
+                </div>
+            </div>
+            <div class="menu-section">
+                <div class="menu-header">
+                    <span>사료</span>
+                    <button class="view-btn">VIEW</button>
+                </div>
+            </div>
+            <div class="menu-section">
+                <div class="menu-header">
+                    <span>어쩌구</span>
+                    <button class="view-btn">VIEW</button>
+                </div>
+            </div>
+            <div class="menu-section">
+                <div class="menu-header">
+                    <span>저쩌구</span>
+                    <button class="view-btn">VIEW</button>
+                </div>
+            </div>
+            <div class="menu-section">
+                <div class="menu-header">
+                    <span>캣푸드</span>
+                    <button class="view-btn">VIEW</button>
+                </div>
+            </div>
+            <div class="menu-section">
+                <div class="menu-header">
+                    <span>사업자전용</span>
+                    <button class="view-btn">VIEW</button>
+                </div>
+            </div>
+            <div class="menu-section">
+                <h4>고객센터</h4>
+                <div class="contact-info">
+                    <h3>010-1234-5678</h3>
+                    <p>평일 09:00 ~ 18:00   점심 12:00 ~ 13:00</p>
+                    <p>토, 일, 공휴일 휴무합니다</p>
+                </div>
+                <div class="company-info">
+                    <p>입금안내</p>
+                    <p>ict은행: 3218748324321</p>
+                    <p>예금주 : (주)펫토피아</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .shop-header {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 100;
+            border-bottom: 1px solid #eee;
+        }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .menu-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .logo a {
+            color: #333;
+            text-decoration: none;
+        }
+        .cart {
+            position: relative;
+        }
+        .cart a {
+            color: #333;
+            text-decoration: none;
+        }
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #45f863;
+            color: white;
+            font-size: 12px;
+            padding: 2px 6px;
+            border-radius: 50%;
+        }
+        .nav-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 150;
+        }
+        .side-nav {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100%;
+            background: #45f863;
+            z-index: 1000;
+            transition: 0.3s;
+            overflow-y: auto;
+        }
+        .side-nav.active {
+            left: 0;
+        }
+        .nav-header {
+            padding: 20px;
+            color: white;
+            text-align: center;
+        }
+        .nav-header h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+        .nav-header h3 {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .welcome-info {
+            margin-top: 15px;
+            font-size: 13px;
+        }
+        .welcome-info p {
+            margin: 5px 0;
+        }
+        .menu-icons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+        }
+        .icon-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #333;
+            background-color: #f5f5f5;
+            width: 100px;
+            height: 60px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        .icon-item:hover {
+            background-color: #e0e0e0;
+            transform: translateY(-2px);
+        }
+        .icon-item i {
+            margin-bottom: 4px;
+            font-size: 16px;
+        }
+        .icon-item span {
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .search-box {
+            padding: 15px;
+            background: white;
+            position: relative;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 8px 30px 8px 10px;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 5px;
+            font-size: 13px;
+        }
+        .search-box button {
+            position: absolute;
+            right: 25px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #666;
+        }
+        .nav-menu {
+            background: white;
+            padding: 0;
+        }
+        .menu-section {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .menu-section h4 {
+            margin: 0;
+            font-size: 14px;
+            color: #333;
+        }
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .menu-header span {
+            font-size: 14px;
+            color: #333;
+        }
+        .view-btn {
+            padding: 2px 8px;
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .contact-info {
+            margin: 15px 0;
+        }
+        .contact-info h3 {
+            font-size: 18px;
+            margin: 10px 0;
+            color: #333;
+        }
+        .contact-info p, .company-info p {
+            margin: 5px 0;
+            font-size: 12px;
+            color: #666;
+        }
+        .close-btn {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+    </style>
+
+    <script>
+        function toggleNav() {
+            const nav = document.querySelector('.side-nav');
+            const overlay = document.querySelector('.nav-overlay');
+            nav.classList.toggle('active');
+            if (nav.classList.contains('active')) {
+                overlay.style.display = 'block';
+            } else {
+                overlay.style.display = 'none';
+            }
+        }
+
+        document.querySelector('.nav-overlay').addEventListener('click', function() {
+            toggleNav();
+        });
+    </script>
+</header>
+</html>

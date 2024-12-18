@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>장바구니 - PETOPIA</title>
+    <link rel="stylesheet" href="/css/shop.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="//fonts.googleapis.com">
+    <link href="//fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+            font-family: 'Noto Sans KR', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .cart-container {
+            max-width: 768px;
+            margin: 0 auto;
+            background: white;
+        }
+        .cart-title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 500;
+            padding: 20px;
+            margin: 0;
+            border-bottom: 1px solid #eee;
+        }
+        .cart-tabs {
+            display: flex;
+            padding: 0 20px;
+            margin: 20px 0;
+        }
+        .cart-tab {
+            flex: 1;
+            height: 45px;
+            line-height: 45px;
+            text-align: center;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            color: #333;
+        }
+        .cart-tab:first-child {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+            border-right: none;
+        }
+        .cart-tab:last-child {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+        .cart-tab.active {
+            background-color: #f8f9fa;
+            font-weight: 500;
+        }
+        .empty-cart {
+            text-align: center;
+            padding: 50px 20px;
+            color: #666;
+            font-size: 14px;
+        }
+        .cart-items {
+            padding: 20px;
+        }
+        .cart-item {
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 8px;
+        }
+        .cart-item-header {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+        }
+        .cart-item-checkbox {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+        }
+        .cart-item-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            margin-right: 15px;
+            border-radius: 4px;
+        }
+        .cart-item-info {
+            flex: 1;
+        }
+        .cart-item-title {
+            font-size: 14px;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .cart-item-delivery {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .cart-item-price {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+        }
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            gap: 5px;
+        }
+        .quantity-control button {
+            width: 28px;
+            height: 28px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .quantity-control input {
+            width: 40px;
+            height: 28px;
+            text-align: center;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .quantity-control .update-btn {
+            padding: 0 12px;
+            height: 28px;
+            font-size: 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            margin-left: 5px;
+        }
+        .shipping-info {
+            margin: 20px 0;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #666;
+        }
+        .shipping-method {
+            padding: 0 20px;
+        }
+        .shipping-method label {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .shipping-method input[type="radio"] {
+            margin-right: 8px;
+        }
+        .cart-summary {
+            padding: 20px;
+            background: #f8f9fa;
+            margin-top: 20px;
+        }
+        .cart-summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            font-size: 14px;
+            color: #333;
+        }
+        .cart-summary-row:last-child {
+            margin-bottom: 0;
+            font-weight: 500;
+        }
+        .cart-buttons {
+            padding: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        .cart-button {
+            flex: 1;
+            height: 48px;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+        .cart-button.primary {
+            background: #333;
+            color: white;
+        }
+        .cart-button.secondary {
+            background: white;
+            border: 1px solid #333;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="shop/shop-header :: shop-header"></div>
+
+    <div class="cart-container">
+        <h2 class="cart-title">장바구니</h2>
+        
+        <div class="cart-tabs">
+            <div class="cart-tab active">국내배송상품(<span th:text="${cartCount ?: '0'}">0</span>)</div>
+            <div class="cart-tab">해외배송상품(0)</div>
+        </div>
+
+        <!-- 장바구니가 비어있을 때 -->
+        <div class="empty-cart" th:if="${#lists.isEmpty(cartItems)}">
+            장바구니가 비어 있습니다.
+        </div>
+
+        <!-- 장바구니에 상품이 있을 때 -->
+        <div th:unless="${#lists.isEmpty(cartItems)}">
+            <div class="cart-items">
+                <div class="cart-item" th:each="item : ${cartItems}">
+                    <div class="cart-item-header">
+                        <input type="checkbox" class="cart-item-checkbox" checked>
+                        <img th:src="${item.imageUrl}" class="cart-item-image" alt="상품 이미지">
+                        <div class="cart-item-info">
+                            <div class="cart-item-title" th:text="${item.name}">상품명</div>
+                            <div class="cart-item-delivery">배송: [무료] / 개별배송</div>
+                            <div class="cart-item-price">￦<span th:text="${item.price}">24,000</span></div>
+                            <div class="quantity-control">
+                                <button onclick="decreaseQuantity(this)">-</button>
+                                <input type="number" value="1" min="1" onchange="updateQuantity(this)">
+                                <button onclick="increaseQuantity(this)">+</button>
+                                <button class="update-btn">변경</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="shipping-info">
+                [옵션: 연결 (-2,000)]
+            </div>
+
+            <div class="shipping-method">
+                <label>
+                    <input type="radio" name="shipping" checked> 개별배송
+                </label>
+                <label>
+                    <input type="radio" name="shipping"> 해외장바구니로 이동
+                </label>
+            </div>
+
+            <div class="cart-summary">
+                <div class="cart-summary-row">
+                    <span>총 상품금액</span>
+                    <span>￦<span th:text="${totalAmount}">24,000</span></span>
+                </div>
+                <div class="cart-summary-row">
+                    <span>총 배송비</span>
+                    <span>￦0</span>
+                </div>
+                <div class="cart-summary-row">
+                    <span>결제예정금액</span>
+                    <span>￦<span th:text="${totalAmount}">24,000</span></span>
+                </div>
+            </div>
+
+            <div class="cart-buttons">
+                <button class="cart-button secondary">선택상품주문</button>
+                <button class="cart-button primary">전체상품주문</button>
+            </div>
+        </div>
+    </div>
+
+    <div th:replace="shop/footer :: footer"></div>
+
+    <script>
+        function decreaseQuantity(button) {
+            const input = button.nextElementSibling;
+            if (input.value > 1) {
+                input.value = parseInt(input.value) - 1;
+            }
+        }
+
+        function increaseQuantity(button) {
+            const input = button.previousElementSibling;
+            input.value = parseInt(input.value) + 1;
+        }
+
+        function updateQuantity(input) {
+            if (input.value < 1) {
+                input.value = 1;
+            }
+        }
+    </script>
+</body>
+</html>

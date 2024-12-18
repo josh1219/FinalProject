@@ -101,16 +101,6 @@ public class MemberService implements UserDetailsService {
         return memberRepository.findByProviderAndSocialId(provider, socialId).orElse(null);
     }
 
-    public Member getMemberByEmail(String email) {
-        return memberRepository.findBymEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("해당 이메일이 존재하지 않습니다: " + email));
-    }
-
-    public Member getMemberByEmail(String email) {
-        return memberRepository.findBymEmail(email)
-                .orElseThrow(() -> new RuntimeException("해당 이메일로 등록된 회원을 찾을 수 없습니다: " + email));
-    }
-
     public Member findByMIdx(int mIdx) {
         return memberRepository.findById(mIdx)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다. ID: " + mIdx));

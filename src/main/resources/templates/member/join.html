@@ -363,68 +363,70 @@
         });
 
         // 약관동의 체크박스 처리
-        const allCheckbox = document.getElementById('agreeAll');
-        const agreementCheckboxes = document.querySelectorAll('.agreement');
-        
-        // 전체 동의 체크박스 이벤트
-        allCheckbox.addEventListener('change', function() {
-            const isChecked = this.checked;
-            agreementCheckboxes.forEach(checkbox => {
-                checkbox.checked = isChecked;
-            });
-        });
+        document.addEventListener('DOMContentLoaded', function() {
+            const agreementCheckboxes = document.querySelectorAll('.agreement');
+            const allCheckbox = document.getElementById('agreeAll');
 
-        // 개별 체크박스 이벤트
-        agreementCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
-                const allChecked = Array.from(agreementCheckboxes).every(cb => cb.checked);
-                allCheckbox.checked = allChecked;
+            // 전체 동의 체크박스 이벤트
+            allCheckbox.addEventListener('change', function() {
+                agreementCheckboxes.forEach(checkbox => {
+                    checkbox.checked = this.checked;
+                });
+            });
+
+            // 개별 체크박스 이벤트
+            agreementCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const allChecked = Array.from(agreementCheckboxes).every(cb => cb.checked);
+                    allCheckbox.checked = allChecked;
+                });
             });
         });
 
         // 카카오 이메일 처리
-        const kakaoEmail = document.getElementById('kakaoEmail');
-        const fullKakaoEmail = document.getElementById('fullKakaoEmail');
-        
-        if (kakaoEmail && fullKakaoEmail) {
-            // 초기값 설정
-            if (kakaoEmail.value) {
-                fullKakaoEmail.value = kakaoEmail.value + '@kakao.com';
-            }
+        document.addEventListener('DOMContentLoaded', function() {
+            const kakaoEmailInput = document.getElementById('kakaoEmail');
+            const fullKakaoEmailInput = document.getElementById('fullKakaoEmail');
             
-            kakaoEmail.addEventListener('input', function() {
-                const prefix = this.value.trim();
-                fullKakaoEmail.value = prefix + '@kakao.com';
-                
-                // 이메일 유효성 검사 실행
-                const emailError = document.getElementById('mEmailError');
-                const email = fullKakaoEmail.value;
-                const emailRegex = /^[a-zA-Z0-9._-]+@kakao\.com$/;
-                
-                if (prefix === '') {
-                    emailError.textContent = '이메일을 입력해주세요.';
-                    emailError.style.display = 'block';
-                    this.classList.remove('valid');
-                    this.classList.add('invalid');
-                } else if (!emailRegex.test(email)) {
-                    emailError.textContent = '올바른 이메일 형식이 아닙니다.';
-                    emailError.style.display = 'block';
-                    this.classList.remove('valid');
-                    this.classList.add('invalid');
-                } else {
-                    emailError.style.display = 'none';
-                    this.classList.remove('invalid');
-                    this.classList.add('valid');
+            if (kakaoEmailInput && fullKakaoEmailInput) {
+                // 초기값 설정
+                if (kakaoEmailInput.value) {
+                    fullKakaoEmailInput.value = kakaoEmailInput.value + '@kakao.com';
                 }
-            });
-        }
-    });
+                
+                kakaoEmailInput.addEventListener('input', function() {
+                    const prefix = this.value.trim();
+                    fullKakaoEmailInput.value = prefix + '@kakao.com';
+                    
+                    // 이메일 유효성 검사 실행
+                    const emailError = document.getElementById('mEmailError');
+                    const email = fullKakaoEmailInput.value;
+                    const emailRegex = /^[a-zA-Z0-9._-]+@kakao\.com$/;
+                    
+                    if (prefix === '') {
+                        emailError.textContent = '이메일을 입력해주세요.';
+                        emailError.style.display = 'block';
+                        this.classList.remove('valid');
+                        this.classList.add('invalid');
+                    } else if (!emailRegex.test(email)) {
+                        emailError.textContent = '올바른 이메일 형식이 아닙니다.';
+                        emailError.style.display = 'block';
+                        this.classList.remove('valid');
+                        this.classList.add('invalid');
+                    } else {
+                        emailError.style.display = 'none';
+                        this.classList.remove('invalid');
+                        this.classList.add('valid');
+                    }
+                });
+            }
+        });
   </script>
 
   <script th:inline="javascript">
     /*<![CDATA[*/
-    const isKakao = [[${memberDTO != null and memberDTO.provider == 'kakao'}]];
-    const kakaoEmail = [[${memberDTO != null ? memberDTO.mEmail : ''}]];
+    var isKakao = /*[[${memberDTO != null && memberDTO.provider == 'kakao'}]]*/ false;
+    var kakaoEmail = /*[[${memberDTO != null ? memberDTO.mEmail : ''}]]*/ '';
     /*]]>*/
     
     function handleKakaoEmail(input) {

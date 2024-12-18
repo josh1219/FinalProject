@@ -206,7 +206,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         httpSession.setAttribute("mIdx", member.getMIdx()); 
         
         // 쿠키에 사용자 정보 저장
-        String userInfo = member.getMIdx() + "★" + member.getMEmail() + "★" + member.getProvider() + "★" + member.getRole(); 
+        String userInfo = member.getMIdx() + "★" + member.getMEmail() + "★" + member.getName() + "★" + member.getProvider() + "★" + member.getRole(); 
         Cookie cookie = new Cookie("USER_INFO", userInfo);
         cookie.setPath("/");
         cookie.setMaxAge(3600); // 1시간

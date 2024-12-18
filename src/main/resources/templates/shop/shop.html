@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity5">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PETOPIA 쇼핑</title>
+    <link rel="stylesheet" href="/css/shop.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="//fonts.googleapis.com">
+    <link href="//fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+        }
+        .shop-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 15px 0;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .product-item {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .product-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100px;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info {
+            padding: 10px;
+        }
+
+        .product-name {
+            margin: 0;
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            height: 40px;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+        }
+
+        .product-price {
+            margin: 5px 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Shop 헤더 include -->
+    <div th:replace="shop/shop-header :: shop-header"></div>
+
+    <div class="shop-container">
+        <!-- 카테고리 네비게이션 -->
+        <div class="category-nav">
+            <div class="scroll-container">
+                <a href="#" class="nav-item active">전체상품</a>
+                <a href="#" class="nav-item">간식</a>
+                <a href="#" class="nav-item">영양제</a>
+                <a href="#" class="nav-item">위생용품</a>
+                <a href="#" class="nav-item">산책용품</a>
+                <a href="#" class="nav-item">이동용품</a>
+                <a href="#" class="nav-item">의류</a>
+                <a href="#" class="nav-item">장난감</a>
+                <a href="#" class="nav-item">하우스/방석</a>
+                <a href="#" class="nav-item">기타</a>
+            </div>
+        </div>
+
+        <h1 class="page-title">전체상품</h1>
+
+        <!-- 상품 정렬 옵션 -->
+        <div class="sort-option">
+            <select id="sortSelect" onchange="sortProducts(this.value)" th:with="sort=${selectedSort}">
+                <option value="new" th:selected="${sort == 'new'}">신상품순</option>
+                <option value="popular" th:selected="${sort == 'popular'}">인기순</option>
+                <option value="low" th:selected="${sort == 'low'}">낮은가격순</option>
+                <option value="high" th:selected="${sort == 'high'}">높은가격순</option>
+            </select>
+        </div>
+
+        <!-- 상품 목록 -->
+        <div class="product-grid">
+            <a th:each="product : ${products}" 
+               th:href="@{/shop/product/{id}(id=${product.pidx})}" 
+               class="product-item">
+                <div class="product-image">
+                    <img th:src="${product.imageUrl}" th:alt="${product.name}">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name" th:text="${product.name}"></h3>
+                    <p class="product-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'"></p>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="nav-overlay"></div>
+    <div class="side-nav">
+        <div class="nav-header">
+            <button class="close-btn" onclick="toggleNav()"><i class="fas fa-times"></i></button>
+            <h2>안녕하세요 !</h2>
+            <h3>PETOPIA 입니다</h3>
+            <div th:if="${userName == null}" class="nav-buttons">
+                <a href="/member/login" class="nav-btn">LOGIN</a>
+                <a href="/member/join" class="nav-btn">JOIN</a>
+            </div>
+            <div th:if="${userName != null}" class="welcome-message">
+                <h2><span th:text="${userName}"></span>님</h2>
+                <h3>환영합니다</h3>
+            </div>
+        </div>
+        <div class="nav-menu">
+            <div class="menu-group">
+                <a href="#" class="menu-title">전체상품</a>
+                <button class="view-btn">VIEW</button>
+            </div>
+            <div class="menu-group">
+                <a href="#" class="menu-title">사료</a>
+                <button class="view-btn">VIEW</button>
+            </div>
+            <div class="menu-group">
+                <a href="#" class="menu-title">순수원물간식</a>
+                <button class="view-btn">VIEW</button>
+            </div>
+            <div class="menu-group">
+                <a href="#" class="menu-title">덴탈껌</a>
+                <button class="view-btn">VIEW</button>
+            </div>
+
+        </div>
+        <div class="nav-footer">
+            <div class="contact-info">
+                <h4>고객센터</h4>
+                <p class="phone">010-2292-2075</p>
+                <p class="time">평일 09:00 ~ 18:00   점심 12:00 ~ 13:00</p>
+                <p class="holiday">토, 일, 공휴일 휴무합니다</p>
+            </div>
+            <div class="company-info">
+                <h4>입금안내</h4>
+                <p>ict은행 : 01022922075</p>
+                <p>예금주 : (주)페토피아</p>
+            </div>
+        </div>
+    </div>
+    <script th:inline="javascript">
+    function toggleNav() {
+        const nav = document.querySelector('.side-nav');
+        const overlay = document.querySelector('.nav-overlay');
+        nav.classList.toggle('open');
+        overlay.classList.toggle('show');
+    }
+
+    // 오버레이 클릭시 네비게이션 닫기
+    document.querySelector('.nav-overlay').addEventListener('click', function() {
+        const nav = document.querySelector('.side-nav');
+        const overlay = document.querySelector('.nav-overlay');
+        nav.classList.remove('open');
+        overlay.classList.remove('show');
+    });
+
+    function sortProducts(sortOption) {
+        window.location.href = '/shop?sort=' + sortOption;
+    }
+    </script>
+</body>
+</html>

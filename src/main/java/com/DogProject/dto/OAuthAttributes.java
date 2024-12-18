@@ -86,18 +86,23 @@ public class OAuthAttributes {
     }
 
     private static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes) {
-        // 디버깅을 위한 로그 추가
         System.out.println("Kakao Raw Attributes: " + attributes);
         
         Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
 
-        String socialId = attributes.get("id").toString();  // Kakao의 고유 ID를 문자열로 변환
+        String socialId = attributes.get("id").toString();
+        String profileImageUrl = (String) profile.get("profile_image_url");
+        
+        // 프로필 이미지 URL에 크기 파라미터 추가 (width=200)
+        if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
+            profileImageUrl = profileImageUrl.replace("/img/", "/img/w/200/");
+        }
 
         return OAuthAttributes.builder()
                 .name((String) profile.get("nickname"))
-                .email(null)  // 이메일은 null로 설정
-                .picture((String) profile.get("profile_image_url"))
+                .email(null)
+                .picture(profileImageUrl)
                 .provider("kakao")
                 .socialId(socialId)
                 .attributes(attributes)

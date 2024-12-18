@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주문조회 - PETOPIA</title>
+    <link rel="stylesheet" href="/css/shop.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="//fonts.googleapis.com">
+    <link href="//fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .order-container {
+            max-width: 768px;
+            margin: 0 auto;
+            background: white;
+        }
+        .order-title {
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            font-size: 20px;
+            font-weight: 500;
+            border-bottom: 1px solid #eee;
+        }
+        .order-tabs {
+            display: flex;
+            padding: 0 20px;
+            margin: 20px 0;
+        }
+        .order-tab {
+            flex: 1;
+            height: 45px;
+            line-height: 45px;
+            text-align: center;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            font-size: 14px;
+            color: #333;
+        }
+        .order-tab:first-child {
+            border-top-left-radius: 4px;
+            border-bottom-left-radius: 4px;
+            border-right: none;
+        }
+        .order-tab:last-child {
+            border-top-right-radius: 4px;
+            border-bottom-right-radius: 4px;
+        }
+        .status-selector {
+            margin: 20px 0;
+        }
+        .status-selector select {
+            width: 200px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            color: #333;
+            background-color: #fff;
+            cursor: pointer;
+        }
+        .status-selector select option {
+            padding: 8px;
+            background-color: #fff;
+            color: #333;
+        }
+        .status-selector select option:hover {
+            background-color: #f0f0f0;
+        }
+        .period-selector {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .period-selector button {
+            padding: 8px 20px;
+            border: 1px solid #ddd;
+            background-color: white;
+            cursor: pointer;
+            border-radius: 20px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .period-selector button.active {
+            background-color: #333;
+            color: white;
+            border-color: #333;
+        }
+        .notice {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .notice p {
+            margin: 5px 0;
+            font-size: 13px;
+            color: #666;
+        }
+        .no-orders {
+            text-align: center;
+            padding: 50px 0;
+            color: #666;
+            font-size: 16px;
+        }
+        @media (max-width: 768px) {
+            .order-container {
+                padding: 10px;
+            }
+            .period-selector button {
+                padding: 6px 15px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="shop/shop-header :: shop-header"></div>
+
+    <div class="order-container">
+        <h2 class="order-title">주문조회</h2>
+        
+        <div class="order-tabs">
+            <div class="order-tab">주문내역조회 (0)</div>
+            <div class="order-tab">취소/반품/교환 내역 (0)</div>
+        </div>
+
+        <div class="status-selector">
+            <select>
+                <option>전체 주문처리상태</option>
+                <option>입금전</option>
+                <option>배송준비중</option>
+                <option>배송중</option>
+                <option>배송완료</option>
+                <option>취소</option>
+                <option>교환</option>
+                <option>반품</option>
+            </select>
+        </div>
+
+        <div class="period-selector">
+            <button>오늘</button>
+            <button>1개월</button>
+            <button class="active">3개월</button>
+            <button>6개월</button>
+        </div>
+
+        <div class="notice">
+            <p>! 최근 3개월 이상 지난 주문은 [마이주문내역]에서 확인할 수 있습니다.</p>
+            <p>! 취소한 주문은 [취소 주문내역]에서 확인할 수 있습니다.</p>
+        </div>
+
+        <div class="no-orders">
+            주문 내역이 없습니다.
+        </div>
+    </div>
+
+    <div th:replace="shop/footer :: footer"></div>
+
+    <script>
+        // 기간 선택 버튼 활성화
+        const periodButtons = document.querySelectorAll('.period-selector button');
+        periodButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                periodButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

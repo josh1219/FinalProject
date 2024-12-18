@@ -22,53 +22,17 @@
 
         .container {
             max-width: 800px;
-            margin: 0 auto;
+            margin: 90px auto 0;  
             padding: 0 20px;
         }
 
         .main-content {
-            margin-top: 2rem;
-        }
-
-        .alram button, .mypage button {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            border: none;
-            padding: 5px;
-            cursor: pointer;
-        }
-
-        .alram img, .mypage img {
-            width: 24px;
-            height: 24px;
-            display: block;
-            margin: auto;
-        }
-
-        .header {
-            position: relative;
-            z-index: 2;
-            background-color: white;
             width: 100%;
         }
 
-        .page-title {
-            text-align: left;
-            margin-bottom: 2rem;
-        }
-
-        .page-title h2 {
+        h2 {
             font-size: 1.5rem;
             color: #333;
-        }
-
-        .top-section {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            gap: 2rem;
             margin-bottom: 2rem;
         }
 
@@ -278,8 +242,6 @@
             padding: 0.7rem;
         }
 
-        
-
         .form-content {
             padding-top: 2rem;
         }
@@ -320,9 +282,9 @@
     <!-- header -->
     <div th:replace="~{common/header :: header}"></div>
     <!-- /header -->
-        
-    <div class="main-content">
-        <div class="grid-container">
+    
+    <div class="container">    
+        <div class="main-content">
             <form action="/dog/insert" method="post" enctype="multipart/form-data" class="dog-form">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <div class="form-content">

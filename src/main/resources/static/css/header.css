@@ -2,12 +2,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 2rem;
-    padding-right: 2rem;
-    padding-bottom: 0rem;
+    padding: 1rem 2rem;
     border-bottom: 2px solid #eee;
-    max-width: 100%;
-    overflow: hidden;
+    background-color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 70px;
 }
 .header img {
     max-height: 50px;

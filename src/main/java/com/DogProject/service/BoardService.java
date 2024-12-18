@@ -11,6 +11,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -46,14 +47,13 @@ public class BoardService {
         if (files != null && !files.isEmpty()) {
             for (MultipartFile multipartFile : files) {
                 if (!multipartFile.isEmpty()) {
-                    File file = new File();
-                    file.setFType(1); // 게시글 첨부파일 타입
-                    file.setTIdx(board.getBIdx()); // 게시글 번호
-                    
                     try {
+                        File file = new File();
+                        file.setFType(1); // 게시글 첨부파일 타입
+                        file.setTIdx(board.getBIdx()); // 게시글 번호 설정
                         fileService.saveFile(file, multipartFile);
                     } catch (Exception e) {
-                        throw new RuntimeException("파일 업로드 중 오류가 발생했습니다: " + e.getMessage());
+                        throw new RuntimeException("파일 저장 중 오류가 발생했습니다: " + e.getMessage());
                     }
                 }
             }
@@ -65,11 +65,27 @@ public class BoardService {
     // 게시글 목록 조회
     @Transactional(readOnly = true)
     public List<Board> getBoardList() {
-        return boardRepository.findByDeleteCheckOrderByBIdxDesc("N");
+        return boardRepository.findAllOrderByTypeAndIdDesc("N");
     }
 
     // 카테고리별 게시글 목록 조회
+    @Transactional(readOnly = true)
     public List<Board> getBoardListByCategory(String category) {
         return boardRepository.findByBTypeAndDeleteCheck(category, "N");
+    }
+
+    // 게시글 번호로 게시글 조회
+    public Board getBoardByIdx(int bIdx) {
+        return boardRepository.findById(bIdx).orElse(null);
+    }
+
+    // 조회수 증가
+    @Transactional
+    public void increaseViewCount(int bIdx) {
+        Board board = getBoardByIdx(bIdx);
+        if (board != null) {
+            board.setReadRate(board.getReadRate() + 1);
+            boardRepository.save(board);
+        }
     }
 }

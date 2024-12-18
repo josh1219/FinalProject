@@ -113,7 +113,7 @@
         overflow-x: auto;
         white-space: nowrap;
         -webkit-overflow-scrolling: touch;
-        background-color: #fff;
+        background-color: rgb(246, 247, 255);
         border-top: 1px solid #eee;
         border-bottom: 1px solid #eee;
         width: 100%;
@@ -155,6 +155,7 @@
     }
 
     .posts-container {
+      background-color: rgb(249 249 249);
       flex: 1;
       overflow-y: auto;
       padding: 20px;
@@ -165,7 +166,7 @@
     #boardList {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 8px;
       padding-bottom: 80px; /* 글쓰기 버튼 공간 확보 */
     }
 
@@ -173,7 +174,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 16px;
+      padding: 10px;
+      margin-bottom: 0;
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -389,6 +391,56 @@
     .board-item.notice .board-meta {
       color: #666;
     }
+
+    /* 게시글 없음 메시지 스타일 */
+    .no-posts {
+        text-align: center;
+        padding: 50px 20px;
+        color: #666;
+        font-size: 1.1em;
+        line-height: 1.6;
+    }
+
+    .no-posts img {
+        width: 120px;
+        margin-bottom: 20px;
+        opacity: 0.7;
+    }
+
+    .no-posts .message {
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    .no-posts .sub-message {
+        font-size: 0.9em;
+        color: #888;
+    }
+    
+    .notice-post {
+        background-color: #fff9e6;
+        border-left: 4px solid #ffd700;
+        position: relative;
+    }
+    
+    .notice-post .board-category {
+        background-color: #ffd700;
+        color: #000;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .notice-post .board-category::before {
+        content: '';
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        background-image: url('/images/pin.svg');
+        background-size: contain;
+        background-repeat: no-repeat;
+    }
   </style>
 </head>
 <body>
@@ -434,10 +486,16 @@
 
     <div class="posts-container">
         <div id="boardList">
-            <!-- 게시글 목록이 여기에 표시됩니다 -->
-            <th:block th:each="board : ${boardList}">
+            <!-- 게시글이 없을 때 표시할 메시지 -->
+            <div th:if="${#lists.isEmpty(boardList)}" class="no-posts">
+                <img src="/images/empty-box.svg" alt="빈 박스">
+                <div class="message">아직 등록된 게시글이 없어요!</div>
+                <div class="sub-message">첫 번째 게시글의 주인공이 되어보세요 🐾</div>
+            </div>
+            <!-- 게시글 목록 -->
+            <th:block th:if="${not #lists.isEmpty(boardList)}" th:each="board : ${boardList}">
                 <div class="board-item" 
-                     th:classappend="${board.member != null && board.member.role != null && board.member.role.name() == 'ADMIN'} ? 'admin-post'" 
+                     th:classappend="${board.bType == '공지사항'} ? 'notice-post' : (${board.member != null && board.member.role != null && board.member.role.name() == 'ADMIN'} ? 'admin-post')"
                      th:onclick="'location.href=\'/board/detail?id=' + ${board.bIdx} + '\''">
                     <div class="board-content">
                         <div class="board-info">
@@ -445,9 +503,7 @@
                         </div>
                         <h3 class="board-title" th:text="${board.title}">제목</h3>
                         <div class="board-meta">
-                            <span>
-                                <span th:text="${board.member.name}">작성자</span>
-                            </span>
+                            <span th:text="${board.member.name}">작성자</span>
                             <span th:text="${board.insertDate}">작성일</span>
                             <span class="has-image" th:if="${board.content.contains('[첨부파일]')}">
                                 <img src="/images/image.svg" alt="이미지">
@@ -461,7 +517,9 @@
     </div>
 
     <!-- 글쓰기 버튼 -->
-    <div class="write-button" onclick="checkLoginAndWrite()" title="글쓰기">
+    <div class="write-button" 
+         th:onclick="${session.member != null} ? 'location.href=\'/board/create\'' : 'alert(\'로그인이 필요한 서비스입니다.\'); location.href=\'/member/login\''" 
+         title="글쓰기">
         <img src="/images/write-button.svg" alt="글쓰기">
     </div>
 
@@ -493,20 +551,6 @@
   </div>
 
   <script>
-    function checkLoginAndWrite() {
-        // 로그인 상태 확인
-        const isLoggedIn = /*[[${session.isLoggedIn}]]*/ false;
-        
-        if (!isLoggedIn) {
-            alert('로그인이 필요한 서비스입니다.');
-            window.location.href = '/member/login';
-            return;
-        }
-        
-        // 로그인 상태면 글쓰기 페이지로 이동
-        window.location.href = '/board/create';
-    }
-
     function filterPosts(type) {
         // 모든 카테고리 버튼의 active 클래스 제거
         document.querySelectorAll('.frame-232 > div').forEach(div => {

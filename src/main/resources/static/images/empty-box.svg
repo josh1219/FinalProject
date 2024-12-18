@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- 박스 그림자 -->
+    <ellipse cx="100" cy="165" rx="70" ry="8" fill="#E0E0E0" opacity="0.3"/>
+    
+    <!-- 박스 바닥 -->
+    <path d="M40 80L100 110L160 80L100 50L40 80Z" fill="#FFC107" opacity="0.2"/>
+    
+    <!-- 박스 왼쪽 면 -->
+    <path d="M40 80L40 140L100 170L100 110L40 80Z" fill="#FFE082" opacity="0.3"/>
+    
+    <!-- 박스 오른쪽 면 -->
+    <path d="M100 110L100 170L160 140L160 80L100 110Z" fill="#FFD54F" opacity="0.3"/>
+    
+    <!-- 박스 윗면 테두리 -->
+    <path d="M40 80L100 110L160 80L100 50L40 80Z" stroke="#FFA000" stroke-width="2" stroke-linejoin="round"/>
+    
+    <!-- 박스 측면 테두리 -->
+    <path d="M40 80L40 140L100 170L100 110M100 110L160 80L160 140L100 170" stroke="#FFA000" stroke-width="2" stroke-linejoin="round"/>
+    
+    <!-- 강아지 발자국 1 -->
+    <path d="M85 90C87 88 89 87 91 88C93 89 93 91 91 93C89 95 87 96 85 95C83 94 83 92 85 90Z" fill="#FFA000"/>
+    <circle cx="82" cy="86" r="2" fill="#FFA000"/>
+    <circle cx="86" cy="84" r="2" fill="#FFA000"/>
+    <circle cx="90" cy="85" r="2" fill="#FFA000"/>
+    
+    <!-- 강아지 발자국 2 -->
+    <path d="M115 75C117 73 119 72 121 73C123 74 123 76 121 78C119 80 117 81 115 80C113 79 113 77 115 75Z" fill="#FFA000"/>
+    <circle cx="112" cy="71" r="2" fill="#FFA000"/>
+    <circle cx="116" cy="69" r="2" fill="#FFA000"/>
+    <circle cx="120" cy="70" r="2" fill="#FFA000"/>
+    
+    <!-- 물음표 -->
+    <text x="90" y="125" font-family="Arial" font-size="40" fill="#FFA000" opacity="0.5">?</text>
+</svg>

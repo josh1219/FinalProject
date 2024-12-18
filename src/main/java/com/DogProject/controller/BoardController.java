@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.DogProject.entity.Board;
+import com.DogProject.entity.File;
 import com.DogProject.entity.Member;
 import com.DogProject.service.BoardService;
+import com.DogProject.service.FileService;
 import com.DogProject.service.MemberService;
 import com.DogProject.constant.Role;
 
@@ -25,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,6 +42,7 @@ public class BoardController {
 
     private final BoardService boardService;
     private final MemberService memberService;
+    private final FileService fileService;
 
     // 게시판 목록 페이지
     @GetMapping({"", "/"})
@@ -49,6 +53,7 @@ public class BoardController {
         } else {
             boardList = boardService.getBoardList();
         }
+        
         model.addAttribute("boardList", boardList);
         model.addAttribute("currentCategory", category);
         return "board";
@@ -118,16 +123,43 @@ public class BoardController {
         }
     }
 
-    // 게시글 상세보기 페이지
+    // 게시글 상세 페이지
     @GetMapping("/detail")
-    public String boardDetail(@RequestParam("id") Long postId, Model model) {
-        // 실제 데이터베이스나 서비스에서 데이터를 가져오는 로직으로 대체 필요
-        // BoardDto post = boardService.getPostById(postId);
+    public String boardDetail(@RequestParam("id") int bIdx, Model model, @AuthenticationPrincipal OAuth2User oauth2User) {
+        try {
+            // 게시글 조회
+            Board board = boardService.getBoardByIdx(bIdx);
+            if (board == null || board.getDeleteCheck().equals("Y")) {
+                return "redirect:/board?error=notfound";
+            }
 
-        model.addAttribute("postId", postId);
-        // model.addAttribute("post", post);
+            // 현재 로그인한 사용자 정보
+            Member currentMember = null;
+            if (oauth2User != null) {
+                String email = oauth2User.getAttribute("email");
+                currentMember = memberService.findBymEmail(email);
+            }
 
-        return "boardDetail";
+            // 조회수 증가 (자신의 게시글이 아닐 경우에만)
+            if (currentMember == null || board.getMember().getMIdx() != currentMember.getMIdx()) {
+                boardService.increaseViewCount(bIdx);
+                board = boardService.getBoardByIdx(bIdx); // 업데이트된 정보 다시 조회
+            }
+
+            // 게시글의 첨부 파일 조회 (fType이 1인 경우 게시글 첨부파일)
+            List<File> boardFiles = fileService.findAllByTypeAndIdx(1, bIdx);
+            if (!boardFiles.isEmpty()) {
+                model.addAttribute("boardFiles", boardFiles);
+            }
+
+            model.addAttribute("board", board);
+            model.addAttribute("currentMember", currentMember);
+            
+            return "boardDetail";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "redirect:/board?error=error";
+        }
     }
 }
 

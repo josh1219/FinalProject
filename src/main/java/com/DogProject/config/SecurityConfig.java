@@ -40,7 +40,7 @@ public class SecurityConfig {
         
         http
             .csrf()
-                .ignoringAntMatchers("/member/checkEmail", "/api/**", "/dog/insert", "/dog/update/**", "/ws/**", "/ws/chat/**")  // WebSocket 경로 CSRF 검사 제외
+                .ignoringAntMatchers("/member/checkEmail", "/api/**", "/dog/insert", "/dog/update/**", "/ws/**", "/ws/chat/**", "/uploads/**")  // WebSocket 경로 CSRF 검사 제외
                 .and()
             .sessionManagement()
                 .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
@@ -57,7 +57,7 @@ public class SecurityConfig {
             .authorizeRequests()
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/video/**","/member/**", "/error", 
                         "/home", "/board", "/board/detail", "/dog/**", "/shop/**", "/chat/**", "/walk/**", "/api/**",
-                        "/ws/**", "/ws/chat/**", "/topic/**", "/schedule/**").permitAll()
+                        "/ws/**", "/ws/chat/**", "/topic/**", "/schedule/**", "/uploads/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")  
                 .antMatchers("/member/checkEmail").permitAll()  // 이메일 중복 체크 API 허용
                 .antMatchers("/board/create").authenticated()  // 로그인하지 않은 사용자의 /board/create 접근 제한

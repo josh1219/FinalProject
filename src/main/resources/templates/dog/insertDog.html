@@ -5,6 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/dog.css">
+    <link rel="stylesheet" href="/css/header.css">
     <style>
         * {
             margin: 0;
@@ -13,57 +14,44 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f5f5f5;
-            color: #333;
+            font-family: Arial, sans-serif;
+            padding-bottom: 60px;
             min-height: 100vh;
-            padding: 1rem;
+            position: relative;
         }
 
         .container {
-            max-width: 1200px;
-            width: 100%;
+            max-width: 800px;
             margin: 0 auto;
-            padding: 1.5rem;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0 20px;
+        }
+
+        .main-content {
+            margin-top: 2rem;
+        }
+
+        .alram button, .mypage button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+        }
+
+        .alram img, .mypage img {
+            width: 24px;
+            height: 24px;
+            display: block;
+            margin: auto;
         }
 
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 0rem;
-            border-bottom: 2px solid #eee;
-            max-width: 100%;
-            overflow: hidden;
-        }
-
-        .header img {
-            max-height: 24px;
-            width: auto;
-        }
-
-        .header a {
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-        }
-
-        .back-button {
-            font-size: 1.5rem;
-            color: #333;
-            text-decoration: none;
-            padding: 0.5rem 1rem;
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: #333;
-            white-space: nowrap;
+            position: relative;
+            z-index: 2;
+            background-color: white;
+            width: 100%;
         }
 
         .page-title {
@@ -240,143 +228,108 @@
             animation: spin 1s linear infinite;
             margin: 10px auto;
         }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-gap: 10px;
+            padding: 0 20px;
+            margin-bottom: 20px;
         }
 
-        /* 모바일 화면 (568px 미만) */
-        @media all and (max-width: 567px) {
-            .container {
-                padding: 0.8rem;
-                margin: 0;
-                border-radius: 0;
-            }
-
-            .header {
-                padding: 0 0.5rem;
-            }
-
-            .logo {
-                font-size: 1.2rem;
-            }
-
-            .back-button {
-                padding: 0.5rem;
-            }
-
-            .form-group {
-                margin-bottom: 1rem;
-            }
-
-            .form-group label {
-                font-size: 0.9rem;
-            }
-
-            .img-area {
-                padding: 1rem;
-                min-height: 200px;
-                position: initial;
-            }
-
-            .form-control {
-                padding: 0.6rem;
-                font-size: 0.9rem;
-            }
-
-            .submit-button {
-                padding: 0.8rem;
-                font-size: 0.9rem;
-            }
+        .back-button {
+            padding: 0.5rem;
         }
 
-        /* 태블릿 및 중간 크기 화면 (568px - 1133px) */
-        @media all and (min-width: 568px) and (max-width: 1133px) {
-            .container {
-                padding: 1rem;
-                margin: 0.5rem;
-            }
-
-            .header {
-                padding: 0 1rem;
-            }
-
-            .form-content {
-                padding-top: 1.5rem;
-            }
-
-            .form-group {
-                margin-bottom: 1.2rem;
-            }
-
-            .img-area {
-                padding: 1rem;
-                min-height: 200px;
-                position: initial;
-            }
-
-            .form-control {
-                padding: 0.7rem;
-            }
+        .form-group {
+            margin-bottom: 1rem;
         }
 
-        /* 큰 화면 (1133px 초과) */
-        @media all and (min-width: 1134px) {
-            .container {
-                max-width: 1200px;
-                padding: 2rem;
-                margin: 1rem auto;
-            }
-
-            .header {
-                padding: 0 2rem;
-            }
-
-            .form-content {
-                padding-top: 2rem;
-            }
-
-            .form-group {
-                margin-bottom: 1.5rem;
-            }
-
-            .img-area {
-                padding: 1.5rem;
-                min-height: 250px;
-                position: initial;
-            }
-
-            .form-control {
-                padding: 1rem;
-            }
-            
-            .img-buttons {
-                gap: 3.5rem;
-            }
-
-            .img-preview {
-                max-height: 230px;
-            }
+        .form-group label {
+            font-size: 0.9rem;
         }
+
+        .img-area {
+            padding: 1rem;
+            min-height: 200px;
+            position: initial;
+        }
+
+        .form-control {
+            padding: 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        .submit-button {
+            padding: 0.8rem;
+            font-size: 0.9rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .img-area {
+            padding: 1rem;
+            min-height: 200px;
+            position: initial;
+        }
+
+        .form-control {
+            padding: 0.7rem;
+        }
+
+        
+
+        .form-content {
+            padding-top: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .img-area {
+            padding: 1.5rem;
+            min-height: 250px;
+            position: initial;
+        }
+
+        .form-control {
+            padding: 1rem;
+        }
+        
+        .img-buttons {
+            gap: 3.5rem;
+        }
+
+        .img-preview {
+            max-height: 230px;
+        }
+        .grid-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-gap: 10px;
+            padding: 0 20px;
+            margin-bottom: 20px;
+        }
+        
     </style>
     <title>PETOPIA - 강아지 등록</title>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <a href="/" class="back-button">←</a>
-            <div class="logo">PETOPIA</div>
-            <a onclick="location.href='/member/login'"><img src="/images/home1.svg"></a>
-        </div>
+    <!-- header -->
+    <div th:replace="~{common/header :: header}"></div>
+    <!-- /header -->
         
-        <form action="/dog/insert" method="post" enctype="multipart/form-data" class="dog-form">
+    <div class="main-content">
+        <div class="grid-container">
+            <form action="/dog/insert" method="post" enctype="multipart/form-data" class="dog-form">
             <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
             <div class="form-content">
                 <div class="form-group">
                     <h2>강아지 등록</h2>
                 </div>
-
+                    
                 <div class="form-group">
                     <label>강아지 사진</label>
                     <div class="img-container">
@@ -399,7 +352,7 @@
                         <input type="file" id="file-input" name="image" accept="image/*" class="file-input" onchange="previewImage(this)" style="display: none;">
                     </div>
                 </div>
-
+            </div>
                 <div class="form-group">
                     <label for="dType">강아지 종류</label>
                     <input type="text" id="dType" name="dType" class="form-control" required>
@@ -433,7 +386,8 @@
 
                 <button type="submit" class="submit-button">마이펫 등록</button>
             </div>
-        </form>
+            </form>
+        </div>
     </div>
 
     <div id="loading-modal" class="loading-modal">

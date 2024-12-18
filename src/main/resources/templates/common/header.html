@@ -1,20 +1,4 @@
-<!-- 공통 헤더 파일 -->
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <style>
-        .logo img {
-            height: 50px;
-            width: auto;
-        }
-        .logo:hover {
-            opacity: 0.8;
-        }
-    </style>
-</head>
-<body>
-    <!-- 헤더 fragment 정의 -->
+<!-- header -->
     <header th:fragment="header" class="header">
         <div class="logo-container">
             <a th:href="@{/home}" class="logo">
@@ -29,11 +13,10 @@
                 </button>
             </div>
             <div class="mypage"><!-- 마이페이지 완성 후, 세션값 있으면 mypage로 이동, 세션값 없으면 login로 이동 하게해야함.-->
-                <button onclick="location.href='/member/login'">  
+                <button onclick="location.href='/member/login'" class="mypage-button">  
                     <img th:src="@{/images/mypage.svg}" alt="마이페이지">
                 </button>
             </div>
         </div>
     </header>
-</body>
-</html>
+    <!-- /header -->

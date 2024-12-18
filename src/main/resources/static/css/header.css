@@ -1,0 +1,58 @@
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-right: 2rem;
+    padding-bottom: 0rem;
+    border-bottom: 2px solid #eee;
+    max-width: 100%;
+    overflow: hidden;
+}
+.header img {
+    max-height: 50px;
+    width: auto;
+}
+
+.header-right {
+display: flex;
+flex-direction: row;
+align-items: center;
+gap: 8px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    color: #333;
+    text-decoration: none;
+    display: block;
+}
+.logo:hover {
+    color: #333;
+    text-decoration: none;
+}
+.alram button, .mypage button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.alram img, .mypage img {
+    width: 24px;
+    height: 24px;
+    display: block;
+    margin: auto;
+}

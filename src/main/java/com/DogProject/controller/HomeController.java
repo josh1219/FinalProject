@@ -75,17 +75,12 @@ public class HomeController {
         }
         
         
-        return "home/homeEx";
+        return "home/home";
     }
 
     @GetMapping("/home01")
     public String home01() {
         return "home/home01";
-    }
-
-    @GetMapping("/homeEx")
-    public String homeEx() {
-        return "home/homeEx";
     }
 
     @GetMapping("/")

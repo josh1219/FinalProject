@@ -343,11 +343,59 @@
       right: 20px;
       bottom: 90px;
       cursor: pointer;
+      z-index: 1000;
+    }
+
+    .write-button::before {
+        content: "글을 작성해볼까요? 🐾";
+        position: absolute;
+        bottom: 100%;
+        right: 0;
+        transform: translateX(-20%) translateY(-10px);
+        background-color: #4A90E2;
+        color: white;
+        padding: 8px 12px;
+        border-radius: 20px;
+        font-size: 14px;
+        white-space: nowrap;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        pointer-events: none;
+        z-index: 1001;
+    }
+
+    .write-button::after {
+        content: "";
+        position: absolute;
+        bottom: 100%;
+        right: 35px;
+        transform: translateY(0px);
+        border: 6px solid transparent;
+        border-top-color: #4A90E2;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        pointer-events: none;
+        z-index: 1001;
+    }
+
+    .write-button.show-tooltip::before,
+    .write-button.show-tooltip::after {
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-20%) translateY(-20px);
     }
 
     .write-button img {
       width: 70px;
       height: 70px;
+      transition: transform 0.3s ease;
+    }
+
+    .write-button:hover img {
+        transform: scale(1.1);
     }
 
     .board-item.admin-post {
@@ -441,9 +489,46 @@
         background-size: contain;
         background-repeat: no-repeat;
     }
+
+    /* 스크롤 버튼 스타일 */
+    #top-btn {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        bottom: 100px;
+        width: 45px;
+        height: 45px;
+        background-color: #4A90E2;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 18px;
+        cursor: pointer;
+        z-index: 99999;
+        opacity: 0;
+        pointer-events: none;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        transition: all 0.4s ease;
+        display: flex;
+    }
+
+    #top-btn:hover {
+        background-color: #357ABD;
+        transform: translateX(-50%) translateY(-3px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    }
+
+    #top-btn.visible {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+    }
   </style>
 </head>
 <body>
+  <button id="top-btn" onclick="scrollToTop()">↑</button>
   <div class="community">
     <div class="header">
         <div class="petopia">PETOPIA</div>
@@ -518,7 +603,7 @@
 
     <!-- 글쓰기 버튼 -->
     <div class="write-button" 
-         th:onclick="${session.member != null} ? 'location.href=\'/board/create\'' : 'alert(\'로그인이 필요한 서비스입니다.\'); location.href=\'/member/login\''" 
+         th:onclick="handleWriteButton()"
          title="글쓰기">
         <img src="/images/write-button.svg" alt="글쓰기">
     </div>
@@ -602,6 +687,68 @@
 
     function toggleMenu() {
         // 메뉴 토글 구현
+    }
+
+    // 스크롤 이벤트 처리
+    const postsContainer = document.querySelector('.posts-container');
+    const topBtn = document.getElementById('top-btn');
+
+    // 페이지 로드 시 버튼이 보이는지 확인
+    console.log('버튼 엘리먼트:', topBtn);
+    console.log('버튼 스타일:', window.getComputedStyle(topBtn));
+
+    postsContainer.addEventListener('scroll', function() {
+        const scrollTop = this.scrollTop;
+        
+        if (scrollTop > 100) {
+            topBtn.classList.add('visible');
+        } else {
+            topBtn.classList.remove('visible');
+        }
+    });
+
+    // 초기 스크롤 위치 확인
+    if (postsContainer.scrollTop > 100) {
+        topBtn.classList.add('visible');
+    }
+
+    function scrollToTop() {
+        // 버튼 클릭시 먼저 버튼을 위로 올리면서 사라지게
+        topBtn.style.transform = 'translateX(-50%) translateY(-20px)';
+        topBtn.style.opacity = '0';
+        
+        // 그 다음 스크롤
+        setTimeout(() => {
+            postsContainer.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+            
+            // 스크롤이 끝나면 버튼 스타일 초기화
+            setTimeout(() => {
+                topBtn.style.transform = '';
+                topBtn.style.opacity = '';
+                if (postsContainer.scrollTop > 100) {
+                    topBtn.classList.add('visible');
+                }
+            }, 500); // 스크롤 애니메이션이 끝날 때쯤
+        }, 200);
+    }
+
+    function handleWriteButton() {
+        const isLoggedIn = [[${session.member != null}]];
+        const writeButton = document.querySelector('.write-button');
+        
+        if (isLoggedIn) {
+            writeButton.classList.add('show-tooltip');
+            setTimeout(() => {
+                writeButton.classList.remove('show-tooltip');
+                location.href = '/board/create';
+            }, 800); // 툴팁이 보일 시간
+        } else {
+            alert('로그인이 필요한 서비스입니다.');
+            location.href = '/member/login';
+        }
     }
   </script>
 </body>

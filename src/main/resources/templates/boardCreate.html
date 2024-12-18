@@ -353,30 +353,28 @@
           return;
         }
 
-        newFiles.forEach((file, index) => {
+        // 기존 DataTransfer 객체 생성 및 현재 파일 복사
+        const dt = new DataTransfer();
+        const existingContainers = preview.querySelectorAll('.file-preview-container');
+        existingContainers.forEach(container => {
+          if (container.file) {
+            dt.items.add(container.file);
+          }
+        });
+
+        // 새로운 파일 추가
+        newFiles.forEach((file) => {
+          dt.items.add(file);
+          
           const container = document.createElement('div');
           container.className = 'file-preview-container';
-          container.dataset.index = index;
 
           const deleteBtn = document.createElement('img');
           deleteBtn.src = '/images/deleteIcon.png';
           deleteBtn.className = 'delete-button';
           deleteBtn.onclick = function() {
             container.remove();
-            
-            // 파일 입력에서도 해당 파일 제거
-            const dt = new DataTransfer();
-            const input = document.getElementById('file-input');
-            const { files } = input;
-            
-            for(let i = 0; i < files.length; i++) {
-              const fileContainer = preview.querySelector(`[data-index="${i}"]`);
-              if(fileContainer && fileContainer !== container) {
-                dt.items.add(files[i]);
-              }
-            }
-            
-            input.files = dt.files;
+            updateFileInput();
           };
 
           if (file.type.startsWith('image/')) {
@@ -399,12 +397,28 @@
           }
 
           container.appendChild(deleteBtn);
+          container.file = file;  // 파일 객체를 컨테이너에 저장
           preview.appendChild(container);
         });
+
+        // 파일 입력 업데이트
+        this.files = dt.files;
       });
 
-      function toggleMenu() {
-        // 메뉴 토글 기능 구현
+      // 파일 입력 업데이트 함수
+      function updateFileInput() {
+        const preview = document.getElementById('file-preview');
+        const input = document.getElementById('file-input');
+        const dt = new DataTransfer();
+        
+        // 현재 미리보기에 있는 모든 파일을 DataTransfer에 추가
+        preview.querySelectorAll('.file-preview-container').forEach(container => {
+          if (container.file) {
+            dt.items.add(container.file);
+          }
+        });
+        
+        input.files = dt.files;
       }
     </script>
   </div>

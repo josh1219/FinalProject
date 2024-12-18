@@ -1,0 +1,39 @@
+<!-- 공통 헤더 파일 -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .logo img {
+            height: 50px;
+            width: auto;
+        }
+        .logo:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 fragment 정의 -->
+    <header th:fragment="header" class="header">
+        <div class="logo-container">
+            <a th:href="@{/home}" class="logo">
+                <img th:src="@{/images/PETOPIA_LOGO.png}" alt="PETOPIA">
+            </a>
+            <span th:if="${isAdmin}" class="admin-badge">관리자 로그인</span>
+        </div>
+        <div class="header-right">
+            <div class="alram">
+                <button onclick="location.href='/community'" class="alram-button">
+                    <img th:src="@{/images/alram.svg}" alt="알림">
+                </button>
+            </div>
+            <div class="mypage"><!-- 마이페이지 완성 후, 세션값 있으면 mypage로 이동, 세션값 없으면 login로 이동 하게해야함.-->
+                <button onclick="location.href='/member/login'">  
+                    <img th:src="@{/images/mypage.svg}" alt="마이페이지">
+                </button>
+            </div>
+        </div>
+    </header>
+</body>
+</html>

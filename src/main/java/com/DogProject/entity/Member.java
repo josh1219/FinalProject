@@ -96,8 +96,6 @@ public class Member {
     @Comment("회원이 받은 채팅 리스트")
     private List<Chat> receivedChats = new ArrayList<>();
 
-
-
     /**
      * 소셜 로그인 회원을 위한 빌더
      */
@@ -175,5 +173,12 @@ public class Member {
 
     public String getRoleKey() {
         return this.role.getKey();
+    }
+
+    public String getName() {
+        if (this.role == Role.ADMIN) {
+            return "관리자";
+        }
+        return this.name;
     }
 }

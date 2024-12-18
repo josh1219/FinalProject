@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
   <title>게시글 작성</title>
   <style>
     * {
@@ -51,6 +53,22 @@
 
     .form-group {
       margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .char-count {
+      position: absolute;
+      right: 10px;
+      bottom: -20px;
+      font-size: 12px;
+      color: #666;
     }
 
     .category-select, .title-input, .content-textarea {
@@ -59,30 +77,53 @@
       border: 1px solid #ddd;
       border-radius: 8px;
       font-size: 16px;
-      margin-bottom: 15px;
+      transition: all 0.2s ease;
+    }
+
+    .category-select:hover, .title-input:hover, .content-textarea:hover {
+      border-color: #4A90E2;
+    }
+
+    .category-select:focus, .title-input:focus, .content-textarea:focus {
+      border-color: #4A90E2;
+      box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+      outline: none;
     }
 
     .content-textarea {
-      height: 200px;
+      height: 300px;
       resize: none;
     }
 
-    .image-upload {
+    .file-upload {
       margin-top: 20px;
     }
 
-    .image-upload-btn {
+    .file-upload-btn {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 8px 16px;
+      padding: 10px 20px;
       border: 1px solid #ddd;
       border-radius: 8px;
       background: #fff;
       cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    .image-preview {
+    .file-upload-btn:hover {
+      border-color: #4A90E2;
+      background: #f8f9fa;
+    }
+
+    .error-message {
+      color: #dc3545;
+      font-size: 12px;
+      margin-top: 5px;
+      display: none;
+    }
+
+    .file-preview {
       margin-top: 10px;
       display: flex;
       gap: 10px;
@@ -96,7 +137,14 @@
       border-radius: 8px;
     }
 
-    .image-preview-container {
+    .preview-video {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .file-preview-container {
       position: relative;
       display: inline-block;
       margin: 5px;
@@ -140,31 +188,225 @@
 
   <div class="content">
     <div class="form-group">
-      <select class="category-select" id="category">
+      <label for="category">카테고리</label>
+      <select class="category-select" id="category" required>
         <option value="">카테고리 선택</option>
-        <option value="notice">공지</option>
-        <option value="question">질문</option>
-        <option value="free">자유</option>
-        <option value="share">나눔</option>
-        <option value="event">이벤트</option>
+        <th:block th:if="${session.member != null && session.member.role.name() == 'ADMIN'}">
+          <option value="공지사항">공지사항</option>
+          <option value="이벤트">이벤트</option>
+        </th:block>
+        <option value="질문">질문</option>
+        <option value="자유">자유</option>
+        <option value="나눔">나눔</option>
       </select>
+      <div class="error-message" id="category-error">카테고리를 선택해주세요.</div>
     </div>
 
     <div class="form-group">
-      <input type="text" class="title-input" id="title" placeholder="제목을 입력하세요">
+      <label for="title">제목</label>
+      <input type="text" class="title-input" id="title" 
+             placeholder="제목을 입력해주세요" 
+             maxlength="50" required>
+      <span class="char-count" id="title-count">0/50</span>
+      <div class="error-message" id="title-error">제목을 입력해주세요.</div>
     </div>
 
     <div class="form-group">
-      <textarea class="content-textarea" id="content" placeholder="내용을 입력하세요"></textarea>
+      <label for="content">내용</label>
+      <textarea class="content-textarea" id="content" 
+                placeholder="내용을 입력해주세요" 
+                maxlength="3000" required></textarea>
+      <span class="char-count" id="content-count">0/3000</span>
+      <div class="error-message" id="content-error">내용을 입력해주세요.</div>
     </div>
 
-    <div class="image-upload">
-      <label class="image-upload-btn">
-        <img src="/images/image-upload-icon.svg" alt="이미지 업로드">
-        <input type="file" id="image-input" accept="image/*" multiple style="display: none;">
+    <div class="file-upload">
+      <label class="file-upload-btn">
+        <img src="/images/image-upload-icon.svg" alt="파일 업로드">
+        <input type="file" id="file-input" accept="image/*,video/*" multiple style="display: none;">
+        <span>이미지/동영상 추가</span>
       </label>
-      <div class="image-preview" id="image-preview"></div>
+      <div class="file-preview" id="file-preview"></div>
     </div>
+
+    <script>
+      // 글자 수 카운트 함수
+      function updateCharCount(element, countElement) {
+        const current = element.value.length;
+        const max = element.maxLength;
+        countElement.textContent = `${current}/${max}`;
+      }
+
+      // 제목 글자 수 카운트
+      const titleInput = document.getElementById('title');
+      const titleCount = document.getElementById('title-count');
+      titleInput.addEventListener('input', () => {
+        updateCharCount(titleInput, titleCount);
+      });
+
+      // 내용 글자 수 카운트
+      const contentInput = document.getElementById('content');
+      const contentCount = document.getElementById('content-count');
+      contentInput.addEventListener('input', () => {
+        updateCharCount(contentInput, contentCount);
+      });
+
+      // 폼 검증
+      function validateForm() {
+        const category = document.getElementById('category').value;
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
+        let isValid = true;
+
+        // 카테고리 검증
+        if (!category) {
+          document.getElementById('category-error').style.display = 'block';
+          isValid = false;
+        } else {
+          document.getElementById('category-error').style.display = 'none';
+        }
+
+        // 제목 검증
+        if (!title.trim()) {
+          document.getElementById('title-error').style.display = 'block';
+          isValid = false;
+        } else {
+          document.getElementById('title-error').style.display = 'none';
+        }
+
+        // 내용 검증
+        if (!content.trim()) {
+          document.getElementById('content-error').style.display = 'block';
+          isValid = false;
+        } else {
+          document.getElementById('content-error').style.display = 'none';
+        }
+
+        return isValid;
+      }
+
+      // 기존 submitPost 함수 수정
+      function submitPost() {
+        if (!validateForm()) {
+          return;
+        }
+
+        // 이하 기존 코드 유지
+        if (!confirm('게시글을 작성하시겠습니까?')) {
+          return;
+        }
+
+        const category = document.getElementById('category').value;
+        const title = document.getElementById('title').value;
+        const content = document.getElementById('content').value;
+        const fileInput = document.getElementById('file-input');
+        const files = fileInput.files;
+
+        const formData = new FormData();
+        formData.append('category', category);
+        formData.append('title', title);
+        formData.append('content', content);
+        
+        for (let i = 0; i < files.length; i++) {
+          formData.append('files', files[i]);
+        }
+
+        // CSRF 토큰 가져오기
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+        fetch('/board/create', {
+          method: 'POST',
+          headers: {
+            [csrfHeader]: csrfToken
+          },
+          credentials: 'include',
+          body: formData
+        })
+        .then(response => {
+          if (!response.ok) {
+            return response.text().then(text => {
+              throw new Error(text || '게시글 작성에 실패했습니다.');
+            });
+          }
+          return response.json();
+        })
+        .then(boardId => {
+          alert('게시글이 작성되었습니다.');
+          window.location.href = '/board';
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          alert(error.message);
+        });
+      }
+
+      document.getElementById('file-input').addEventListener('change', function(e) {
+        const preview = document.getElementById('file-preview');
+        const maxFiles = 9;
+        const currentFiles = preview.querySelectorAll('.file-preview-container').length;
+        const newFiles = [...e.target.files];
+        
+        if (currentFiles + newFiles.length > maxFiles) {
+          alert(`파일은 최대 ${maxFiles}개까지만 업로드할 수 있습니다.`);
+          this.value = '';
+          return;
+        }
+
+        newFiles.forEach((file, index) => {
+          const container = document.createElement('div');
+          container.className = 'file-preview-container';
+          container.dataset.index = index;
+
+          const deleteBtn = document.createElement('img');
+          deleteBtn.src = '/images/deleteIcon.png';
+          deleteBtn.className = 'delete-button';
+          deleteBtn.onclick = function() {
+            container.remove();
+            
+            // 파일 입력에서도 해당 파일 제거
+            const dt = new DataTransfer();
+            const input = document.getElementById('file-input');
+            const { files } = input;
+            
+            for(let i = 0; i < files.length; i++) {
+              const fileContainer = preview.querySelector(`[data-index="${i}"]`);
+              if(fileContainer && fileContainer !== container) {
+                dt.items.add(files[i]);
+              }
+            }
+            
+            input.files = dt.files;
+          };
+
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const img = document.createElement('img');
+              img.src = e.target.result;
+              img.className = 'preview-image';
+              container.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+          } else if (file.type.startsWith('video/')) {
+            const video = document.createElement('video');
+            video.src = URL.createObjectURL(file);
+            video.className = 'preview-video';
+            video.style.width = '80px';
+            video.style.height = '80px';
+            video.style.objectFit = 'cover';
+            container.appendChild(video);
+          }
+
+          container.appendChild(deleteBtn);
+          preview.appendChild(container);
+        });
+      });
+
+      function toggleMenu() {
+        // 메뉴 토글 기능 구현
+      }
+    </script>
   </div>
 
   <div class="footer">
@@ -174,76 +416,5 @@
     <img src="/images/_3-user0.svg" alt="커뮤니티" onclick="location.href='/community'"/>
     <img src="/images/category0.svg" alt="메뉴" onclick="toggleMenu()"/>
   </div>
-
-  <script>
-    function submitPost() {
-      const category = document.getElementById('category').value;
-      const title = document.getElementById('title').value;
-      const content = document.getElementById('content').value;
-
-      if (!category || !title || !content) {
-        alert('모든 필드를 입력해주세요.');
-        return;
-      }
-
-      // TODO: API 호출하여 게시글 저장
-      console.log('게시글 작성:', { category, title, content });
-    }
-
-    document.getElementById('image-input').addEventListener('change', function(e) {
-      const preview = document.getElementById('image-preview');
-      const maxFiles = 9;
-      const currentFiles = preview.querySelectorAll('.image-preview-container').length;
-      const newFiles = [...e.target.files];
-      
-      if (currentFiles + newFiles.length > maxFiles) {
-        alert(`이미지는 최대 ${maxFiles}개까지만 업로드할 수 있습니다.`);
-        this.value = ''; // 파일 선택 초기화
-        return;
-      }
-      
-      newFiles.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const container = document.createElement('div');
-          container.className = 'image-preview-container';
-          container.dataset.index = index;
-
-          const img = document.createElement('img');
-          img.src = e.target.result;
-          img.className = 'preview-image';
-
-          const deleteBtn = document.createElement('img');
-          deleteBtn.src = '/images/deleteIcon.png';
-          deleteBtn.className = 'delete-button';
-          deleteBtn.onclick = function() {
-            container.remove();
-            // 파일 입력에서도 해당 파일 제거
-            const dt = new DataTransfer();
-            const input = document.getElementById('image-input');
-            const { files } = input;
-            
-            for(let i = 0; i < files.length; i++) {
-              if(i !== index) {
-                dt.items.add(files[i]);
-              }
-            }
-            
-            input.files = dt.files;
-          };
-
-          container.appendChild(img);
-          container.appendChild(deleteBtn);
-          preview.appendChild(container);
-        }
-        reader.readAsDataURL(file);
-      });
-    });
-
-    function toggleMenu() {
-      // TODO: 메뉴 토글 구현
-      console.log('메뉴 토글');
-    }
-  </script>
 </body>
 </html>

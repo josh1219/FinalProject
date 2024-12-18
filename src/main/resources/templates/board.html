@@ -78,6 +78,33 @@
         cursor: pointer;
     }
 
+    .category-buttons {
+        display: flex;
+        gap: 8px;
+        padding: 10px 20px;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .category-buttons a {
+        padding: 6px 12px;
+        border-radius: 15px;
+        color: #666;
+        background-color: #f5f5f5;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+    
+    .category-buttons a:hover {
+        background-color: #e0e0e0;
+    }
+    
+    .category-buttons a.active {
+        background-color: #4CAF50;
+        color: white;
+    }
+
     .frame-232 {
         display: flex;
         gap: 10px;
@@ -235,26 +262,52 @@
         line-height: 1.4;
     }
 
+    /* 하단 네비게이션 바 스타일 */
     .group-31 {
         position: fixed;
         bottom: 0;
         width: 100%;
         max-width: 414px;
-        background: white;
+        background: #FFFFFF;
+        border-top: 1px solid #EEEEEE;
         padding: 10px 0;
-        border-top: 1px solid #eee;
+        z-index: 1000;
     }
 
-    .frame-35 {
+    .frame-31 {
         display: flex;
         justify-content: space-around;
         align-items: center;
+        padding: 0 20px;
     }
 
-    .frame-35 img {
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        cursor: pointer;
+    }
+
+    .nav-item img {
         width: 24px;
         height: 24px;
-        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+    }
+
+    .nav-item.active img {
+        opacity: 1;
+    }
+
+    .nav-item span {
+        font-size: 12px;
+        color: #666666;
+    }
+
+    .nav-item.active span {
+        color: #0C098C;
+        font-weight: 500;
     }
 
     .notice {
@@ -281,21 +334,17 @@
         font-weight: bold;
     }
 
+    /* 글쓰기 버튼 스타일 */
     .write-button {
-      position: sticky;
-      float: right;
-      bottom: 20px;
+      position: absolute;
       right: 20px;
-      width: 64px;
-      height: 100px;
+      bottom: 90px;
       cursor: pointer;
-      z-index: 100;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
-    .write-button:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    .write-button img {
+      width: 70px;
+      height: 70px;
     }
 
     /* 관리자 공지사항 스타일 */
@@ -326,204 +375,164 @@
         <div class="petopia">PETOPIA</div>
         <div class="icon-buttons">
             <div class="icon-button">
-                <img src="/images/notification0.svg" alt="Notifications"/>
+                <img src="/images/notification0.svg" alt="알림" onclick="location.href='/'">
             </div>
             <div class="icon-button">
-                <img src="/images/group-500.svg" alt="Profile"/>
+                <img src="/images/group-500.svg" alt="마이페이지" onclick="location.href='/'">
             </div>
         </div>
     </div>
+
     <div class="frame-232">
-      <div class="div2" onclick="filterPosts('all')">
-        <img src="/images/home-4-home-house-roof-shelter1.svg" alt="전체"/>
-        <div class="div3">전체</div>
-      </div>
-      <div class="div4" onclick="filterPosts('notice')">
-        <img src="/images/volume.svg" alt="공지"/>
-        <div class="div5">공지</div>
-      </div>
-      <div class="div2" onclick="filterPosts('question')">
-        <img src="/images/help-chat-2-bubble-help-mark-message-query-question-speech-circle0.svg" alt="질문"/>
-        <div class="div6">질문</div>
-      </div>
-      <div class="div2" onclick="filterPosts('free')">
-        <img src="/images/chat-bubble-square-write-messages-message-bubble-chat-square-write-review-pen-pencil-compose1.svg" alt="자유"/>
-        <div class="div7">자유</div>
-      </div>
-      <div class="div4" onclick="filterPosts('share')">
-        <img src="/images/coin-share-payment-cash-money-finance-receive-give-coin-hand1.svg" alt="나눔"/>
-        <div class="div8">나눔</div>
-      </div>
-      <div class="div9" onclick="filterPosts('event')">
-        <img src="/images/gift-reward-box-social-present-gift-media-rating-bow1.svg" alt="이벤트"/>
-        <div class="div10">이벤트</div>
-      </div>
+        <div onclick="filterPosts('all')" class="active">
+            <img src="/images/home-4-home-house-roof-shelter1.svg" alt="전체">
+            <div class="div3">전체</div>
+        </div>
+        <div onclick="filterPosts('notice')">
+            <img src="/images/volume.svg" alt="공지">
+            <div class="div5">공지</div>
+        </div>
+        <div onclick="filterPosts('question')">
+            <img src="/images/union0.svg" alt="질문">
+            <div class="div6">질문</div>
+        </div>
+        <div onclick="filterPosts('free')">
+            <img src="/images/chat-bubble-square-write-messages-message-bubble-chat-square-write-review-pen-pencil-compose1.svg" alt="자유">
+            <div class="div7">자유</div>
+        </div>
+        <div onclick="filterPosts('share')">
+            <img src="/images/coin-share-payment-cash-money-finance-receive-give-coin-hand1.svg" alt="나눔">
+            <div class="div8">나눔</div>
+        </div>
+        <div onclick="filterPosts('event')">
+            <img src="/images/gift-reward-box-social-present-gift-media-rating-bow1.svg" alt="이벤트">
+            <div class="div10">이벤트</div>
+        </div>
     </div>
 
     <div class="posts-container">
-      <div id="boardList">
-        <!-- 더미 데이터 게시글 -->
-      </div>
-      <img src="/images/write-button.svg" alt="글쓰기" class="write-button" onclick="location.href='/board/create'"/>
+        <div id="boardList">
+            <!-- 게시글 목록이 여기에 표시됩니다 -->
+            <th:block th:each="board : ${boardList}">
+                <div class="board-item" th:onclick="'location.href=\'/board/detail?id=' + ${board.bIdx} + '\''">
+                    <div class="board-content">
+                        <div class="board-info">
+                            <span class="board-category" th:text="${board.bType}">카테고리</span>
+                        </div>
+                        <h3 class="board-title" th:text="${board.title}">제목</h3>
+                        <div class="board-meta">
+                            <span th:text="${board.member.name}">작성자</span>
+                            <span th:text="${board.insertDate}">작성일</span>
+                            <span class="has-image" th:if="${board.content.contains('[첨부파일]')}">
+                                <img src="/images/image.svg" alt="이미지">
+                                첨부파일
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </th:block>
+        </div>
     </div>
 
+    <!-- 글쓰기 버튼 -->
+    <div class="write-button" onclick="checkLoginAndWrite()" title="글쓰기">
+        <img src="/images/write-button.svg" alt="글쓰기">
+    </div>
+
+    <!-- 하단 메뉴 -->
     <div class="group-31">
-      <div class="frame-35">
-        <img src="/images/calendar0.svg" alt="캘린더" onclick="location.href='/calendar'"/>
-        <img src="/images/location0.svg" alt="산책" onclick="location.href='/walk'"/>
-        <img src="/images/home1.svg" alt="홈" onclick="location.href='/'"/>
-        <img src="/images/_3-user0.svg" alt="커뮤니티" onclick="location.href='/community'"/>
-        <img src="/images/category0.svg" alt="메뉴" onclick="toggleMenu()"/>
-      </div>
+        <div class="frame-31">
+            <div class="nav-item" onclick="location.href='/'">
+                <img src="/images/home1.svg" alt="홈">
+                <span>홈</span>
+            </div>
+            <div class="nav-item" onclick="location.href='/calendar'">
+                <img src="/images/calendar0.svg" alt="캘린더">
+                <span>캘린더</span>
+            </div>
+            <div class="nav-item" onclick="location.href='/walk'">
+                <img src="/images/location0.svg" alt="산책">
+                <span>산책</span>
+            </div>
+            <div class="nav-item active" onclick="location.href='/board'">
+                <img src="/images/_3-user0.svg" alt="커뮤니티">
+                <span>커뮤니티</span>
+            </div>
+            <div class="nav-item" onclick="toggleMenu()">
+                <img src="/images/category0.svg" alt="메뉴">
+                <span>메뉴</span>
+            </div>
+        </div>
     </div>
   </div>
 
   <script>
-    // 더미 데이터
-    const dummyPosts = [
-      {
-        id: 1,
-        type: 'notice',
-        title: '커뮤니티 이용 규칙 안내',
-        author: '관리자',
-        date: '2024-12-10',
-        comments: 0,
-        image: '/images/notice-image.jpg'
-      },
-      {
-        id: 2,
-        type: 'question',
-        title: '강아지 사료 추천해주세요',
-        author: '멍멍이맘',
-        date: '2024-12-10',
-        comments: 5,
-        image: '/images/dog-food.jpg'
-      },
-      {
-        id: 3,
-        type: 'free',
-        title: '우리 강아지 산책 인증',
-        author: '행복한집사',
-        date: '2024-12-10',
-        comments: 8,
-        image: '/images/dog-walk.jpg'
-      },
-      {
-        id: 4,
-        type: 'share',
-        title: '강아지 장난감 나눔합니다',
-        author: '나눔이',
-        date: '2024-12-10',
-        comments: 3,
-        image: '/images/dog-toy.jpg'
-      },
-      {
-        id: 5,
-        type: 'free',
-        title: '우리 강아지 산책 인증',
-        author: '행복한집사',
-        date: '2024-12-10',
-        comments: 8,
-        image: '/images/dog-walk.jpg'
-      },
-      {
-        id: 6,
-        type: 'free',
-        title: '우리 강아지 산책 인증',
-        author: '행복한집사',
-        date: '2024-12-10',
-        comments: 8,
-        image: '/images/dog-walk.jpg'
-      },
-      {
-        id: 7,
-        type: 'free',
-        title: '우리 강아지 산책 인증',
-        author: '행복한집사',
-        date: '2024-12-10',
-        comments: 8,
-        image: '/images/dog-walk.jpg'
-      },
-      {
-        id: 8,
-        type: 'free',
-        title: '우리 강아지 산책 인증',
-        author: '행복한집사',
-        date: '2024-12-10',
-        comments: 8,
-        image: '/images/dog-walk.jpg'
-      }
-    ];
-
-    // 게시글 목록 표시 함수
-    function displayPosts(posts) {
-      const boardList = document.getElementById('boardList');
-      boardList.innerHTML = '';
-      
-      if (posts.length === 0) {
-        boardList.innerHTML = `
-          <div class="empty-state">
-            <img src="/images/calendar-edit-calendar-date-day-compose-edit-note0.svg" alt="게시물 없음"/>
-            <div class="message">아직 게시물이 없습니다</div>
-            <div class="sub-message">첫 게시물의 주인공이 되어보세요!</div>
-          </div>
-        `;
-        return;
-      }
-      
-      posts.forEach(post => {
-        const postElement = document.createElement('div');
-        postElement.className = `board-item ${post.type === 'notice' ? 'notice' : ''}`;
-        postElement.onclick = () => location.href = `/board/detail?id=${post.id}`;
+    function checkLoginAndWrite() {
+        // 로그인 상태 확인
+        const isLoggedIn = /*[[${session.isLoggedIn}]]*/ false;
         
-        postElement.innerHTML = `
-          <div class="board-content">
-            <div class="board-info">
-              ${post.type !== 'notice' ? `<div class="board-category">${post.type}</div>` : ''}
-              <div class="board-title">${post.title}</div>
-            </div>
-            <div class="board-meta">
-              ${post.author} • ${post.date} • 댓글 ${post.comments}
-              ${post.image ? `<span class="has-image"><img src="/images/image-icon.svg" alt="이미지 있음"/> 1</span>` : ''}
-            </div>
-          </div>
-        `;
+        if (!isLoggedIn) {
+            alert('로그인이 필요한 서비스입니다.');
+            window.location.href = '/member/login';
+            return;
+        }
         
-        boardList.appendChild(postElement);
-      });
+        // 로그인 상태면 글쓰기 페이지로 이동
+        window.location.href = '/board/create';
     }
 
-    // 게시글 필터링 함수
     function filterPosts(type) {
-      const filteredPosts = type === 'all' 
-        ? dummyPosts 
-        : dummyPosts.filter(post => post.type === type);
-      
-      displayPosts(filteredPosts);
-      
-      // 활성화된 카테고리 표시
-      document.querySelectorAll('.frame-232 > div').forEach(div => {
-        div.style.backgroundColor = div.querySelector('div').textContent === (type === 'all' ? '전체' : type) 
-          ? '#f5f5f5' 
-          : 'transparent';
-      });
+        // 모든 카테고리 버튼의 active 클래스 제거
+        document.querySelectorAll('.frame-232 > div').forEach(div => {
+            div.classList.remove('active');
+        });
+        
+        // 클릭된 버튼에 active 클래스 추가
+        event.currentTarget.classList.add('active');
+        
+        // 카테고리에 따른 URL 설정
+        let url = '/board';
+        if (type !== 'all') {
+            const categoryMap = {
+                'notice': '공지사항',
+                'event': '이벤트',
+                'question': '질문',
+                'free': '자유',
+                'share': '나눔'
+            };
+            url += '?category=' + categoryMap[type];
+        }
+        
+        // 페이지 이동
+        window.location.href = url;
     }
+    
+    // 현재 카테고리에 따라 버튼 활성화
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category');
+        
+        const reverseMap = {
+            '공지사항': 'notice',
+            '이벤트': 'event',
+            '질문': 'question',
+            '자유': 'free',
+            '나눔': 'share'
+        };
+        
+        const type = category ? reverseMap[category] : 'all';
+        const targetDiv = document.querySelector(`.frame-232 > div[onclick="filterPosts('${type}')"]`);
+        if (targetDiv) {
+            document.querySelectorAll('.frame-232 > div').forEach(div => {
+                div.classList.remove('active');
+            });
+            targetDiv.classList.add('active');
+        }
+    });
 
-    // 게시글 상세보기 함수
-    function viewPost(id) {
-      const post = dummyPosts.find(p => p.id === id);
-      if (post) {
-        alert(`${post.title} 상세보기 구현 예정`);
-      }
-    }
-
-    // 메뉴 토글 함수
     function toggleMenu() {
-      alert('메뉴 토글 구현 예정');
+        // 메뉴 토글 구현
     }
-
-    // 초기 게시글 표시
-    displayPosts(dummyPosts);
   </script>
 </body>
 </html>

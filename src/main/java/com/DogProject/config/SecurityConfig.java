@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.firewall.StrictHttpFirewall;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
 import java.util.Enumeration;
@@ -33,6 +34,10 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http.securityContext((securityContext) -> securityContext
+            .requireExplicitSave(true)
+        );
+        
         http
             .csrf()
                 .ignoringAntMatchers("/member/checkEmail", "/api/**", "/dog/insert", "/dog/update/**", "/ws/**", "/ws/chat/**")  // WebSocket 경로 CSRF 검사 제외
@@ -51,10 +56,11 @@ public class SecurityConfig {
                 .and()
             .authorizeRequests()
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/video/**","/member/**", "/error", 
-                        "/home", "/board/**", "/dog/**", "/shop/**", "/chat/**", "/walk/**", "/api/**",
+                        "/home", "/board", "/board/detail", "/dog/**", "/shop/**", "/chat/**", "/walk/**", "/api/**",
                         "/ws/**", "/ws/chat/**", "/topic/**", "/schedule/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")  
                 .antMatchers("/member/checkEmail").permitAll()  // 이메일 중복 체크 API 허용
+                .antMatchers("/board/create").authenticated()  // 로그인하지 않은 사용자의 /board/create 접근 제한
                 .anyRequest().authenticated()
                 .and()
             .formLogin()
@@ -120,5 +126,11 @@ public class SecurityConfig {
                     .baseUri("/oauth2/authorization");
 
         return http.build();
+    }
+    
+    @Bean
+    public StrictHttpFirewall strictHttpFirewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        return firewall;
     }
 }

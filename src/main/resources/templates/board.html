@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PETOPIA 자유게시판</title>
+  <title th:text="${isAdmin ? 'PETOPIA - 관리자 로그인' : 'PETOPIA'}">자유게시판</title>
   <style>
     /* Reset and Global Styles */
     a, button, input, select, h1, h2, h3, h4, h5, * {

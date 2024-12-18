@@ -1,7 +1,10 @@
 package com.DogProject.controller;
 
 import com.DogProject.entity.Member;
+import com.DogProject.entity.Board;
 import com.DogProject.service.MemberService;
+import com.DogProject.service.BoardService;
+import com.DogProject.constant.Role;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -10,6 +13,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import javax.servlet.http.HttpSession;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -17,6 +21,7 @@ import java.util.Map;
 public class HomeController {
 
     private final MemberService memberService;
+    private final BoardService boardService;
     private final HttpSession httpSession;
 
     @GetMapping("/home")
@@ -58,6 +63,7 @@ public class HomeController {
             
             if (member != null) {
                 model.addAttribute("member", member);
+                model.addAttribute("isAdmin", Role.ADMIN.equals(member.getRole()));
                 model.addAttribute("isLoggedIn", true);
                 System.out.println("Home - 로그인 사용자 정보:");
                 System.out.println("Email: " + member.getMEmail());
@@ -68,7 +74,8 @@ public class HomeController {
             model.addAttribute("isLoggedIn", false);
         }
         
-        return "home/homeex";
+        
+        return "home/homeEx";
     }
 
     @GetMapping("/home01")
@@ -84,6 +91,6 @@ public class HomeController {
     @GetMapping("/")
     public String root(Model model) {
         // 루트 경로 접근 시 home 페이지로 리다이렉트
-        return "redirect:/home/home";
+        return "redirect:/home";
     }
 }

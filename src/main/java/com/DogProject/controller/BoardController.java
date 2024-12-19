@@ -180,6 +180,10 @@ public class BoardController {
             boolean isAuthor = sessionMember != null && sessionMember.getMIdx() == board.getMember().getMIdx();
             model.addAttribute("isAuthor", isAuthor);
             
+            // 관리자 여부 확인 추가
+            boolean isAdmin = sessionMember != null && Role.ADMIN.equals(sessionMember.getRole());
+            model.addAttribute("isAdmin", isAdmin);
+            
             return "boardDetail";
         } catch (Exception e) {
             e.printStackTrace();

@@ -96,8 +96,8 @@
 
         .post-info {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 15px;
             color: #666;
             font-size: 14px;
         }
@@ -139,6 +139,81 @@
 
         .modal video {
             pointer-events: all;
+        }
+
+        /* Post Author Link Style */
+        .post-author-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .post-author {
+            font-weight: bold;
+            color: #333;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 15px;
+        }
+
+        .post-author::before {
+            font-size: 14px;
+        }
+
+        .post-author.user::before {
+            content: "👤";
+        }
+
+        .post-author.admin::before {
+            content: "👑";  /* 관리자용 특별 이모티콘 */
+        }
+
+        .post-author.clickable {
+            cursor: pointer;
+            background-color: #f0f0f0;
+            transition: all 0.2s ease;
+        }
+
+        .post-author.clickable:hover {
+            background-color: #e0e0e0;
+            color: #FF4081;
+            transform: translateY(-1px);
+        }
+
+        .tooltip {
+            position: relative;
+            background-color: #FF9EBB;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            white-space: nowrap;
+            animation: float 2s ease-in-out infinite;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        .tooltip::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: -6px;
+            transform: translateY(-50%);
+            border-width: 6px 6px 6px 0;
+            border-style: solid;
+            border-color: transparent #FF9EBB transparent transparent;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
         }
 
         /* Footer Styles */
@@ -190,35 +265,74 @@
         .post-actions {
             margin-top: 20px;
             display: flex;
-            gap: 10px;
+            gap: 15px;
             justify-content: flex-end;
         }
 
         .edit-button, .delete-button {
-            padding: 8px 16px;
             border: none;
-            border-radius: 4px;
+            padding: 8px 20px;
+            border-radius: 50px;
             cursor: pointer;
             font-size: 14px;
-            transition: background-color 0.2s;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .edit-button {
-            background-color: #4A90E2;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
             color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.2);
         }
 
-        .delete-button {
-            background-color: #dc3545;
-            color: white;
+        .edit-button::before {
+            content: "✏️";
+            font-size: 14px;
         }
 
         .edit-button:hover {
-            background-color: #357ABD;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.3);
+        }
+
+        .delete-button {
+            background: linear-gradient(135deg, #ff4081, #e63672);
+            color: white;
+            box-shadow: 0 4px 15px rgba(255, 64, 129, 0.2);
+        }
+
+        .delete-button::before {
+            content: "🗑️";
+            font-size: 14px;
         }
 
         .delete-button:hover {
-            background-color: #C82333;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 64, 129, 0.3);
+        }
+
+        .admin-delete {
+            background: linear-gradient(135deg, #9c27b0, #7b1fa2) !important;
+            box-shadow: 0 4px 15px rgba(156, 39, 176, 0.2) !important;
+        }
+
+        .admin-delete:hover {
+            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.3) !important;
+        }
+
+        .admin-delete::before {
+            content: "⚡" !important;
+        }
+
+        /* 버튼 클릭 효과 */
+        .edit-button:active, .delete-button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
         /* Modal Styles */
@@ -265,6 +379,165 @@
             max-height: 90vh;
             object-fit: contain;
         }
+
+        /* User Profile Modal Styles */
+        .profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            display: none;
+        }
+
+        .profile-modal.show {
+            opacity: 1;
+            visibility: visible;
+            display: block;
+        }
+
+        .profile-modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.7);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: white;
+            padding: 25px;
+            border-radius: 20px;
+            width: 320px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-modal.show .profile-modal-content {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .profile-image {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            margin-right: 15px;
+            background-color: #FFE5EE;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .profile-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .profile-info {
+            margin-bottom: 20px;
+        }
+
+        .profile-info-item {
+            display: flex;
+            align-items: center;
+            margin: 12px 0;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .profile-info-item strong {
+            width: 100px;
+            color: #FF4081;
+        }
+
+        .profile-pets {
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .profile-pets-title {
+            font-weight: bold;
+            color: #FF4081;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .profile-pets-title::before {
+            content: "🐾";
+        }
+
+        .pet-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pet-tag {
+            background-color: #FFE5EE;
+            color: #FF4081;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chat-button {
+            width: 100%;
+            padding: 12px;
+            background-color: #FF4081;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .chat-button:hover {
+            background-color: #E63672;
+        }
+
+        .chat-button::before {
+            content: "💌";
+        }
+
+        .close-profile {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 24px;
+            color: #999;
+            transition: color 0.2s;
+        }
+
+        .close-profile:hover {
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -289,8 +562,21 @@
             <div class="post-header">
                 <h1 class="post-title" th:text="${board.title}">게시글 제목</h1>
                 <div class="post-info">
-                    <span th:text="${board.member.name}">작성자</span>
-                    <span th:text="${board.insertDate}">작성일</span>
+                    <div class="post-author-wrapper">
+                        <!-- 관리자가 아닐 때만 클릭 가능하고 툴팁 표시 -->
+                        <span th:if="${board.member.role.name() != 'ADMIN'}" 
+                              class="post-author clickable user" 
+                              onclick="openProfileModal()" 
+                              th:text="${board.member.name}">
+                        </span>
+                        <!-- 관리자일 때는 클릭 불가능하고 툴팁 없음 -->
+                        <span th:if="${board.member.role.name() == 'ADMIN'}" 
+                              class="post-author admin"
+                              th:text="${board.member.name}">
+                        </span>
+                        <span th:if="${board.member.role.name() != 'ADMIN'}" class="tooltip">눌러서 채팅 시작! 💬</span>
+                    </div>
+                    <span class="post-date" th:text="${board.insertDate}"></span>
                 </div>
             </div>
 
@@ -329,9 +615,16 @@
             </div>
 
             <!-- 수정/삭제 버튼 -->
-            <div class="post-actions" th:if="${isAuthor}">
-                <button class="edit-button" th:onclick="'location.href=\'/board/edit?id=' + ${board.bIdx} + '\''">수정</button>
-                <button class="delete-button" th:onclick="'deletePost(' + ${board.bIdx} + ')'">삭제</button>
+            <div class="post-actions">
+                <!-- 작성자 본인일 때 -->
+                <th:block th:if="${isAuthor}">
+                    <button class="edit-button" th:onclick="'confirmEdit(' + ${board.bIdx} + ')'">수정</button>
+                    <button class="delete-button" th:onclick="'deletePost(' + ${board.bIdx} + ')'">삭제</button>
+                </th:block>
+                <!-- 관리자가 다른 사람의 글을 볼 때 -->
+                <th:block th:if="${isAdmin and !isAuthor}">
+                    <button class="delete-button admin-delete" th:onclick="'confirmAdminDelete()'">관리자 삭제</button>
+                </th:block>
             </div>
         </div>
 
@@ -339,6 +632,53 @@
         <div class="modal" id="mediaModal">
             <span class="modal-close" onclick="closeModal()">&times;</span>
             <div class="modal-content"></div>
+        </div>
+
+        <!-- User Profile Modal -->
+        <div id="profileModal" class="profile-modal">
+            <div class="profile-modal-content">
+                <span class="close-profile" onclick="closeProfileModal()">&times;</span>
+                <div class="profile-header">
+                    <div class="profile-image">🐕</div>
+                    <div class="profile-name" th:text="${board.member.name}"></div>
+                </div>
+                <div class="profile-info">
+                    <div class="profile-info-item">
+                        <strong>활동 등급</strong>
+                        <span>
+                            <th:block th:if="${board.member.point >= 1000}">🏆 골드</th:block>
+                            <th:block th:if="${board.member.point >= 500 && board.member.point < 1000}">🥈 실버</th:block>
+                            <th:block th:if="${board.member.point < 500}">🥉 브론즈</th:block>
+                        </span>
+                    </div>
+                    <div class="profile-info-item">
+                        <strong>산책 거리</strong>
+                        <span th:if="${board.member.point != null}" th:text="${board.member.point * 100 + 'm'}">0m</span>
+                    </div>
+                    <div class="profile-info-item">
+                        <strong>작성 게시글</strong>
+                        <span th:text="${board.member.boards.size() + '개'}">0개</span>
+                    </div>
+                    <div class="profile-info-item">
+                        <strong>가입일</strong>
+                        <span th:text="${#temporals.format(board.member.lastLoginDate, 'yyyy년 MM월 dd일')}"></span>
+                    </div>
+                </div>
+                <div class="profile-pets">
+                    <div class="profile-pets-title">반려동물</div>
+                    <div class="pet-list">
+                        <th:block th:if="${not #lists.isEmpty(board.member.dogs)}">
+                            <span class="pet-tag" th:each="dog : ${board.member.dogs}">
+                                🐕 <span th:text="${dog.name}"></span>
+                            </span>
+                        </th:block>
+                        <th:block th:if="${#lists.isEmpty(board.member.dogs)}">
+                            <span class="pet-tag">아직 등록된 반려동물이 없어요</span>
+                        </th:block>
+                    </div>
+                </div>
+                <button class="chat-button" onclick="startChat()">1:1 채팅하기</button>
+            </div>
         </div>
 
         <!-- Footer -->
@@ -366,16 +706,22 @@
         </div>
     </div>
 
-    <script>
+    <script th:inline="javascript">
+        function confirmEdit(boardId) {
+            if (confirm('게시글을 수정하시겠습니까?')) {
+                window.location.href = '/board/edit?id=' + boardId;
+            }
+        }
+
         function deletePost(boardId) {
             if (confirm('정말로 삭제하시겠습니까?')) {
                 fetch('/board/delete/' + boardId)
                     .then(response => {
                         if (response.ok) {
-                            alert('게시글이 삭제되었습니다!');
+                            alert('게시글이 삭제되었습니다.');
                             window.location.href = '/board';
                         } else {
-                            alert('삭제 중 오류가 발생했습니다.');
+                            response.text().then(text => alert(text));
                         }
                     })
                     .catch(error => {
@@ -424,6 +770,57 @@
                 closeModal();
             }
         });
+
+        // 프로필 모달 관련 함수
+        function openProfileModal() {
+            const modal = document.getElementById('profileModal');
+            modal.style.display = 'block';
+            // 약간의 지연 후 애니메이션 적용
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeProfileModal() {
+            const modal = document.getElementById('profileModal');
+            modal.classList.remove('show');
+            // 애니메이션이 끝난 후 display none 처리
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            document.body.style.overflow = '';
+        }
+
+        // 프로필 모달 외부 클릭시 닫기
+        document.getElementById('profileModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeProfileModal();
+            }
+        });
+
+        function startChat() {
+            // 채팅 페이지로 이동
+            window.location.href = '/chat/room/' + [[${board.member.mIdx}]];
+        }
+
+        function confirmAdminDelete() {
+            if(confirm('관리자 권한으로 이 게시글을 삭제하시겠습니까?')) {
+                fetch('/board/delete/' + [[${board.bIdx}]])
+                    .then(response => {
+                        if (response.ok) {
+                            alert('게시글이 관리자 권한으로 삭제되었습니다.');
+                            window.location.href = '/board';
+                        } else {
+                            response.text().then(text => alert(text));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('삭제 중 오류가 발생했습니다.');
+                    });
+            }
+        }
     </script>
 </body>
 </html>

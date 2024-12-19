@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface PathRepository extends JpaRepository<Path, Integer> {
-    @Query("SELECT p FROM Path p WHERE p.walkSession.wsIdx = :wsIdx ORDER BY p.sequence ASC")
+    @Query("SELECT p FROM Path p JOIN FETCH p.walkSession JOIN FETCH p.member WHERE p.walkSession.wsIdx = :wsIdx ORDER BY p.createTime ASC")
     List<Path> findPathsByWalkSessionOrderBySequence(@Param("wsIdx") int wsIdx);
 
     @Query("SELECT COUNT(p) FROM Path p WHERE p.walkSession = :walkSession")

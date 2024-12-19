@@ -1,5 +1,6 @@
     package com.DogProject.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Comment;
@@ -37,13 +38,15 @@ public class Path {
     @Comment("경로 수정 일시")
     private LocalDateTime updateTime;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "m_idx", nullable = false)
     @Comment("회원과의 연관 관계 (Foreign Key)")
     private Member member;
 
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ws_idx", nullable = false)
-    @Comment("산책 세션과의 연관 관계 (Foreign Key)")
+    @JoinColumn(name = "ws_idx")
+    @Comment("산책 세션")
     private WalkSession walkSession;
 }

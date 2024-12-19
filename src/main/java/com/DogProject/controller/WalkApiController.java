@@ -57,9 +57,10 @@ public class WalkApiController {
                     .orElseThrow(() -> new RuntimeException("Walk session not found"));
             
             walkSession.setTotalDistance(totalDistance);
+            walkSession.setWalkEndDate(LocalDateTime.now());  // 종료 시간 설정
             walkSessionRepository.save(walkSession);
 
-            int earnedPoint = (int)(totalDistance * 0.01);
+            int earnedPoint = (int)(totalDistance / 100);  // 100m당 1포인트
             
             Member member = walkSession.getMember();
             member.setPoint(member.getPoint() + earnedPoint);

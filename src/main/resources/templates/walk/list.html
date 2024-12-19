@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>산책 기록 목록</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>산책 기록 목록</h2>
+        
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>날짜</th>
+                        <th>총 거리 (m)</th>
+                        <th>시작 시간</th>
+                        <th>종료 시간</th>
+                        <th>상세보기</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="walk : ${walkSessions}">
+                        <td th:text="${#temporals.format(walk.walkDate, 'yyyy-MM-dd')}"></td>
+                        <td th:text="${#numbers.formatDecimal(walk.totalDistance, 0, 2)}"></td>
+                        <td th:text="${#temporals.format(walk.walkDate, 'HH:mm')}"></td>
+                        <td th:text="${#temporals.format(walk.walkEndDate, 'HH:mm')}"></td>
+                        <td>
+                            <a th:href="@{'/walk/detail/' + ${walk.wsIdx}}" class="btn btn-primary btn-sm">상세보기</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <a href="/walk" class="btn btn-primary">새로운 산책 시작</a>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

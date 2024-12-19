@@ -1,6 +1,7 @@
 package com.DogProject.controller;
 
 import com.DogProject.dto.MemberDTO;
+import com.DogProject.dto.WalkSessionDTO;
 import com.DogProject.entity.Member;
 import com.DogProject.entity.Path;
 import com.DogProject.entity.WalkSession;
@@ -21,6 +22,9 @@ import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Set;
+import java.util.HashSet;
 
 @Controller
 @RequestMapping("/walk")
@@ -89,8 +93,6 @@ public class WalkController {
             WalkSession walkSession = new WalkSession();
             walkSession.setMember(member);
             walkSession.setTotalDistance(totalDistance);
-            walkSession.setWalkDate(LocalDateTime.now());
-            walkSession.setWalkEndDate(LocalDateTime.now()); // 종료 시간 설정
             walkSession = walkSessionRepository.save(walkSession);
 
             // Path 데이터 일괄 저장
@@ -105,6 +107,14 @@ public class WalkController {
                 path.setCreateTime(now);
                 path.setUpdateTime(now);
                 pathRepository.save(path);
+            }
+
+            // 첫 번째 Path의 create_time을 walk_date로, 마지막 Path의 create_time을 walk_end_date로 설정
+            List<Path> paths = pathRepository.findPathsByWalkSessionOrderBySequence(walkSession.getWsIdx());
+            if (!paths.isEmpty()) {
+                walkSession.setWalkDate(paths.get(0).getCreateTime());
+                walkSession.setWalkEndDate(paths.get(paths.size() - 1).getCreateTime());
+                walkSession = walkSessionRepository.save(walkSession);
             }
 
             // 포인트 적립 (100m당 1포인트, 최소 1포인트)
@@ -122,6 +132,29 @@ public class WalkController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("산책 데이터 저장에 실패했습니다: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/list")
+    @ResponseBody
+    public ResponseEntity<?> getWalkList(HttpSession session) {
+        try {
+            Object mIdxObj = session.getAttribute("mIdx");
+            if (mIdxObj == null) {
+                return ResponseEntity.badRequest().body("로그인이 필요합니다.");
+            }
+
+            int mIdx = Integer.parseInt(mIdxObj.toString());
+            List<WalkSession> walkSessions = walkSessionRepository.findByMember_mIdxOrderByWalkDateDesc(mIdx);
+            
+            List<WalkSessionDTO> walkSessionDTOs = walkSessions.stream()
+                .map(WalkSessionDTO::fromEntity)
+                .collect(Collectors.toList());
+            
+            return ResponseEntity.ok(walkSessionDTOs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("산책 기록을 불러오는 중 오류가 발생했습니다: " + e.getMessage());
         }
     }
 
@@ -157,16 +190,18 @@ public class WalkController {
                 walkSession = new WalkSession();
                 walkSession.setMember(member);
                 walkSession.setTotalDistance(distance);
-                walkSession.setWalkDate(LocalDateTime.now());
+                walkSession = walkSessionRepository.save(walkSession);
             } else {
                 walkSession = walkSessionRepository.findById(wsIdx)
                     .orElseGet(() -> {
                         WalkSession newSession = new WalkSession();
                         newSession.setMember(member);
                         newSession.setWalkDate(LocalDateTime.now());
+                        newSession.setWalkEndDate(LocalDateTime.now()); // 새 세션의 시작 시간으로 초기화
                         return newSession;
                     });
                 walkSession.setTotalDistance(distance);
+                walkSession.setWalkEndDate(LocalDateTime.now()); // 현재 기록 시점으로 종료 시간 업데이트
             }
             walkSession = walkSessionRepository.save(walkSession);
 
@@ -181,6 +216,14 @@ public class WalkController {
             path.setCreateTime(now);
             path.setUpdateTime(now);
             pathRepository.save(path);
+
+            // 첫 번째와 마지막 Path의 create_time으로 walk_date와 walk_end_date 업데이트
+            List<Path> paths = pathRepository.findPathsByWalkSessionOrderBySequence(walkSession.getWsIdx());
+            if (!paths.isEmpty()) {
+                walkSession.setWalkDate(paths.get(0).getCreateTime());
+                walkSession.setWalkEndDate(paths.get(paths.size() - 1).getCreateTime());
+                walkSession = walkSessionRepository.save(walkSession);
+            }
 
             Map<String, Object> response = new HashMap<>();
             response.put("wsIdx", walkSession.getWsIdx());

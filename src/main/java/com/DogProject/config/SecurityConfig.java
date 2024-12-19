@@ -42,12 +42,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         firewall.setAllowUrlEncodedPercent(true);
         firewall.setAllowBackSlash(true);
         firewall.setAllowUrlEncodedPeriod(true);
+        firewall.setAllowedHeaderNames(header -> true);  // 모든 헤더 이름 허용
+        firewall.setAllowedHeaderValues(header -> true); // 모든 헤더 값 허용
         return firewall;
     }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
-        web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
+        web.httpFirewall(allowUrlEncodedSlashHttpFirewall())
+           .ignoring()
+           .antMatchers("/ws/**", "/topic/**", "/queue/**");
     }
 
     @Override
@@ -59,7 +63,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
             .csrf()
                 .ignoringAntMatchers("/member/checkEmail", "/api/**", "/dog/insert", "/dog/update/**", 
-                    "/ws/**", "/ws/chat/**", "/uploads/**", "/schedule/save", "/schedule/update")
+                    "/uploads/**", "/schedule/save", "/schedule/update")
                 .and()
             .sessionManagement()
                 .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
@@ -76,7 +80,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/video/**","/member/**", "/error", 
                         "/home", "/board", "/board/detail", "/dog/**", "/shop/**", "/chat/**", "/walk/**", "/api/**",
-                        "/ws/**", "/ws/chat/**", "/topic/**", "/schedule/**", "/uploads/**").permitAll()
+                        "/uploads/**", "/schedule/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/member/checkEmail").permitAll()
                 .antMatchers("/board/create").authenticated()

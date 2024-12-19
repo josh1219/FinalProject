@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,127 +8,157 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <style>
         /* Reset and Global Styles */
-        a, button, input, select, h1, h2, h3, h4, h5, * {
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            border: none;
-            text-decoration: none;
-            background: none;
-            -webkit-font-smoothing: antialiased;
         }
 
-        menu, ol, ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Chat UI Styles */
         body {
             font-family: 'Inter', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            background-color: #f5f5f5;
             height: 100vh;
-            background-color: #f0f0f0;
-        }
-
-        .chat {
-            background: #ffffff;
-            padding: 30px 20px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            align-items: flex-start;
-            justify-content: flex-start;
-            height: 852px;
-            width: 414px;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .header {
+        .chat-container {
+            max-width: 414px;
+            width: 100%;
+            height: 100vh;
+            margin: 0 auto;
+            background: white;
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .chat-header {
+            padding: 15px;
+            background-color: white;
+            border-bottom: 1px solid #eee;
+            display: flex;
             align-items: center;
-            justify-content: space-between;
-            width: 100%;
-            height: 49px;
-        }
-
-        .petopia {
-            color: #000000;
-            font-weight: 700;
-            font-size: 20px;
-        }
-
-        /* Notification and Profile buttons */
-        .header .icon-buttons {
-            display: flex;
             gap: 10px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
 
-        .chat-list {
-            background: rgba(136, 184, 246, 0.15);
+        .back-button {
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .back-button img {
+            width: 24px;
+            height: 24px;
+        }
+
+        .chat-title {
+            font-size: 20px;
+            font-weight: bold;
             flex-grow: 1;
-            width: 100%;
-            overflow-y: auto;
-            padding: 10px;
         }
 
-        .message-container {
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
             display: flex;
             flex-direction: column;
             gap: 10px;
+            background-color: #f8f9fa;
         }
 
-        .system-message {
-            background: rgba(44, 116, 210, 0.22);
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
             border-radius: 20px;
-            padding: 10px;
-            text-align: center;
-            font-size: 13px;
-            margin-bottom: 10px;
+            word-wrap: break-word;
+        }
+
+        .message.sent {
+            background-color: #88B8F6;
+            color: white;
+            margin-left: auto;
+            border-radius: 20px 20px 0 20px;
+        }
+
+        .message.received {
+            background-color: white;
+            margin-right: auto;
+            border-radius: 20px 20px 20px 0;
+            border: 1px solid #eee;
+        }
+
+        .message-time {
+            font-size: 0.8em;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        .chat-input-container {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            position: sticky;
+            bottom: 0;
         }
 
         .chat-input {
-            display: flex;
-            flex-direction: row;
-            gap: 10px;
-            width: 100%;
-            align-items: center;
-        }
-
-        #message {
-            flex-grow: 1;
-            font-size: 16px;
-            padding: 10px;
-            border-radius: 10px;
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
             resize: none;
-            border: 1px solid #ddd;
-        }
-
-        .username-input {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            width: 100%;
-        }
-
-        #username {
-            width: 100%;
             font-size: 14px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
+            max-height: 100px;
+            overflow-y: auto;
         }
 
-        .footer {
+        .chat-input:focus {
+            outline: none;
+            border-color: #88B8F6;
+        }
+
+        .send-button {
+            background-color: #88B8F6;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
             display: flex;
-            justify-content: space-between;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .send-button:hover {
+            background-color: #7aa7e5;
+        }
+
+        .send-button img {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            position: sticky;
+            bottom: 0;
             width: 100%;
+            height: 85px;
+            background: white;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
             padding: 10px 0;
         }
 
@@ -138,6 +168,8 @@
             align-items: center;
             gap: 5px;
             cursor: pointer;
+            text-decoration: none;
+            color: inherit;
         }
 
         .footer-item img {
@@ -149,312 +181,131 @@
             font-size: 11px;
             color: #000;
         }
-
-        /* Icons and Images */
-        .icon-button {
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .icon-button img {
-            width: 24px;
-            height: 24px;
-        }
-
-        /* Added message styles */
-        .other-message {
-            background-color: #f0f0f0;
-            border-radius: 10px;
-            padding: 10px;
-            max-width: 70%;
-            align-self: flex-start;
-            margin-bottom: 10px;
-        }
-
-        .user-message {
-            background-color: rgba(136, 184, 246, 0.5);
-            border-radius: 10px;
-            padding: 10px;
-            max-width: 70%;
-            align-self: flex-end;
-            margin-bottom: 10px;
-        }
-
-        .attachment {
-            margin-top: 10px;
-        }
-
-        .attachment img {
-            max-width: 100%;
-            border-radius: 10px;
-        }
-
-        .preview {
-            display: flex;
-            align-items: center;
-            margin-top: 10px;
-        }
-
-        .preview img {
-            max-width: 50px;
-            max-height: 50px;
-            border-radius: 10px;
-            margin-right: 10px;
-        }
-
-        #deleteIcon {
-            width: 20px;
-        }
     </style>
 </head>
 <body>
-<div class="chat">
-    <div class="header">
-        <div class="petopia">PETOPIA</div>
-        <div class="icon-buttons">
-            <div class="icon-button">
-                <img src="/images/notification0.svg" alt="Notifications"/>
+    <div class="chat-container">
+        <div class="chat-header">
+            <div class="back-button" onclick="history.back()">
+                <img src="/images/arrow-left0.svg" alt="뒤로가기">
             </div>
-            <div class="icon-button">
-                <img src="/images/group-500.svg" alt="Profile"/>
-            </div>
+            <div class="chat-title">채팅</div>
+        </div>
+
+        <div class="chat-messages" id="messageContainer"></div>
+
+        <div class="chat-input-container">
+            <textarea id="message" class="chat-input" placeholder="메시지를 입력하세요..." rows="1"></textarea>
+            <button class="send-button" onclick="sendMessage()">
+                <img src="/images/send0.svg" alt="전송">
+            </button>
+        </div>
+
+        <div class="footer">
+            <a href="/calendar" class="footer-item">
+                <img src="/images/calendar0.svg" alt="Calendar">
+                <div class="footer-item-text">캘린더</div>
+            </a>
+            <a href="/walk" class="footer-item">
+                <img src="/images/location0.svg" alt="Walk">
+                <div class="footer-item-text">산책</div>
+            </a>
+            <a href="/home" class="footer-item">
+                <img src="/images/home0.svg" alt="Home">
+                <div class="footer-item-text">홈</div>
+            </a>
+            <a href="/board" class="footer-item">
+                <img src="/images/_3-user0.svg" alt="Community">
+                <div class="footer-item-text">커뮤니티</div>
+            </a>
+            <a href="/menu" class="footer-item">
+                <img src="/images/category0.svg" alt="Menu">
+                <div class="footer-item-text">메뉴</div>
+            </a>
         </div>
     </div>
 
-    <div class="chat-list" id="chatMessages">
-        <div class="message-container" id="messageContainer"></div>
-    </div>
-
-    <div class="username-input" id="usernameInput">
-        <label for="username">사용자 이름</label>
-        <input id="username" type="text" placeholder="사용자 이름을 입력하세요"/>
-        <button id="setUsername">확인</button>
-    </div>
-
-    <div class="preview" id="filePreview" style="display: none;">
-        <img id="previewImage" src="" alt="Preview"/>
-        <div class="delete-button" onclick="removeAttachedFile()">
-            <img id="deleteIcon" src="/images/deleteIcon.png" alt="Delete"/>
-        </div>
-    </div>
-
-    <div class="chat-input">
-        <div class="icon-button">
-            <img src="/images/camera0.svg" alt="Attach" id="attachButton"/>
-            <input type="file" id="fileInput" accept="image/*" style="display: none;"/>
-        </div>
-        <textarea id="message" placeholder="메세지를 입력해주세요." disabled></textarea>
-        <div class="icon-button" id="sendMessage" onclick="sendMessage()" style="display: none;">
-            <img src="/images/send0.svg" alt="Send"/>
-        </div>
-    </div>
-
-    <div class="footer">
-        <div class="footer-item" id="calendarBtn">
-            <img src="/images/calendar1.svg" alt="Calendar"/>
-            <div class="footer-item-text">캘린더</div>
-        </div>
-        <div class="footer-item" id="walkBtn">
-            <img src="/images/location0.svg" alt="Walk"/>
-            <div class="footer-item-text">산책</div>
-        </div>
-        <div class="footer-item" id="homeBtn">
-            <img src="/images/home1.svg" alt="Home"/>
-            <div class="footer-item-text">홈</div>
-        </div>
-        <div class="footer-item" id="communityBtn">
-            <img src="/images/_3-user0.svg" alt="Community"/>
-            <div class="footer-item-text">커뮤니티</div>
-        </div>
-        <div class="footer-item" id="menuBtn">
-            <img src="/images/category0.svg" alt="Menu"/>
-            <div class="footer-item-text">메뉴</div>
-        </div>
-    </div>
-</div>
-
-<script>
-    function removeAttachedFile() {
-        // 파일 미리보기 영역 숨기기
-        document.getElementById('filePreview').style.display = 'none';
-
-        // 파일 입력 필드 초기화
-        document.getElementById('fileInput').value = '';
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-        var stompClient = null;
-        var username = '';
-        var fileInput = document.getElementById('fileInput');
-        var filePreview = document.getElementById('filePreview');
-        var previewImage = document.getElementById('previewImage');
-
-        function getCurrentTime() {
-            const now = new Date();
-            return now.toLocaleTimeString('ko-KR', {
-                hour: '2-digit',
-                minute: '2-digit',
-                hour12: false
-            });
-        }
-
-        const usernameInput = document.getElementById('username');
-        const setUsernameBtn = document.getElementById('setUsername');
-        const messageInput = document.getElementById('message');
-        const sendMessageBtn = document.getElementById('sendMessage');
-        const messageContainer = document.getElementById('messageContainer');
+    <script th:inline="javascript">
+        const currentMember = /*[[${currentMember}]]*/ {};
+        const roomId = /*[[${roomId}]]*/ '';
+        let stompClient = null;
+        
+        console.log("스크립트 시작");
+        console.log("currentMember:", currentMember);
+        console.log("roomId:", roomId);
 
         function connect() {
-            var socket = new SockJS('/ws/chat');
+            console.log("연결 시도");
+            const socket = new SockJS('/ws');
             stompClient = Stomp.over(socket);
-
-            stompClient.connect({}, function (frame) {
+            stompClient.connect({}, function(frame) {
                 console.log('Connected: ' + frame);
-
-                stompClient.subscribe('/topic/messages', function (message) {
+                stompClient.subscribe('/topic/messages/' + roomId, function(message) {
                     showMessage(JSON.parse(message.body));
                 });
-
-                // Send system message for user joining
-                sendSystemMessage(username + " 님이 채팅에 참여하셨습니다.");
             });
         }
 
         function showMessage(message) {
-            const messageElem = document.createElement('div');
+            const messageContainer = document.querySelector('.chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.senderId === currentMember.mIdx ? 'sent' : 'received'}`;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.textContent = message.content;
+            messageDiv.appendChild(contentDiv);
 
-            if (message.type === "system") {
-                messageElem.classList.add('system-message');
-                messageElem.textContent = message.content;
-            } else {
-                const isSelf = message.username === username;
-                messageElem.classList.add(isSelf ? 'user-message' : 'other-message');
+            const timeDiv = document.createElement('div');
+            timeDiv.className = 'message-time';
+            timeDiv.textContent = message.time;
+            messageDiv.appendChild(timeDiv);
 
-                const usernameSpan = document.createElement('strong');
-                usernameSpan.textContent = isSelf ? '' : message.username;
-
-                const messageText = document.createElement('div');
-                messageText.textContent = message.content;
-
-                messageElem.appendChild(usernameSpan);
-                messageElem.appendChild(messageText);
-
-                // If there's an attachment, show it for both sent and received messages
-                if (message.attachment) {
-                    const attachmentElem = document.createElement('div');
-                    attachmentElem.classList.add('attachment');
-                    const attachmentImage = document.createElement('img');
-                    attachmentImage.src = message.attachment; // URL 사용
-                    attachmentElem.appendChild(attachmentImage);
-                    messageElem.appendChild(attachmentElem);
-                }
-
-                // Add the time span at the end
-                const timeSpan = document.createElement('small');
-                timeSpan.textContent = message.timestamp || getCurrentTime();
-                timeSpan.style.display = 'block';
-                timeSpan.style.fontSize = '0.8em';
-                timeSpan.style.color = '#666';
-                timeSpan.style.marginTop = '5px';
-                timeSpan.style.textAlign = isSelf ? 'right' : 'left';
-
-                messageElem.appendChild(timeSpan);
-            }
-
-            messageContainer.appendChild(messageElem);
-            scrollToBottom();
+            messageContainer.appendChild(messageDiv);
+            messageContainer.scrollTop = messageContainer.scrollHeight;
         }
 
         function sendMessage() {
-            const message = messageInput.value.trim();
-            if (message || fileInput.files.length > 0) {
-                const formData = new FormData();
-                formData.append('username', username);
-                formData.append('content', message);
-                let attachmentUrl = null;
-
-                if (fileInput.files.length > 0) {
-                    const file = fileInput.files[0];
-                    attachmentUrl = URL.createObjectURL(file); // 선택한 파일의 URL 생성
-                }
-
-                // Send the message via WebSocket
-                stompClient.send("/app/sendMessage", {}, JSON.stringify({
-                    username: username,
-                    content: message,
-                    type: "chat",
-                    timestamp: getCurrentTime(),
-                    attachment: attachmentUrl // 생성된 URL 사용
-                }));
-
-                fileInput.value = ''; // Clear the file input
-                messageInput.value = ''; // Clear the message input
-                filePreview.style.display = 'none'; // Hide the preview
+            console.log("메시지 전송 시도");
+            const messageInput = document.getElementById('message');
+            const content = messageInput.value.trim();
+            
+            if (content && stompClient) {
+                const chatMessage = {
+                    roomId: roomId,
+                    senderId: currentMember.mIdx,
+                    senderName: currentMember.mName,
+                    content: content,
+                    time: new Date().toLocaleTimeString('ko-KR', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    })
+                };
+                
+                stompClient.send("/app/chat/" + roomId, {}, JSON.stringify(chatMessage));
+                messageInput.value = '';
+                messageInput.style.height = 'auto';
             }
         }
 
-        function sendSystemMessage(content) {
-            stompClient.send("/app/sendMessage", {}, JSON.stringify({
-                username: username,
-                content: content,
-                type: "system",
-                timestamp: getCurrentTime()
-            }));
-        }
-
-        function scrollToBottom() {
-            const chatList = document.querySelector('.chat-list');
-            chatList.scrollTop = chatList.scrollHeight;
-        }
-
-        // Username input handling
-        setUsernameBtn.addEventListener('click', () => {
-            const inputUsername = usernameInput.value.trim();
-            if (inputUsername) {
-                username = inputUsername;
-                usernameInput.disabled = true;
-                setUsernameBtn.disabled = true;
-                document.getElementById('usernameInput').style.display = 'none';
-                messageInput.disabled = false;
-                sendMessageBtn.style.display = 'block'; // Show send button
-                connect();
-            }
+        // DOM이 완전히 로드된 후 실행
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM 로드됨");
+            connect();
         });
 
-        // Send message on Enter key
-        messageInput.addEventListener('keypress', (e) => {
+        // Enter 키로 메시지 전송
+        document.getElementById('message').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 sendMessage();
             }
         });
 
-        // Send message when send button is clicked
-        sendMessageBtn.addEventListener('click', () => {
-            sendMessage();
+        // 텍스트 영역 자동 높이 조절
+        document.getElementById('message').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
         });
-
-        // File input handling (camera button)
-        document.getElementById('attachButton').addEventListener('click', () => {
-            fileInput.click();
-        });
-
-        // Handle file selection
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    previewImage.src = event.target.result; // Set the preview image source
-                    filePreview.style.display = 'flex'; // Show the preview
-                    messageInput.placeholder = ''; // Clear the placeholder
-                };
-                reader.readAsDataURL(file); // Read the file as a data URL
-            }
-        });
-    });
-</script>
+    </script>
 </body>
 </html>

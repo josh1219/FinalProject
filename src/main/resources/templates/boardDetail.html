@@ -501,42 +501,18 @@
         }
 
         .chat-button {
-            width: 100%;
-            padding: 12px;
-            background-color: #FF4081;
+            padding: 10px 20px;
+            background-color: #4CAF50;
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 15px;
-            font-weight: bold;
+            border-radius: 5px;
             cursor: pointer;
-            transition: background-color 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
+            font-size: 16px;
+            transition: background-color 0.3s;
         }
 
         .chat-button:hover {
-            background-color: #E63672;
-        }
-
-        .chat-button::before {
-            content: "💌";
-        }
-
-        .close-profile {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            cursor: pointer;
-            font-size: 24px;
-            color: #999;
-            transition: color 0.2s;
-        }
-
-        .close-profile:hover {
-            color: #666;
+            background-color: #45a049;
         }
     </style>
 </head>
@@ -582,6 +558,13 @@
 
             <div class="post-content" th:text="${board.content}">
                 게시글 내용
+            </div>
+
+            <div th:if="${sessionMember != null && board.member.mIdx != sessionMember.mIdx}" 
+                 style="margin-top: 20px; text-align: right;">
+                <button onclick="startChat()" class="chat-button">
+                    💬 채팅하기
+                </button>
             </div>
 
             <div class="post-media" th:if="${boardFiles != null}">
@@ -800,8 +783,11 @@
         });
 
         function startChat() {
-            // 채팅 페이지로 이동
-            window.location.href = '/chat/room/' + [[${board.member.mIdx}]];
+            const currentId = [[${sessionMember.mIdx}]];
+            const targetId = [[${board.member.mIdx}]];
+            const id1 = Math.min(currentId, targetId);
+            const id2 = Math.max(currentId, targetId);
+            window.location.href = `/chat/${id1}_${id2}`;
         }
 
         function confirmAdminDelete() {

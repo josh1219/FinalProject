@@ -32,12 +32,7 @@ public class Schedule {
     private LocalDateTime endTime;
 
     @ManyToOne
-    @JoinColumn(name = "midx")
+    @JoinColumn(name = "mIdx")
     @Comment("일정을 작성한 회원")
     private Member member;
-
-    @ManyToOne
-    @JoinColumn(name = "didx")
-    @Comment("일정과 관련된 강아지")
-    private Dog dog;
 }

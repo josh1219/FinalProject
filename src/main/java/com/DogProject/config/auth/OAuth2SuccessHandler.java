@@ -15,7 +15,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Cookie;
 import java.io.IOException;
+import java.util.Base64;
 import java.util.Map;
+import java.nio.charset.StandardCharsets;
 
 @Component
 @RequiredArgsConstructor
@@ -70,7 +72,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     
                     member.updateOAuth2Info(name, picture, provider, socialId);
                     memberRepository.save(member);
-                    setLoginSession(request, response, member);
+                    
+                    setLoginSession(response, member);
                     response.sendRedirect("/home");
                     return;
                 } else {
@@ -114,7 +117,8 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     
                     member.updateOAuth2Info(name, picture, provider, socialId);
                     memberRepository.save(member);
-                    setLoginSession(request, response, member);
+                    
+                    setLoginSession(response, member);
                     response.sendRedirect("/home");
                     return;
                 } else {
@@ -163,9 +167,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     member.updateOAuth2Info(name, picture, provider, socialId);
                     memberRepository.save(member);
                     
-                    // 세션에 저장할 때는 기존 회원의 이메일 사용
-                    email = member.getMEmail();  // 기존 회원의 이메일로 설정
-                    setLoginSession(request, response, member);
+                    setLoginSession(response, member);
                     response.sendRedirect("/home");
                     return;
                 } else {
@@ -199,17 +201,29 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     }
     
     // 세션 설정 메소드
-    private void setLoginSession(HttpServletRequest request, HttpServletResponse response, Member member) {
+    private void setLoginSession(HttpServletResponse response, Member member) {
         // 세션에 로그인 정보 저장
-        httpSession.setAttribute("member", member);
-        httpSession.setAttribute("isLoggedIn", true);
-        httpSession.setAttribute("mIdx", member.getMIdx()); 
+        HttpSession session = httpSession;
+        session.setAttribute("member", member);
+        session.setAttribute("isLoggedIn", true);
+        session.setAttribute("mIdx", member.getMIdx());
+        session.setAttribute("email", member.getMEmail());
+        session.setAttribute("role", member.getRole());
         
-        // 쿠키에 사용자 정보 저장
-        String userInfo = member.getMIdx() + "★" + member.getMEmail() + "★" + member.getName() + "★" + member.getProvider() + "★" + member.getRole(); 
-        Cookie cookie = new Cookie("USER_INFO", userInfo);
-        cookie.setPath("/");
-        cookie.setMaxAge(3600); // 1시간
-        response.addCookie(cookie);
+        // 쿠키 정보 저장 (Base64 인코딩)
+        String userInfo = String.format("%d|%s|%s|%s", 
+            member.getMIdx(), member.getMEmail(), member.getProvider(), member.getRole());
+        String encodedUserInfo = Base64.getEncoder().encodeToString(
+            userInfo.getBytes(StandardCharsets.UTF_8));
+        
+        Cookie emailCookie = new Cookie("USER_INFO", encodedUserInfo);
+        emailCookie.setPath("/");
+        emailCookie.setMaxAge(3600);
+        response.addCookie(emailCookie);
+        
+        // 디버그 로그 추가
+        System.out.println("OAuth2 Session mIdx: " + session.getAttribute("mIdx"));
+        System.out.println("OAuth2 Session email: " + session.getAttribute("email"));
+        System.out.println("OAuth2 Cookie userInfo: " + userInfo);
     }
 }

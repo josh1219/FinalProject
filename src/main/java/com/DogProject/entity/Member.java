@@ -96,6 +96,10 @@ public class Member {
     @Comment("회원이 받은 채팅 리스트")
     private List<Chat> receivedChats = new ArrayList<>();
 
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @Comment("회원의 일정 리스트")
+    private List<Schedule> schedules = new ArrayList<>();
+
     /**
      * 소셜 로그인 회원을 위한 빌더
      */

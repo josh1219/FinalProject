@@ -23,4 +23,14 @@ public class ScheduleService {
     public List<Schedule> getAllSchedules() {
         return scheduleRepository.findAll();
     }
+
+    @Transactional(readOnly = true)
+    public Schedule getScheduleById(int saIdx) {
+        return scheduleRepository.findById(saIdx).orElse(null);
+    }
+
+    @Transactional
+    public Schedule updateSchedule(Schedule schedule) {
+        return scheduleRepository.save(schedule);
+    }
 }

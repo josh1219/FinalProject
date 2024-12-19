@@ -46,7 +46,8 @@
         }
 
         .calendar-container {
-            flex: 1;
+            height: calc(100vh - 150px);
+            overflow: hidden;
             display: flex;
             flex-direction: column;
             background: white;
@@ -64,17 +65,18 @@
             border-bottom: 1px solid #eee;
         }
 
-        .calendar-nav {
+        .calendar-buttons {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 0.75rem;
+            gap: 10px;
         }
 
-        .view-buttons {
+        .view-buttons, .nav-buttons {
             display: flex;
-            gap: 0.25rem;
-            margin-bottom: 0.5rem;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
         }
 
         .view-buttons button {
@@ -115,6 +117,13 @@
 
         .btn:hover {
             opacity: 0.9;
+        }
+
+        #addScheduleBtn {
+            background: #1a73e8;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            margin-top: 0.5rem;
         }
 
         #calendar {
@@ -211,83 +220,530 @@
             font-weight: 500;
         }
 
+        /* 주간 보기 스타일 */
+        .toastui-calendar-week-view {
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .toastui-calendar-panel.toastui-calendar-time-grid {
+            height: auto !important;
+            min-height: 100%;
+        }
+
+        /* 주간 뷰 날짜/요일 표시 스타일 */
+        .toastui-calendar-week-view .toastui-calendar-daygrid-cell {
+            min-height: 100px;
+        }
+
+        .toastui-calendar-week-view .toastui-calendar-day-names {
+            border-bottom: 1px solid #e5e5e5;
+            padding: 8px 0;
+        }
+
+        .toastui-calendar-week-view .toastui-calendar-day-name-container {
+            text-align: center;
+            padding: 4px;
+            margin-left: 50px !important; /* 시간 영역 너비와 동일하게 설정 */
+        }
+
+        .toastui-calendar-week-view .toastui-calendar-day-name {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .toastui-calendar-week-view .toastui-calendar-date {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .toastui-calendar-week-view .toastui-calendar-today .toastui-calendar-date {
+            background-color: #1a73e8;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            margin: 0 auto;
+        }
+
+        .toastui-calendar-week-view .toastui-calendar-weekend .toastui-calendar-day-name {
+            color: #f54242;
+        }
+        
+        .toastui-calendar-week-view .toastui-calendar-weekend .toastui-calendar-date {
+            color: #f54242;
+        }
+
+        /* 주간 뷰 헤더 스타일 */
+        .toastui-calendar-week-view .toastui-calendar-panel-title {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: none;
+            position: relative;
+        }
+
+        /* 시간 영역만큼의 빈 공간 추가 */
+        .toastui-calendar-week-view .toastui-calendar-panel-title::before {
+            content: '';
+            width: 45px; /* 시간 영역 너비와 동일하게 설정 */
+            flex: none;
+            margin-right: 5px;
+        }
+
+        .toastui-calendar-week-view .toastui-calendar-panel-title-day {
+            flex: 1;
+            text-align: center;
+            font-size: 1rem;
+            padding: 4px 2px; /* 좌우 패딩 축소 */
+            border: none;
+            background: none;
+        }
+
+        /* 날짜 숫자 스타일 */
+        .toastui-calendar-week-view .toastui-calendar-panel-title-date {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #333;
+            margin-top: 4px;
+        }
+
+        /* 시간 영역 너비 조정 */
+        .toastui-calendar-week-view .toastui-calendar-time-date {
+            width: 45px; /* 시간 영역 너비 축소 */
+            padding-right: 5px;
+            text-align: right;
+        }
+
+        /* 주말 색상 */
+        .toastui-calendar-week-view .toastui-calendar-weekend .toastui-calendar-panel-title-date,
+        .toastui-calendar-week-view .toastui-calendar-weekend .toastui-calendar-panel-title-day-name {
+            color: #f54242;
+        }
+
+        /* 오늘 날짜 강조 */
+        .toastui-calendar-week-view .toastui-calendar-today .toastui-calendar-panel-title-date {
+            background-color: #1a73e8;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            line-height: 24px;
+            margin: 4px auto 0;
+        }
+
+        /* 구분선 제거 */
+        .toastui-calendar-week-view .toastui-calendar-panel-title-day {
+            border-right: none;
+        }
+
+        /* 이벤트 영역 왼쪽 여백 조정 */
+        .toastui-calendar-time-date {
+            padding-left: 5px !important;
+            padding-right: 5px !important;
+        }
+
+        .toastui-calendar-time {
+            padding-left: 5px !important;
+            padding-right: 5px !important;
+        }
+
+        /* 날짜 컨테이너 margin 조정 */
+        .toastui-calendar-day-name-container {
+            
+            padding-left: 5px;
+        }
+
+        /* 시간 그리드 조정 */
+        .toastui-calendar-week-view .toastui-calendar-time-grid {
+            margin-left: 45px; /* 시간 영역 너비와 동일하게 설정 */
+            padding-left: 5px;
+        }
+
+        /* 스크롤바 스타일 */
+        .toastui-calendar-week-view::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .toastui-calendar-week-view::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .toastui-calendar-week-view::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .toastui-calendar-week-view::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
         /* 모달 스타일 */
         .modal {
             display: none;
             position: fixed;
-            top: 0;
+            z-index: 1000;
             left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
+            background-color: rgba(0,0,0,0.4);
         }
 
         .modal-content {
-            position: relative;
-            background-color: #fff;
+            background-color: #fefefe;
             margin: 15% auto;
             padding: 20px;
-            width: 70%;
-            max-width: 600px;
+            border: 1px solid #ddd;
+            width: 300px;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
         }
 
         .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
         }
 
-        .modal-header h3 {
+        .modal-header h2 {
+            font-size: 16px;
             margin: 0;
-            font-size: 18px;
-            font-weight: bold;
         }
 
-        .close-btn {
+        .close {
+            position: absolute;
+            right: 15px;
+            top: 10px;
+            font-size: 20px;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
             background: none;
             border: none;
-            font-size: 24px;
+            padding: 0;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .form-group textarea {
+            height: 80px;
+            resize: none;
+        }
+
+        .form-buttons {
+            text-align: center;
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .form-buttons .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
             cursor: pointer;
-            color: #666;
+            font-size: 14px;
+            width: 80px;
         }
 
-        .close-btn:hover {
-            color: #000;
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
         }
 
-        .schedule-list {
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .event-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
 
-        .schedule-item {
-            display: flex;
-            align-items: center;
+        .event-list li {
             padding: 12px;
             border-bottom: 1px solid #eee;
             cursor: pointer;
         }
 
-        .schedule-item:hover {
+        .event-list li:last-child {
+            border-bottom: none;
+        }
+
+        .event-list li:hover {
+            background-color: #f5f6fa;
+        }
+
+        .detail-modal {
+            z-index: 1100;
+        }
+
+        .detail-modal .modal-content {
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .detail-header {
+            padding: 16px;
             background-color: #f8f9fa;
+            border-bottom: 1px solid #eee;
         }
 
-        .schedule-time {
-            min-width: 80px;
+        .detail-body {
+            padding: 16px;
+        }
+
+        .detail-footer {
+            padding: 16px;
+            border-top: 1px solid #eee;
+            text-align: right;
+        }
+
+        .map-container {
+            height: 300px;
+            margin: 16px 0;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .today {
+            background-color: #e8f5e9;
+            padding: 2px 6px;
+            border-radius: 4px;
             font-weight: bold;
-            color: #1a73e8;
         }
 
-        .schedule-title {
-            flex: 1;
-            margin-left: 12px;
+        .event-count {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .event-item {
+            padding: 8px;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 4px;
+        }
+        
+        .event-item:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .event-time {
+            color: #1a73e8;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .event-title {
+            color: #333;
+        }
+
+        .event-count {
+            cursor: pointer;
+            color: #1a73e8;
+            font-weight: bold;
+        }
+
+        .event-count:hover {
+            text-decoration: underline;
+        }
+
+        /* test */
+        .toastui-calendar-day-view .toastui-calendar-panel:not(.toastui-calendar-time), .toastui-calendar-week-view .toastui-calendar-panel:not(.toastui-calendar-time) {
+            overflow-y: unset;
+        }
+        .toastui-calendar-week {
+            border-left: 0!important; 
+        }
+
+        /* 요일 숨기기 */
+        .toastui-calendar-day-name__name {
+            display: none !important;
+        }
+
+        /* test */
+        .toastui-calendar-day-view .toastui-calendar-panel:not(.toastui-calendar-time), .toastui-calendar-week-view .toastui-calendar-panel:not(.toastui-calendar-time) {
+            overflow-y: unset;
+        }
+        
+        .toastui-calendar-week {
+            border-left: 0!important; 
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        #editMode .form-group {
+            margin-bottom: 15px;
+        }
+        
+        #editMode label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        #editMode button {
+            margin-right: 10px;
+        }
+        
+        .edit-title-input {
+            width: 100%;
+            padding: 8px;
+            font-size: 1.17em;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+        }
+        
+        .edit-content-input {
+            width: 100%;
+            min-height: 100px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        
+        .cancel-btn {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        .submit-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .cancel-btn:hover {
+            background-color: #da190b;
+        }
+
+        .time-inputs {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .time-input-group {
+            margin: 8px 0;
+        }
+
+        .time-input-group label {
+            display: inline-block;
+            width: 80px;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+
+        .time-input {
+            padding: 6px 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            color: #495057;
+        }
+
+        .time-input:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+        .edit-content-input {
+            margin-top: 10px;
+            width: 100%;
+            min-height: 100px;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            resize: vertical;
         }
     </style>
 </head>
@@ -303,17 +759,17 @@
 
         <div class="calendar-container">
             <div class="calendar-header">
-                <div class="view-buttons">
-                    <button id="monthView" class="active">월</button>
-                    <button id="weekView">주</button>
-                    <button id="dayView">일</button>
-                </div>
-                <div class="calendar-nav">
-                    <div class="current-month" id="currentMonth"></div>
-                    <div>
-                        <button id="prevBtn" class="btn nav-btn">&lt;</button>
-                        <button id="todayBtn" class="btn">오늘</button>
-                        <button id="nextBtn" class="btn nav-btn">&gt;</button>
+                <div class="calendar-buttons">
+                    <div class="nav-buttons">
+                        <button type="button" id="prevBtn" class="btn"><</button>
+                        <span id="currentViewRange">오늘</span>
+                        <button type="button" id="nextBtn" class="btn">></button>
+                    </div>
+                    
+                    <div class="view-buttons">
+                        <button type="button" id="monthViewBtn" class="btn">월</button>
+                        <button type="button" id="weekViewBtn" class="btn">주</button>
+                        <button type="button" id="dayViewBtn" class="btn">일</button>
                     </div>
                 </div>
                 <button id="addScheduleBtn" class="btn">일정 추가</button>
@@ -346,29 +802,114 @@
     </div>
 
     <!-- 일정 목록 모달 -->
-    <div id="scheduleListModal" class="modal">
+    <div id="eventListModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modalDate"></h3>
-                <button class="close-btn" onclick="closeModal('scheduleListModal')">&times;</button>
+            <button class="close-btn" onclick="closeModal('eventListModal')">&times;</button>
+            <h3 id="modalDate"></h3>
+            <ul id="eventList" class="event-list"></ul>
+        </div>
+    </div>
+
+    <!-- 상세 정보 모달 -->
+    <div id="detailModal" class="modal detail-modal">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal('detailModal')">&times;</button>
+            <div id="viewMode">
+                <div class="detail-header">
+                    <h3 id="detailTitle"></h3>
+                </div>
+                <div class="detail-body">
+                    <div id="detailContent"></div>
+                    <div id="mapContainer" class="map-container" style="display: none;"></div>
+                </div>
+                <div class="detail-footer">
+                    <button id="editBtn" onclick="toggleEditMode()" style="display: none;">수정</button>
+                </div>
             </div>
-            <div class="modal-body">
-                <ul id="scheduleList" class="schedule-list"></ul>
+            <div id="editMode" style="display: none;">
+                <form id="editForm">
+                    <div class="detail-header">
+                        <input type="text" id="editTitleInput" class="edit-title-input" placeholder="제목을 입력하세요">
+                    </div>
+                    <div class="detail-body">
+                        <div class="time-inputs">
+                            <div class="time-input-group">
+                                <label for="editStartTime">시작 시간:</label>
+                                <input type="datetime-local" id="editStartTime" class="time-input">
+                            </div>
+                            <div class="time-input-group">
+                                <label for="editEndTime">종료 시간:</label>
+                                <input type="datetime-local" id="editEndTime" class="time-input">
+                            </div>
+                        </div>
+                        <textarea id="editContentInput" class="edit-content-input" placeholder="내용을 입력하세요"></textarea>
+                    </div>
+                    <div class="detail-footer">
+                        <button type="button" class="submit-btn" onclick="updateSchedule()">수정하기</button>
+                        <button type="button" class="cancel-btn" onclick="cancelEdit()">취소</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- 상세 보기 모달 -->
-    <div id="detailModal" class="modal">
+    <!-- 일정 수정 모달 -->
+    <div id="editModal" class="modal">
         <div class="modal-content">
+            <span class="close" onclick="closeModal('editModal')">&times;</span>
+            <h2>일정 수정</h2>
+            <form id="editForm">
+                <input type="hidden" id="editEventId">
+                <div class="form-group">
+                    <label for="editTitle">제목</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="editContent">내용</label>
+                    <textarea id="editContent" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="editStart">시작 시간</label>
+                    <input type="datetime-local" id="editStart" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEnd">종료 시간</label>
+                    <input type="datetime-local" id="editEnd" required>
+                </div>
+                <button type="submit">저장</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 일정 추가 모달 -->
+    <div id="addScheduleModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addScheduleModal')">&times;</span>
             <div class="modal-header">
-                <h3 id="detailTitle"></h3>
-                <button class="close-btn" onclick="closeModal('detailModal')">&times;</button>
+                <h2>일정 추가</h2>
             </div>
-            <div class="modal-body">
-                <div id="detailContent"></div>
-                <div id="mapContainer" style="display: none; height: 300px; margin-top: 16px;"></div>
-            </div>
+            <form id="scheduleForm">
+                <div class="form-group">
+                    <label for="title">제목</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="content">내용</label>
+                    <textarea id="content" name="content"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="startTime">시작 시간</label>
+                    <input type="datetime-local" id="startTime" name="startTime" required>
+                </div>
+                <div class="form-group">
+                    <label for="endTime">종료 시간</label>
+                    <input type="datetime-local" id="endTime" name="endTime" required>
+                </div>
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-primary">저장</button>
+                    <button type="button" class="btn btn-secondary close-btn">취소</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -382,153 +923,393 @@
         // 캘린더 초기화
         const calendar = new Calendar('#calendar', {
             defaultView: 'month',
-            isReadOnly: false,
-            usageStatistics: false,
+            isReadOnly: true,
             month: {
                 dayNames: ['일', '월', '화', '수', '목', '금', '토'],
-                visibleEventCount: 1,
-                isAlways6Weeks: false,
-                gridSelection: false
+                visibleEventCount: 0,
             },
             template: {
-                time(event) {
-                    const start = new Date(event.start);
-                    return `${start.getHours()}:${String(start.getMinutes()).padStart(2, '0')}`;
+                monthDayname: function(model) {
+                    return model.label;
                 },
-                monthGridHeader(model) {
+                monthGridHeader: function(model) {
                     const date = parseInt(model.date.split('-')[2], 10);
                     const day = model.day;
                     const isToday = model.isToday;
+                    const events = model.events || [];
                     const style = day === 0 ? 'color: #FF0000;' : 
                                 day === 6 ? 'color: #0000FF;' : '';
-                    return `<span class="${isToday ? 'today' : ''}" style="${style}">${date}</span>`;
+                    
+                    let html = `<span class="${isToday ? 'today' : ''}" style="${style}">${date}</span>`;
+                    
+                    if (events.length > 0) {
+                        // 숫자에 클릭 이벤트 추가
+                        html += `<br><span class="event-count" onclick="showEventList('${model.date}', ${events.length})">${events.length}</span>`;
+                    }
+                    
+                    return html;
                 }
             }
         });
 
-        // Google Maps 초기화 함수
-        function initMap(eventId) {
-            if (!map) {
-                map = new google.maps.Map(document.getElementById('mapContainer'), {
-                    zoom: 15,
-                    center: { lat: 37.5665, lng: 126.9780 } // 기본 중심점
-                });
-            }
-
-            // 기존 경로 제거
-            if (currentPath) {
-                currentPath.setMap(null);
-            }
-
-            // 산책 경로 데이터 가져오기
-            fetch(`/walk/path/${eventId}`)
-                .then(response => response.json())
-                .then(pathData => {
-                    const path = pathData.map(point => ({
-                        lat: point.latitude,
-                        lng: point.longitude
-                    }));
-
-                    currentPath = new google.maps.Polyline({
-                        path: path,
-                        geodesic: true,
-                        strokeColor: '#FF0000',
-                        strokeOpacity: 1.0,
-                        strokeWeight: 2
-                    });
-
-                    currentPath.setMap(map);
-
-                    if (path.length > 0) {
-                        map.setCenter(path[0]);
-                    }
-                })
-                .catch(error => {
-                    console.error('산책 경로를 불러오는 중 오류가 발생했습니다:', error);
-                });
-        }
-
-        // 일정 데이터 가져오기
+        // 일정과 산책 데이터 한 번에 가져오기
         fetch('/schedule/events')
-            .then(response => response.json())
-            .then(events => {
-                calendar.createEvents(events.map(event => ({
-                    id: event.id,
-                    title: event.title,
-                    body: event.content,
-                    start: new Date(event.start),
-                    end: new Date(event.end),
-                    category: 'time',
-                    calendarId: event.type || 'default'
-                })));
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('서버 오류가 발생했습니다.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('서버에서 받은 데이터:', data);
+                if (data && data.events && Array.isArray(data.events)) {
+                    const events = data.events.map(event => {
+                        console.log('이벤트 처리:', event);
+                        return {
+                            id: event.id,
+                            title: event.title,
+                            body: event.content,
+                            start: new Date(event.start),
+                            end: new Date(event.end),
+                            category: 'time',
+                            calendarId: event.type || 'default',
+                            extendedProps: {
+                                type: event.type,
+                                body: event.content,
+                                totalDistance: event.totalDistance
+                            }
+                        };
+                    });
+                    console.log('캘린더에 추가할 이벤트:', events);
+                    calendar.createEvents(events);
+                }
             })
             .catch(error => {
                 console.error('일정을 불러오는 중 오류가 발생했습니다:', error);
+                alert('일정을 불러오는 중 오류가 발생했습니다.');
             });
 
-        // 뷰 변경 버튼 이벤트 핸들러
-        document.getElementById('monthView').addEventListener('click', () => {
-            calendar.changeView('month');
-            updateViewButtons('monthView');
-        });
-        document.getElementById('weekView').addEventListener('click', () => {
-            calendar.changeView('week');
-            updateViewButtons('weekView');
-        });
-        document.getElementById('dayView').addEventListener('click', () => {
-            calendar.changeView('day');
-            updateViewButtons('dayView');
-        });
-
-        // 뷰 버튼 상태 업데이트
-        function updateViewButtons(activeId) {
-            ['monthView', 'weekView', 'dayView'].forEach(id => {
-                document.getElementById(id).classList.toggle('active', id === activeId);
-            });
-        }
-
-        // 네비게이션 버튼 이벤트 핸들러
-        document.getElementById('prevBtn').addEventListener('click', () => calendar.prev());
-        document.getElementById('nextBtn').addEventListener('click', () => calendar.next());
-        document.getElementById('todayBtn').addEventListener('click', () => calendar.today());
-
-        // 현재 월 표시 업데이트
-        function updateCurrentMonth() {
-            const date = calendar.getDate();
-            document.getElementById('currentMonth').textContent = date.toLocaleString('ko-KR', {
-                year: 'numeric',
-                month: 'long'
-            });
-        }
-
-        calendar.on('afterRenderSchedule', updateCurrentMonth);
-        updateCurrentMonth();
-
-        // 일정 클릭 시 상세 보기
+        // 이벤트 블록 클릭 시 상세 정보 표시
         calendar.on('clickEvent', (event) => {
-            showDetailModal(event.event);
+            console.log("이벤트 클릭됨:", event);
+            showDetailView(event.event);
         });
 
-        // more 버튼 클릭 시 목록 보기
-        calendar.on('clickMoreEventsBtn', (event) => {
-            const date = event.date;
-            const events = calendar.getEventsByDate(date);
-            showScheduleList(date, events);
+        // 날짜 클릭 시 이벤트 목록 표시
+        calendar.on('selectDateTime', (event) => {
+            console.log("날짜 선택됨:", event);
+            const date = event.start;
+            const events = calendar.getEvents(date);
+            showEventList(date, events);
         });
 
-        // 날짜 클릭 시 해당 날짜의 일정 목록 보기
-        calendar.on('clickDate', (event) => {
-            const date = event.date;
-            const events = calendar.getEventsByDate(date);
+        // 백업으로 select 이벤트도 처리
+        calendar.on('select', (event) => {
+            console.log("select 이벤트 발생:", event);
+            const date = event.start;
+            const events = calendar.getEvents(date);
+            showEventList(date, events);
+        });
+
+        // 이벤트 목록 표시 함수 수정
+        function showEventList(dateStr, count) {
+            const date = new Date(dateStr);
+            const events = calendar.getEvents(date);
+            const modalDate = document.getElementById('modalDate');
+            const eventList = document.getElementById('eventList');
+            const modal = document.getElementById('eventListModal');
+
+            modalDate.textContent = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
+            eventList.innerHTML = '';
+
+            events.forEach(event => {
+                const li = document.createElement('li');
+                const time = new Date(event.start);
+                li.innerHTML = `
+                    <div class="event-item">
+                        <span class="event-time">${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}</span>
+                        <span class="event-title">${event.title}</span>
+                    </div>
+                `;
+                // 직접 클릭 이벤트 핸들러를 추가
+                li.querySelector('.event-item').addEventListener('click', () => {
+                    showDetailView(event);
+                });
+                eventList.appendChild(li);
+            });
+
+            modal.style.display = 'block';
+        }
+
+        function showDetailView(event) {
+            console.log("Event data:", event);
             
-            if (events.length === 1) {
-                // 일정이 1개면 바로 상세 보기
-                showDetailModal(events[0]);
-            } else if (events.length > 1) {
-                // 일정이 2개 이상이면 목록 보기
-                showScheduleList(date, events);
+            const detailModal = document.getElementById('detailModal');
+            const detailTitle = document.getElementById('detailTitle');
+            const detailContent = document.getElementById('detailContent');
+            const mapContainer = document.getElementById('mapContainer');
+            const editBtn = document.getElementById('editBtn');
+            const viewMode = document.getElementById('viewMode');
+            const editMode = document.getElementById('editMode');
+
+            // 초기 상태는 보기 모드
+            viewMode.style.display = 'block';
+            editMode.style.display = 'none';
+
+            detailTitle.textContent = event.title;
+
+            // event.id로 일정 타입 확인 ('w'로 시작하면 산책)
+            const isWalk = event.id.startsWith('w');
+
+            if (isWalk) {
+                // 산책 상세 정보 표시
+                mapContainer.style.display = 'block';
+                editBtn.style.display = 'none';
+                
+                // 거리 추출 (문자열에서 숫자만 추출)
+                const distanceMatch = event.body.match(/[\d.]+/);
+                const distanceInMeters = distanceMatch ? parseFloat(distanceMatch[0]) : 0;
+                
+                // 거리 포맷팅 (기본 단위는 m, 1000m 이상일 때만 km로 변환)
+                let distanceText = '';
+                if (distanceInMeters >= 1000) {
+                    distanceText = `${(distanceInMeters / 1000).toFixed(2)}km`;
+                } else {
+                    distanceText = `${Math.round(distanceInMeters)}m`;
+                }
+
+                // 시작/종료 시간 포맷팅
+                const startTime = new Date(event.start);
+                const endTime = new Date(event.end);
+                const timeFormat = (date) => {
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const minutes = String(date.getMinutes()).padStart(2, '0');
+                    const seconds = String(date.getSeconds()).padStart(2, '0');
+                    return `${hours}:${minutes}:${seconds}`;
+                };
+
+                detailContent.innerHTML = `
+                    시작시간 : ${timeFormat(startTime)}<br>
+                    종료시간 : ${timeFormat(endTime)}<br>
+                    총 거리 : ${distanceText}<br>
+                    <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
+                        <span style="color: #4CAF50;">●</span> 출발지점&nbsp;&nbsp;
+                        <span style="color: #F44336;">●</span> 도착지점
+                    </div>
+                `;
+
+                // 산책 ID에서 'w' 제거하고 지도 초기화
+                const walkId = event.id.substring(1);
+                initWalkMap(walkId);
+            } else {
+                // 일반 일정 상세 정보 표시
+                detailContent.textContent = event.body || '';
+                mapContainer.style.display = 'none';
+                editBtn.style.display = 'block';
+                editBtn.dataset.eventId = event.id;
+                
+                // 수정 폼에 현재 값 설정
+                document.getElementById('editTitleInput').value = event.title;
+                document.getElementById('editContentInput').value = event.body || '';
+                document.getElementById('editStartTime').value = formatDateTimeLocal(new Date(event.start));
+                document.getElementById('editEndTime').value = formatDateTimeLocal(new Date(event.end));
             }
+
+            // 이전 모달 닫기
+            closeModal('eventListModal');
+            // 상세 모달 표시
+            detailModal.style.display = 'block';
+        }
+
+        function toggleEditMode() {
+            const viewMode = document.getElementById('viewMode');
+            const editMode = document.getElementById('editMode');
+            viewMode.style.display = 'none';
+            editMode.style.display = 'block';
+        }
+
+        function cancelEdit() {
+            const viewMode = document.getElementById('viewMode');
+            const editMode = document.getElementById('editMode');
+            viewMode.style.display = 'block';
+            editMode.style.display = 'none';
+        }
+
+        function updateSchedule() {
+            const eventId = document.getElementById('editBtn').dataset.eventId;
+            console.log("수정할 일정 ID:", eventId);
+            
+            const title = document.getElementById('editTitleInput').value;
+            const body = document.getElementById('editContentInput').value;
+            const startTime = document.getElementById('editStartTime').value;
+            const endTime = document.getElementById('editEndTime').value;
+
+            if (!title || !startTime || !endTime) {
+                alert('제목, 시작 시간, 종료 시간은 필수 입력사항입니다.');
+                return;
+            }
+
+            // 날짜 형식 변환 (로컬 시간 유지)
+            const startDate = new Date(startTime);
+            const endDate = new Date(endTime);
+            
+            // UTC 오프셋을 포함한 ISO 문자열 생성
+            const koreanTimeOffset = '+09:00';
+            const startISOString = startDate.getFullYear() + 
+                '-' + String(startDate.getMonth() + 1).padStart(2, '0') + 
+                '-' + String(startDate.getDate()).padStart(2, '0') + 
+                'T' + String(startDate.getHours()).padStart(2, '0') + 
+                ':' + String(startDate.getMinutes()).padStart(2, '0') + 
+                ':00' + koreanTimeOffset;
+            
+            const endISOString = endDate.getFullYear() + 
+                '-' + String(endDate.getMonth() + 1).padStart(2, '0') + 
+                '-' + String(endDate.getDate()).padStart(2, '0') + 
+                'T' + String(endDate.getHours()).padStart(2, '0') + 
+                ':' + String(endDate.getMinutes()).padStart(2, '0') + 
+                ':00' + koreanTimeOffset;
+
+            const updateData = {
+                id: eventId,
+                title: title,
+                body: body,
+                start: startISOString,
+                end: endISOString
+            };
+
+            console.log("전송할 데이터:", updateData);
+
+            fetch('/schedule/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(updateData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('서버 응답:', result);
+                if (result.success) {
+                    alert(result.message || '일정이 수정되었습니다.');
+                    // 페이지 새로고침
+                    window.location.reload();
+                } else {
+                    alert(result.message || '일정 수정에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('일정 수정 중 오류가 발생했습니다.');
+            });
+        }
+
+        function fetchEvents() {
+            fetch('/schedule/events')
+                .then(response => response.json())
+                .then(events => {
+                    events.forEach(event => {
+                        calendar.createEvents([{
+                            id: event.id,
+                            title: event.title,
+                            body: event.content,
+                            start: new Date(event.start),
+                            end: new Date(event.end),
+                            category: 'time'
+                        }]);
+                    });
+                });
+        }
+
+        // datetime-local 입력을 위한 날짜 포맷 함수
+        function formatDateTimeLocal(date) {
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const hours = String(d.getHours()).padStart(2, '0');
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day}T${hours}:${minutes}`;
+        }
+
+        function editSchedule() {
+            const eventId = document.getElementById('editBtn').dataset.eventId;
+            const event = calendar.getEvent(eventId);
+            
+            if (!event) {
+                alert('일정을 찾을 수 없습니다.');
+                return;
+            }
+
+            // 수정 폼에 현재 일정 정보 설정
+            document.getElementById('editEventId').value = eventId;
+            document.getElementById('editTitle').value = event.title;
+            document.getElementById('editContent').value = event.extendedProps.body || '';
+            document.getElementById('editStart').value = formatDateTimeLocal(new Date(event.start));
+            document.getElementById('editEnd').value = formatDateTimeLocal(new Date(event.end));
+
+            // 상세 모달 닫고 수정 모달 열기
+            closeModal('detailModal');
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // 일정 수정 폼 제출 처리
+        document.getElementById('editForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const eventId = document.getElementById('editEventId').value;
+            const title = document.getElementById('editTitle').value;
+            const content = document.getElementById('editContent').value;
+            const start = new Date(document.getElementById('editStart').value);
+            const end = new Date(document.getElementById('editEnd').value);
+
+            // 서버에 일정 수정 요청
+            fetch('/schedule/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: eventId,
+                    title: title,
+                    body: content,
+                    start: start.toISOString(),
+                    end: end.toISOString()
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('서버 오류가 발생했습니다');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 캘린더에서 기존 일정 업데이트
+                calendar.updateEvent({
+                    id: eventId,
+                    title: title,
+                    body: content,
+                    start: start,
+                    end: end
+                });
+
+                alert('일정이 수정되었습니다.');
+                closeModal('editModal');
+            })
+            .catch(error => {
+                alert(error.message);
+            });
         });
+
+        function formatDateTime(date) {
+            const d = new Date(date);
+            return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+        }
+
+        function formatDate(date) {
+            const d = new Date(date);
+            return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+        }
 
         // 모달 닫기 함수
         function closeModal(modalId) {
@@ -539,67 +1320,6 @@
                 currentPath.setMap(null);
                 currentPath = null;
             }
-        }
-
-        // 상세 보기 모달 표시
-        function showDetailModal(event) {
-            const modal = document.getElementById('detailModal');
-            const title = document.getElementById('detailTitle');
-            const content = document.getElementById('detailContent');
-            const mapContainer = document.getElementById('mapContainer');
-
-            title.textContent = event.title;
-            
-            let contentHtml = `
-                <p><strong>시간:</strong> ${formatTime(event.start)} ~ ${formatTime(event.end)}</p>
-            `;
-
-            if (event.calendarId === 'walk') {
-                contentHtml += `
-                    <p><strong>총 거리:</strong> ${event.body || '기록 없음'}</p>
-                `;
-                mapContainer.style.display = 'block';
-                // Google Maps 초기화 및 경로 표시
-                initMap(event.id);
-            } else {
-                mapContainer.style.display = 'none';
-                if (event.body) {
-                    contentHtml += `<p><strong>내용:</strong> ${event.body}</p>`;
-                }
-            }
-
-            content.innerHTML = contentHtml;
-            modal.style.display = 'block';
-        }
-
-        // 일정 목록 표시
-        function showScheduleList(date, events) {
-            const modal = document.getElementById('scheduleListModal');
-            const modalDate = document.getElementById('modalDate');
-            const scheduleList = document.getElementById('scheduleList');
-            
-            modalDate.textContent = date.toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                weekday: 'long'
-            });
-
-            scheduleList.innerHTML = events.map(event => `
-                <li class="schedule-item" onclick="showDetailModal(${JSON.stringify(event).replace(/"/g, '&quot;')})">
-                    <div class="schedule-time">${formatTime(event.start)}</div>
-                    <div class="schedule-title">${event.title}</div>
-                </li>
-            `).join('');
-
-            modal.style.display = 'block';
-        }
-
-        // 시간 포맷 함수
-        function formatTime(date) {
-            const hours = date.getHours();
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            return `${hours}:${minutes}`;
         }
 
         // 모달 외부 클릭 시 닫기
@@ -614,6 +1334,315 @@
                 }
             }
         };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 뷰 변경 버튼 이벤트 핸들러
+            document.getElementById('monthViewBtn').addEventListener('click', function() {
+                calendar.changeView('month');
+                updateViewRange();
+            });
+            
+            document.getElementById('weekViewBtn').addEventListener('click', function() {
+                calendar.changeView('week');
+                updateViewRange();
+                calendar.setOptions({
+                    week: {
+                        dayNames: ['일', '월', '화', '수', '목', '금', '토'],
+                        showTimezoneCollapseButton: false,
+                        timezonesCollapsed: false,
+                        hourStart: 0,
+                        hourEnd: 24,
+                        taskView: false,
+                        eventView: ['time'],
+                        collapseDuplicateEvents: false,
+                        narrowWeekend: false,
+                        startDayOfWeek: 0,
+                        workweek: false,
+                        cellEvents: {
+                            clickable: true,
+                            enableDblClick: false,
+                        },
+                        dayGridMode: 'slot'
+                    },
+                    theme: {
+                        week: {
+                            dayName: {
+                                borderLeft: '1px solid #e5e5e5',
+                                borderRight: '1px solid #e5e5e5'
+                            },
+                            timeGridLeft: {
+                                width: '50px',
+                                backgroundColor: '#fff'
+                            },
+                            timeGridLeftAdditionalTimezone: {
+                                backgroundColor: '#fff'
+                            },
+                            timeGridHourLine: {
+                                borderBottom: '1px solid #e5e5e5'
+                            },
+                            nowIndicatorLabel: {
+                                color: '#515ce6'
+                            },
+                            nowIndicatorPast: {
+                                border: '1px dashed #515ce6'
+                            },
+                            nowIndicatorBullet: {
+                                backgroundColor: '#515ce6'
+                            },
+                            nowIndicatorToday: {
+                                border: '1px solid #515ce6'
+                            },
+                            nowIndicatorFuture: {
+                                border: '1px dashed #515ce6'
+                            }
+                        }
+                    }
+                });
+            });
+            
+            document.getElementById('dayViewBtn').addEventListener('click', function() {
+                calendar.changeView('day');
+                updateViewRange();
+            });
+            
+            // 이전/다음 버튼 이벤트 핸들러
+            document.getElementById('prevBtn').addEventListener('click', function() {
+                calendar.prev();
+                updateViewRange();
+            });
+            
+            document.getElementById('nextBtn').addEventListener('click', function() {
+                calendar.next();
+                updateViewRange();
+            });
+            
+            // 현재 뷰의 날짜 범위 업데이트 함수
+            function updateViewRange() {
+                const currentView = calendar.getViewName();
+                const calendarDate = calendar.getDate();
+                let rangeText = '';
+                
+                if (currentView === 'month') {
+                    rangeText = calendarDate.getFullYear() + '년 ' + (calendarDate.getMonth() + 1) + '월';
+                } else if (currentView === 'week') {
+                    const weekStart = new Date(calendarDate);
+                    weekStart.setDate(calendarDate.getDate() - calendarDate.getDay());
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
+                    rangeText = (weekStart.getMonth() + 1) + '월 ' + weekStart.getDate() + '일 - ' +
+                              (weekEnd.getMonth() + 1) + '월 ' + weekEnd.getDate() + '일';
+                } else if (currentView === 'day') {
+                    rangeText = (calendarDate.getMonth() + 1) + '월 ' + calendarDate.getDate() + '일';
+                }
+                
+                document.getElementById('currentViewRange').textContent = rangeText;
+            }
+            
+            // 초기 날짜 범위 표시
+            updateViewRange();
+        });
+
+        // 일정 추가 모달 관련 코드
+        const addScheduleModal = document.getElementById('addScheduleModal');
+        const addScheduleBtn = document.getElementById('addScheduleBtn');
+        const closeButtons = addScheduleModal.querySelectorAll('.close, .close-btn');
+        const scheduleForm = document.getElementById('scheduleForm');
+
+        // 모달 열기
+        addScheduleBtn.addEventListener('click', function() {
+            addScheduleModal.style.display = 'block';
+            
+            // 현재 선택된 날짜를 기본값으로 설정
+            const currentDate = calendar.getDate();
+            const startDateTime = new Date(currentDate);
+            const endDateTime = new Date(currentDate);
+            endDateTime.setHours(startDateTime.getHours() + 1); // 기본 1시간 간격
+
+            document.getElementById('startTime').value = formatDateTimeLocal(startDateTime);
+            document.getElementById('endTime').value = formatDateTimeLocal(endDateTime);
+        });
+
+        // 모달 닫기
+        closeButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                addScheduleModal.style.display = 'none';
+                scheduleForm.reset();
+            });
+        });
+
+        // 모달 외부 클릭 시 닫기
+        window.addEventListener('click', function(event) {
+            if (event.target == addScheduleModal) {
+                addScheduleModal.style.display = 'none';
+                scheduleForm.reset();
+            }
+        });
+
+        // 일정 추가 폼 제출 처리
+        document.getElementById('scheduleForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            
+            if (!title || !startTime || !endTime) {
+                alert('제목, 시작 시간, 종료 시간은 필수 입력사항입니다.');
+                return;
+            }
+            
+            // 날짜 형식 변환 (로컬 시간 유지)
+            const startDate = new Date(startTime);
+            const endDate = new Date(endTime);
+            
+            // UTC 오프셋을 포함한 ISO 문자열 생성
+            const koreanTimeOffset = '+09:00';
+            const startISOString = startDate.getFullYear() + 
+                '-' + String(startDate.getMonth() + 1).padStart(2, '0') + 
+                '-' + String(startDate.getDate()).padStart(2, '0') + 
+                'T' + String(startDate.getHours()).padStart(2, '0') + 
+                ':' + String(startDate.getMinutes()).padStart(2, '0') + 
+                ':00' + koreanTimeOffset;
+            
+            const endISOString = endDate.getFullYear() + 
+                '-' + String(endDate.getMonth() + 1).padStart(2, '0') + 
+                '-' + String(endDate.getDate()).padStart(2, '0') + 
+                'T' + String(endDate.getHours()).padStart(2, '0') + 
+                ':' + String(endDate.getMinutes()).padStart(2, '0') + 
+                ':00' + koreanTimeOffset;
+            
+            const scheduleData = {
+                title: title,
+                content: content,
+                startTime: startISOString,
+                endTime: endISOString
+            };
+            
+            fetch('/schedule/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(scheduleData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.id) {
+                    alert('일정이 추가되었습니다.');
+                    // 폼 초기화
+                    document.getElementById('scheduleForm').reset();
+                    // 모달 닫기
+                    closeModal('addScheduleModal');
+                    // 페이지 새로고침
+                    window.location.reload();
+                } else {
+                    alert(result.message || '일정 추가에 실패했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('일정 추가 중 오류가 발생했습니다.');
+            });
+        });
+
+        function initWalkMap(walkId) {
+            // 지도 초기화
+            const mapContainer = document.getElementById('mapContainer');
+            let map = null;
+
+            // 산책 경로 데이터 가져오기
+            fetch(`/schedule/walk/${walkId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('서버 오류가 발생했습니다');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("받은 데이터:", data);
+                    if (data && data.path && Array.isArray(data.path) && data.path.length > 0) {
+                        // 경로 데이터를 sequence 기준으로 정렬
+                        const sortedPath = data.path.sort((a, b) => a.sequence - b.sequence);
+                        
+                        // 모든 경로 좌표 변환
+                        const coordinates = sortedPath.map(point => ({
+                            lat: parseFloat(point.latitude),
+                            lng: parseFloat(point.longitude)
+                        }));
+
+                        // 지도 초기화
+                        map = new google.maps.Map(mapContainer, {
+                            zoom: 16,
+                            center: coordinates[0],
+                            zoomControl: false,
+                            mapTypeControl: false,
+                            scaleControl: false,
+                            streetViewControl: false,
+                            rotateControl: false,
+                            fullscreenControl: false,
+                            gestureHandling: 'cooperative',
+                            disableDefaultUI: true
+                        });
+
+                        // 경로 그리기
+                        const path = new google.maps.Polyline({
+                            path: coordinates,
+                            geodesic: false,
+                            strokeColor: '#2196F3',
+                            strokeOpacity: 1.0,
+                            strokeWeight: 3
+                        });
+
+                        path.setMap(map);
+
+                        // 시작 지점 마커 (첫 번째 좌표)
+                        new google.maps.Marker({
+                            position: coordinates[0],
+                            map: map,
+                            title: '시작 지점',
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 10,
+                                fillColor: '#4CAF50',
+                                fillOpacity: 1,
+                                strokeWeight: 2,
+                                strokeColor: '#fff'
+                            },
+                            zIndex: 2
+                        });
+
+                        // 종료 지점 마커 (마지막 좌표)
+                        new google.maps.Marker({
+                            position: coordinates[coordinates.length - 1],
+                            map: map,
+                            title: '종료 지점',
+                            icon: {
+                                path: google.maps.SymbolPath.CIRCLE,
+                                scale: 10,
+                                fillColor: '#F44336',
+                                fillOpacity: 1,
+                                strokeWeight: 2,
+                                strokeColor: '#fff'
+                            },
+                            zIndex: 2
+                        });
+
+                        // 모든 경로가 보이도록 지도 영역 조정
+                        const bounds = new google.maps.LatLngBounds();
+                        coordinates.forEach(coord => bounds.extend(coord));
+                        map.fitBounds(bounds);
+                    } else {
+                        console.log("산책 경로 데이터가 없습니다");
+                        mapContainer.innerHTML = '<div style="padding: 20px; text-align: center;">산책 경로 데이터가 없습니다</div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('산책 경로를 불러오는 중 오류가 발생했습니다:', error);
+                    mapContainer.innerHTML = '<div style="padding: 20px; text-align: center;">산책 경로를 불러오는데 실패했습니다</div>';
+                });
+        }
     </script>
 </body>
 </html>

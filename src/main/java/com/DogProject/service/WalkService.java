@@ -6,11 +6,14 @@ import com.DogProject.repository.WalkSessionRepository;
 import com.DogProject.repository.PathRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 
 @Service
 public class WalkService {
+    
+    private static final Logger logger = LoggerFactory.getLogger(WalkService.class);
     
     @Autowired
     private WalkSessionRepository walkSessionRepository;
@@ -23,7 +26,14 @@ public class WalkService {
     }
 
     public List<WalkSession> getWalkSessionsByMember(int mIdx) {
-        return walkSessionRepository.findByMember_mIdxOrderByWalkDateDesc(mIdx);
+        logger.info("산책 세션 조회 시작: mIdx={}", mIdx);
+        List<WalkSession> sessions = walkSessionRepository.findByMember_mIdxOrderByWalkDateDesc(mIdx);
+        logger.info("산책 세션 조회 결과: {} 건", sessions.size());
+        for (WalkSession session : sessions) {
+            logger.info("산책 세션: wsIdx={}, walkDate={}, walkEndDate={}, distance={}", 
+                session.getWsIdx(), session.getWalkDate(), session.getWalkEndDate(), session.getTotalDistance());
+        }
+        return sessions;
     }
 
     public WalkSession getWalkSessionById(int wsIdx) {

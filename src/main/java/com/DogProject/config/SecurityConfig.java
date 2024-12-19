@@ -8,20 +8,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.firewall.StrictHttpFirewall;
+import org.springframework.security.web.firewall.HttpFirewall;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession;
-import java.util.Enumeration;
+import java.util.Base64;
+import java.nio.charset.StandardCharsets;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfig {
+public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final CustomOAuth2UserService customOAuth2UserService;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
@@ -33,22 +35,39 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
+        StrictHttpFirewall firewall = new StrictHttpFirewall();
+        firewall.setAllowUrlEncodedSlash(true);
+        firewall.setAllowSemicolon(true);
+        firewall.setAllowUrlEncodedPercent(true);
+        firewall.setAllowBackSlash(true);
+        firewall.setAllowUrlEncodedPeriod(true);
+        return firewall;
+    }
+
+    @Override
+    public void configure(WebSecurity web) throws Exception {
+        web.httpFirewall(allowUrlEncodedSlashHttpFirewall());
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
         http.securityContext((securityContext) -> securityContext
             .requireExplicitSave(true)
         );
         
         http
             .csrf()
-                .ignoringAntMatchers("/member/checkEmail", "/api/**", "/dog/insert", "/dog/update/**", "/ws/**", "/ws/chat/**", "/uploads/**")  // WebSocket 경로 CSRF 검사 제외
+                .ignoringAntMatchers("/member/checkEmail", "/api/**", "/dog/insert", "/dog/update/**", 
+                    "/ws/**", "/ws/chat/**", "/uploads/**", "/schedule/save", "/schedule/update")
                 .and()
             .sessionManagement()
                 .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
                 .maximumSessions(1)
-                .maxSessionsPreventsLogin(false)  // 동시 로그인 허용으로 변경
+                .maxSessionsPreventsLogin(false)
                 .expiredUrl("/member/login?expired")
                 .and()
-                .sessionFixation().migrateSession()  // 세션 마이그레이션으로 변경
+                .sessionFixation().migrateSession()
                 .invalidSessionUrl("/member/login?invalid")
                 .and()
             .headers()
@@ -58,38 +77,49 @@ public class SecurityConfig {
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/video/**","/member/**", "/error", 
                         "/home", "/board", "/board/detail", "/dog/**", "/shop/**", "/chat/**", "/walk/**", "/api/**",
                         "/ws/**", "/ws/chat/**", "/topic/**", "/schedule/**", "/uploads/**").permitAll()
-                .antMatchers("/admin/**").hasRole("ADMIN")  
-                .antMatchers("/member/checkEmail").permitAll()  // 이메일 중복 체크 API 허용
-                .antMatchers("/board/create").authenticated()  // 로그인하지 않은 사용자의 /board/create 접근 제한
+                .antMatchers("/admin/**").hasRole("ADMIN")
+                .antMatchers("/member/checkEmail").permitAll()
+                .antMatchers("/board/create").authenticated()
                 .anyRequest().authenticated()
                 .and()
             .formLogin()
                 .loginPage("/member/login")
                 .loginProcessingUrl("/member/login")
-                .defaultSuccessUrl("/home", true)  // true를 추가하여 항상 홈으로 리다이렉트
-                .failureUrl("/member/login/error")  // 실패 URL 수정
+                .defaultSuccessUrl("/home", true)
+                .failureUrl("/member/login/error")
                 .usernameParameter("email")
                 .passwordParameter("password")
                 .successHandler((request, response, authentication) -> {
                     String userEmail = authentication.getName();
                     String role = authentication.getAuthorities().toString();
                     
-                    // MemberService를 통해 사용자 정보 조회
                     Member member = memberService.findBymEmail(userEmail);
                     String provider = member != null ? member.getProvider() : "unknown";
                     
-                    // 세션에 로그인 정보 저장
+                    // 세션에 로그인 정보 저장 (mIdx를 Integer로 저장)
                     HttpSession session = request.getSession();
                     session.setAttribute("member", member);
                     session.setAttribute("isLoggedIn", true);
-                    session.setAttribute("mIdx", member.getMIdx());  
+                    session.setAttribute("mIdx", member.getMIdx());
+                    session.setAttribute("email", userEmail);
+                    session.setAttribute("role", role);
                     
-                    // USER_INFO 쿠키에 이메일, 권한, provider, mIdx 정보 포함
-                    var userInfo = member.getMIdx() + "★" + userEmail + "★" + provider + "★" + role;  // mIdx 추가
-                    Cookie emailCookie = new Cookie("USER_INFO", userInfo);
+                    // 쿠키 정보 저장 (Base64 인코딩)
+                    String userInfo = String.format("%d|%s|%s|%s", 
+                        member.getMIdx(), userEmail, provider, role);
+                    String encodedUserInfo = Base64.getEncoder().encodeToString(
+                        userInfo.getBytes(StandardCharsets.UTF_8));
+                    
+                    Cookie emailCookie = new Cookie("USER_INFO", encodedUserInfo);
                     emailCookie.setPath("/");
-                    emailCookie.setMaxAge(3600); // 1시간
+                    emailCookie.setMaxAge(3600);
                     response.addCookie(emailCookie);
+                    
+                    // 디버그 로그 추가
+                    System.out.println("Session mIdx: " + session.getAttribute("mIdx"));
+                    System.out.println("Session email: " + session.getAttribute("email"));
+                    System.out.println("Cookie userInfo: " + userInfo);
+                    
                     response.sendRedirect("/home");
                 })
                 .permitAll()
@@ -107,14 +137,14 @@ public class SecurityConfig {
                     response.sendRedirect("/member/login");
                 })
                 .permitAll()
-            .and()
-            .rememberMe()  
-                .key("uniqueAndSecret")  
-                .tokenValiditySeconds(60 * 60 * 24 * 30)  
-                .rememberMeParameter("remember-me")  
-                .userDetailsService(memberService)  
                 .and()
-                .oauth2Login()
+            .rememberMe()
+                .key("uniqueAndSecret")
+                .tokenValiditySeconds(60 * 60 * 24 * 30)
+                .rememberMeParameter("remember-me")
+                .userDetailsService(memberService)
+                .and()
+            .oauth2Login()
                 .loginPage("/member/login")
                 .defaultSuccessUrl("/home", true)
                 .failureUrl("/member/login?error=true")
@@ -124,13 +154,5 @@ public class SecurityConfig {
                 .and()
                 .authorizationEndpoint()
                     .baseUri("/oauth2/authorization");
-
-        return http.build();
-    }
-    
-    @Bean
-    public StrictHttpFirewall strictHttpFirewall() {
-        StrictHttpFirewall firewall = new StrictHttpFirewall();
-        return firewall;
     }
 }

@@ -50,9 +50,4 @@ public class Dog {
     @Column(length = 1)
     @Comment("삭제 여부 (Y/N)")
     private String delYN = "N";
-
-    @Builder.Default
-    @OneToMany(mappedBy = "dog", cascade = CascadeType.ALL)
-    @Comment("강아지의 일정")
-    private List<Schedule> schedules = new ArrayList<>();
 }

@@ -208,8 +208,8 @@
   top: 2.83px;
   overflow: visible;
 }
-.div7 {
-  padding: 21px 18px 21px 18px;
+.mileige {
+  padding: 0px 0px 0px 0px;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -295,46 +295,52 @@
   position: relative;
   object-fit: cover;
 }
-.frame-61 {
+.map {
   background: #bab9b9;
   width: 430px;
   height: calc(100% - 68px); /* 푸터 높이만큼 자동 조정 */
   position: absolute;
   left: 0px;
-  top: 292px;
+  top: 250px;
   bottom: 0px; /* 푸터와 자연스럽게 겹치도록 설정 */
   overflow: hidden;
 }
-.frame-483 {
-  padding: 19px 21px 19px 21px;
+.Go-button-site {
+  padding: 19px 21px;
   display: flex;
   flex-direction: row;
   gap: 10px;
   align-items: center;
   justify-content: center;
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  transform: translateX(-50%);
+  z-index: 1;
   width: 87px;
   height: 76px;
-  position: absolute;
-  left: 172px;
-  top: 373px;
+  user-select: none;
 }
-.ellipse-1 {
+
+.Go-button {
   background: rgba(0, 68, 151, 0.63);
   border-radius: 50%;
-  flex-shrink: 0;
+  position: absolute;
   width: 87px;
   height: 76px;
-  position: absolute;
-  left: 0px;
-  top: 0px;
+  left: 0;
+  top: 0;
+  user-select: none;
 }
+
 .go {
   color: #ffffff;
   text-align: center;
-  font-family: "IstokWeb-Bold", sans-serif;
-  font-size: 24px;
-  font-weight: 700;
+  font: 900 30px "Inter", sans-serif;
   position: relative;
+  z-index: 2;
+  user-select: none;
+  pointer-events: none;
 }
 .frame-60 {
   background: #ffffff;
@@ -357,19 +363,7 @@
   left: 4px;
   top: 4px;
 }
-.header {
-  padding: 6px 0px 6px 0px;
-  display: flex;
-  flex-direction: row;
-  gap: 300px;
-  align-items: flex-start;
-  justify-content: flex-start;
-  position: absolute;
-  right: 20px;
-  left: 20px;
-  top: 16px;
-  overflow: hidden;
-}
+
 .frame-484 {
   padding: 10px;
   display: flex;
@@ -416,13 +410,13 @@
   top: 0%;
   overflow: visible;
 }
-.frame-59 {
+.timeanddistance {
   border-radius: 0px 0px 20px 20px;
   width: 430px;
-  height: 110px;
+  height: 95px;
   position: absolute;
   left: 0px;
-  top: 182px;
+  top: 150px;
   overflow: hidden;
 }
 .div13 {
@@ -436,7 +430,7 @@
   left: 218px;
   top: 20px;
 }
-.frame-58 {
+.walk-distance {
   background: rgba(44, 116, 210, 0.37);
   border-radius: 20px;
   align-self: stretch;
@@ -476,7 +470,7 @@
   left: 20px;
   top: 20px;
 }
-.frame-582 {
+.walk-time {
   background: rgba(66, 176, 85, 0.28);
   border-radius: 20px;
   align-self: stretch;

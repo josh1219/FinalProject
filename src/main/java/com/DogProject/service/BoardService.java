@@ -28,16 +28,11 @@ public class BoardService {
 
     @Transactional
     public Board createPost(String category, String title, String content, Member member, List<MultipartFile> files) {
-        // 영속성 컨텍스트에서 Member 엔티티를 다시 조회
-        Member managedMember = boardRepository.findById(member.getMIdx())
-                .map(Board::getMember)
-                .orElse(member);
-
         Board board = new Board();
         board.setBType(category);  // 카테고리를 bType 필드에 저장
         board.setTitle(title);
         board.setContent(content);
-        board.setMember(managedMember);
+        board.setMember(member);  // 직접 세션의 member 사용
         board.setInsertDate(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
         board.setDeleteCheck("N");
         board.setReadRate(0);

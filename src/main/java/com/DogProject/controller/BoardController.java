@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.DogProject.entity.Board;
@@ -38,6 +39,7 @@ import javax.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Enumeration;
 
 @Controller
 @RequestMapping("/board")
@@ -99,33 +101,58 @@ public class BoardController {
                     .body("로그인이 필요합니다.");
             }
 
-            // 세션에서 member 가져오기
+            // 세션에서 member 정보 확인
             HttpSession session = request.getSession();
-            Member sessionMember = (Member) session.getAttribute("member");
+            Member member = (Member) session.getAttribute("member");
             
             System.out.println("=== Session Debug ===");
             System.out.println("Session ID: " + session.getId());
-            System.out.println("Session member: " + sessionMember);
-            if (sessionMember != null) {
-                System.out.println("Session member mIdx: " + sessionMember.getMIdx());
-                System.out.println("Session member name: " + sessionMember.getName());
-                System.out.println("Session member role: " + sessionMember.getRole());
-            }
             
-            if (sessionMember == null) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body("세션이 만료되었습니다. 다시 로그인해주세요.");
+            // 세션의 모든 속성 출력
+            Enumeration<String> attributeNames = session.getAttributeNames();
+            while (attributeNames.hasMoreElements()) {
+                String attributeName = attributeNames.nextElement();
+                System.out.println(attributeName + ": " + session.getAttribute(attributeName));
+            }
+
+            if (member == null) {
+                // OAuth2User에서 provider와 socialId 가져오기
+                Map<String, Object> attributes = oauth2User.getAttributes();
+                String provider = "";
+                String socialId = "";
+                
+                if (attributes.containsKey("response")) {
+                    // Naver
+                    Map<String, Object> response = (Map<String, Object>) attributes.get("response");
+                    provider = "naver";
+                    socialId = String.valueOf(response.get("id"));
+                } else {
+                    // Google
+                    provider = "google";
+                    socialId = String.valueOf(attributes.get("sub"));
+                }
+                
+                // provider와 socialId로 회원 조회
+                member = memberService.findByProviderAndSocialId(provider, socialId);
+                
+                if (member == null) {
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body("회원 정보를 찾을 수 없습니다. 다시 로그인해주세요.");
+                }
+                
+                // 세션에 member 저장
+                session.setAttribute("member", member);
             }
 
             // 관리자가 아닌 경우 공지사항/이벤트 카테고리 제한
             if ((category.equals("notice") || category.equals("event")) 
-                && sessionMember.getRole() != Role.ADMIN) {
+                && member.getRole() != Role.ADMIN) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN)
                     .body("해당 카테고리는 관리자만 작성할 수 있습니다.");
             }
             
             // 게시글 저장
-            Board board = boardService.createPost(category, title, content, sessionMember, files);
+            Board board = boardService.createPost(category, title, content, member, files);
             
             return ResponseEntity.ok().body(board.getBIdx());
             

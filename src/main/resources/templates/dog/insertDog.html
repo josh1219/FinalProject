@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/dog.css">
     <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
+
     <style>
         * {
             margin: 0;
@@ -22,7 +24,7 @@
 
         .container {
             max-width: 800px;
-            margin: 90px auto 0;  
+            margin: 20px 20px;  
             padding: 0 20px;
         }
 
@@ -346,6 +348,15 @@
                     </select>
                 </div>
 
+                <div class="form-group">
+                    <label for="subGender">중성화 여부</label>
+                    <select id="subGender" name="subGender" class="form-control" required>
+                        <option value="">선택하세요</option>
+                        <option value="yes">여</option>
+                        <option value="no">부</option>
+                    </select>
+                </div>
+
                 <button type="submit" class="submit-button">마이펫 등록</button>
             </div>
             </form>
@@ -358,6 +369,10 @@
             <p>견종 식별 중입니다.<br>실제 견종과 다를 시 수정해주세요.</p>
         </div>
     </div>
+
+    <!-- footer -->
+    <div th:replace="~{common/footer :: footer}"></div>
+    <!-- /footer -->
 
     <script>
         function openCamera() {

@@ -1,52 +1,40 @@
-<div class="footer">
-    <div class="div">
-        <div class="frame-48">
-            <div class="iconly-regular-outline-calendar">
-                <img class="calendar" src="/images/calendar0.svg"/>
+<!-- footer -->
+<footer th:fragment="footer" class="footer">
+    <nav class="nav-buttons">
+        <button class="nav-calendar-button" onclick="location.href='/schedule'">
+            <div class="nav-icon">
+                <img src="/images/calendar0.svg" alt="캘린더">
             </div>
-        </div>
-        <div class="frame-49">
-            <div class="div2">캘린더</div>
-        </div>
-    </div>
-    <div class="div3">
-        <div class="frame-48">
-            <div class="iconly-regular-outline-location">
-                <img class="location" src="/images/location0.svg"/>
+            <span class="nav-text">캘린더</span>
+        </button>
+
+        <button class="nav-walk-button" onclick="location.href='/walk'">
+            <div class="nav-icon">
+                <img src="/images/location0.svg" alt="산책">
             </div>
-        </div>
-        <div class="frame-492">
-            <div class="div2">산책</div>
-        </div>
-    </div>
-    <div class="div4">
-        <div class="frame-48">
-            <div class="iconly-regular-outline-home">
-                <img class="home" src="/images/home0.svg"/>
+            <span class="nav-text">산책</span>
+        </button>
+
+        <button class="nav-home-button" onclick="location.href='/home'">
+            <div class="nav-icon">
+                <img src="/images/home0.svg" alt="홈">
             </div>
-        </div>
-        <div class="frame-482">
-            <div class="div2">홈</div>
-        </div>
-    </div>
-    <div class="div5">
-        <div class="frame-48">
-            <div class="iconly-regular-outline-3-user">
-                <img class="_3-user" src="/images/_3-user0.svg"/>
+            <span class="nav-text">홈</span>
+        </button>
+
+        <button class="nav-community-button" onclick="location.href='/board'">
+            <div class="nav-icon">
+                <img src="/images/_3-user0.svg" alt="커뮤니티">
             </div>
-        </div>
-        <div class="frame-49">
-            <div class="div2">커뮤니티</div>
-        </div>
-    </div>
-    <div class="div6">
-        <div class="frame-48">
-            <div class="iconly-regular-outline-category">
-                <img class="category" src="/images/category0.svg"/>
+            <span class="nav-text">커뮤니티</span>
+        </button>
+
+        <button class="nav-menu-button" onclick="location.href='/menu'">
+            <div class="nav-icon">
+                <img src="/images/category0.svg" alt="메뉴">
             </div>
-        </div>
-        <div class="frame-482">
-            <div class="div2">메뉴</div>
-        </div>
-    </div>
-</div>
+            <span class="nav-text">메뉴</span>
+        </button>
+    </nav>
+</footer>
+<!-- /footer -->

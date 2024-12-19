@@ -1,0 +1,80 @@
+.footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #ffffff;
+    border-top: 1px solid #e0e0e0;
+    z-index: 1000;
+}
+
+.nav-buttons {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px 0;
+}
+
+.nav-calendar-button,
+.nav-walk-button,
+.nav-home-button,
+.nav-community-button,
+.nav-menu-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    width: 20%;
+}
+
+.nav-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.nav-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.nav-text {
+    color: #000000;
+    font-family: "IstokWeb-Regular", sans-serif;
+    font-size: 11px;
+    text-align: center;
+    margin-top: 2px;
+}
+
+/* 활성화된 버튼 스타일 */
+.nav-calendar-button.active,
+.nav-walk-button.active,
+.nav-home-button.active,
+.nav-community-button.active,
+.nav-menu-button.active {
+    color: #2C74D2;
+}
+
+.nav-calendar-button.active .nav-icon img,
+.nav-walk-button.active .nav-icon img,
+.nav-home-button.active .nav-icon img,
+.nav-community-button.active .nav-icon img,
+.nav-menu-button.active .nav-icon img {
+    filter: brightness(0) saturate(100%) invert(37%) sepia(74%) saturate(1303%) hue-rotate(199deg) brightness(91%) contrast(89%);
+}
+
+.nav-calendar-button.active .nav-text,
+.nav-walk-button.active .nav-text,
+.nav-home-button.active .nav-text,
+.nav-community-button.active .nav-text,
+.nav-menu-button.active .nav-text {
+    color: #2C74D2;
+    font-weight: bold;
+}

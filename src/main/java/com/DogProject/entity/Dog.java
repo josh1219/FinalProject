@@ -38,6 +38,9 @@ public class Dog {
     @Comment("강아지 유형 또는 AI 데이터 타입")
     private String dType;
 
+    @Comment("중성화 여부")
+    private String subGender;
+
     @ManyToOne
     @JoinColumn(name = "midx")
     @Comment("강아지와 연결된 회원 고유 ID")

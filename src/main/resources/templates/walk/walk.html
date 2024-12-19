@@ -8,6 +8,7 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAyQygBh-3yT1w9IwEOALZVRr3833ZaD-8&libraries=geometry"></script>
     <script src="/js/jquery-3.7.1.min.js"></script>
     <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
     <style>
         a,
         button,
@@ -139,10 +140,15 @@
 
     <div id="warningMessage" class="warning-message"></div>
 
+
     <!-- <div id="test-controls" style="position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
         <button onclick="startTestWalk()" style="margin: 5px; padding: 5px 10px; background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">테스트 시작</button>
         <button onclick="stopTestWalk()" style="margin: 5px; padding: 5px 10px; background: #f44336; color: white; border-radius: 4px; cursor: pointer;">테스트 중지</button>
     </div> -->
+
+    <!-- footer -->
+    <div th:replace="~{common/footer :: footer}"></div>
+    <!-- /footer -->
 
     <script th:inline="javascript">
         var map, directionsService, directionsRenderer, currentLocationMarker, polyline = null, pathCoordinates = [], totalDistance = 0, lastValidLocation = null, currentLocation = null, MIN_DISTANCE = 2;

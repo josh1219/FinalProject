@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${isAdmin != null and isAdmin ? 'PETOPIA - 관리자 로그인' : 'PETOPIA'}">PETOPIA</title>
     <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
     <style>
         * {
             margin: 0;
@@ -421,7 +422,12 @@
             </ul>
         </div>
     </div>
-    <nav class="navigation">
+
+    <!-- footer -->
+    <div th:replace="~{common/footer :: footer}"></div>
+    <!-- /footer -->
+
+    <!-- <nav class="navigation">
         <a href="/schedule" class="nav-item">
             <div class="nav-icon">
                 <img th:src="@{/images/calendar1.svg}">
@@ -452,7 +458,7 @@
             </div>
             <span>메뉴</span>
         </a>
-    </nav>
+    </nav> -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const slider = document.querySelector('.slider');

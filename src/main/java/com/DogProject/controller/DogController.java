@@ -103,6 +103,7 @@ public class DogController {
             @RequestParam("age") int age,
             @RequestParam("birthday") String birthday,
             @RequestParam("gender") String gender,
+            @RequestParam("subGender") String subGender,
             @RequestParam("dType") String dType,
             @RequestParam(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal Object principal,
@@ -124,6 +125,7 @@ public class DogController {
                     .age(age)
                     .birthday(birthday)
                     .gender(gender)
+                    .subGender(subGender)
                     .dType(dType)
                     .member(member)
                     .build();
@@ -238,6 +240,7 @@ public class DogController {
             @RequestParam("age") int age,
             @RequestParam("birthday") String birthday,
             @RequestParam("gender") String gender,
+            @RequestParam("subGender") String subGender,
             @RequestParam("dType") String dType,
             @RequestParam(value = "image", required = false) MultipartFile image,
             @AuthenticationPrincipal Object principal,
@@ -263,6 +266,7 @@ public class DogController {
             existingDog.setAge(age);
             existingDog.setBirthday(birthday);
             existingDog.setGender(gender);
+            existingDog.setSubGender(subGender);
             existingDog.setDType(dType);
 
             dogService.updateDog(existingDog, image);

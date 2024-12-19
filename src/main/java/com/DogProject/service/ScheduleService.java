@@ -25,6 +25,11 @@ public class ScheduleService {
     }
 
     @Transactional(readOnly = true)
+    public List<Schedule> getSchedulesByMember(int mIdx) {
+        return scheduleRepository.findByMember_mIdxOrderByStartTimeDesc(mIdx);
+    }
+
+    @Transactional(readOnly = true)
     public Schedule getScheduleById(int saIdx) {
         return scheduleRepository.findById(saIdx).orElse(null);
     }

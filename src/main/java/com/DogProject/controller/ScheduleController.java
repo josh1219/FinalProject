@@ -52,56 +52,55 @@ public class ScheduleController {
         List<CalendarEventDTO> events = new ArrayList<>();
         
         try {
-            // 일정 데이터 가져오기
-            List<Schedule> schedules = scheduleService.getAllSchedules();
-            logger.info("일정 데이터 조회: {} 건", schedules.size());
-            for (Schedule schedule : schedules) {
-                CalendarEventDTO event = new CalendarEventDTO();
-                event.setId("s" + schedule.getSaIdx());
-                event.setTitle(schedule.getTitle());
-                event.setContent(schedule.getContent());
-                event.setStart(schedule.getStartTime());
-                event.setEnd(schedule.getEndTime());
-                event.setType("schedule");
-                events.add(event);
-            }
-            
             // 세션에서 사용자 정보 가져오기
             HttpSession session = request.getSession();
             Object mIdxObj = session.getAttribute("mIdx");
             
-            logger.info("세션에서 가져온 mIdx: {}", mIdxObj);
-            
-            if (mIdxObj != null) {
-                try {
-                    int mIdx = Integer.parseInt(mIdxObj.toString());
-                    logger.info("사용자 ID 확인됨: {}", mIdx);
-                    
-                    // 산책 세션 데이터 가져오기
-                    List<WalkSession> walkSessions = walkService.getWalkSessionsByMember(mIdx);
-                    logger.info("산책 데이터 조회: {} 건", walkSessions.size());
-                    
-                    for (WalkSession walk : walkSessions) {
-                        logger.info("산책 데이터 처리: wsIdx={}, walkDate={}, walkEndDate={}, distance={}", 
-                            walk.getWsIdx(), walk.getWalkDate(), walk.getWalkEndDate(), walk.getTotalDistance());
-                            
-                        CalendarEventDTO event = new CalendarEventDTO();
-                        event.setId("w" + walk.getWsIdx());
-                        event.setTitle("산책");
-                        event.setContent("총 거리: " + String.format("%.2f", walk.getTotalDistance()) + "km");
-                        event.setStart(walk.getWalkDate());
-                        event.setEnd(walk.getWalkEndDate());
-                        event.setType("walk");
-                        event.setTotalDistance(walk.getTotalDistance());
-                        events.add(event);
-                    }
-                } catch (NumberFormatException e) {
-                    logger.error("사용자 ID 파싱 실패: {}", e.getMessage());
-                } catch (Exception e) {
-                    logger.error("산책 데이터 처리 중 오류: {}", e.getMessage(), e);
-                }
-            } else {
+            if (mIdxObj == null) {
                 logger.warn("세션에서 사용자 정보를 찾을 수 없음");
+                return ResponseEntity.ok(Map.of("events", new ArrayList<>()));
+            }
+            
+            try {
+                int mIdx = Integer.parseInt(mIdxObj.toString());
+                logger.info("사용자 ID 확인됨: {}", mIdx);
+                
+                // 일정 데이터 가져오기
+                List<Schedule> schedules = scheduleService.getSchedulesByMember(mIdx);
+                logger.info("일정 데이터 조회: {} 건", schedules.size());
+                for (Schedule schedule : schedules) {
+                    CalendarEventDTO event = new CalendarEventDTO();
+                    event.setId("s" + schedule.getSaIdx());
+                    event.setTitle(schedule.getTitle());
+                    event.setContent(schedule.getContent());
+                    event.setStart(schedule.getStartTime());
+                    event.setEnd(schedule.getEndTime());
+                    event.setType("schedule");
+                    events.add(event);
+                }
+                
+                // 산책 세션 데이터 가져오기
+                List<WalkSession> walkSessions = walkService.getWalkSessionsByMember(mIdx);
+                logger.info("산책 데이터 조회: {} 건", walkSessions.size());
+                
+                for (WalkSession walk : walkSessions) {
+                    logger.info("산책 데이터 처리: wsIdx={}, walkDate={}, walkEndDate={}, distance={}", 
+                        walk.getWsIdx(), walk.getWalkDate(), walk.getWalkEndDate(), walk.getTotalDistance());
+                        
+                    CalendarEventDTO event = new CalendarEventDTO();
+                    event.setId("w" + walk.getWsIdx());
+                    event.setTitle("산책");
+                    event.setContent("총 거리: " + String.format("%.2f", walk.getTotalDistance()) + "km");
+                    event.setStart(walk.getWalkDate());
+                    event.setEnd(walk.getWalkEndDate());
+                    event.setType("walk");
+                    event.setTotalDistance(walk.getTotalDistance());
+                    events.add(event);
+                }
+            } catch (NumberFormatException e) {
+                logger.error("사용자 ID 파싱 실패: {}", e.getMessage());
+            } catch (Exception e) {
+                logger.error("산책 데이터 처리 중 오류: {}", e.getMessage(), e);
             }
             
             // 시간순으로 정렬

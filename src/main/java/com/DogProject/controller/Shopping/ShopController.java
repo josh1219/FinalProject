@@ -6,14 +6,14 @@ import com.DogProject.service.MemberService;
 import com.DogProject.service.Shopping.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Cookie;
+import java.security.Principal;
 import java.util.List;
 
 @Controller
@@ -27,32 +27,15 @@ public class ShopController {
     private final ProductService productService;
 
     @GetMapping("")
-    public String shopMain(Model model, HttpServletRequest request, 
+    public String shopMain(Model model, HttpServletRequest request, Principal principal,
                       @RequestParam(required = false) String category,
                       @RequestParam(required = false) String keyword) {
-        // 쿠키에서 사용자 정보 가져오기
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("USER_INFO")) {
-                    String[] userInfo = cookie.getValue().split("★");
-                    if (userInfo.length >= 3) {
-                        model.addAttribute("userName", userInfo[2]); // name은 세 번째 값
-                        // DB에서 멤버 정보를 가져와서 포인트 설정
-                        Member member = memberService.findBymEmail(userInfo[1]);
-                        if (member != null) {
-                            model.addAttribute("point", member.getPoint());
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-        
+        addUserInfoToModel(model, request, principal);
         List<Product> products;
         
         if (category != null && !category.isEmpty()) {
             products = productService.getProductsByCategory(category);
+            model.addAttribute("category", category);
         } else if (keyword != null && !keyword.isEmpty()) {
             products = productService.searchProducts(keyword);
         } else {
@@ -91,5 +74,53 @@ public class ShopController {
         model.addAttribute("products", products);
         model.addAttribute("selectedSort", sort != null ? sort : "new"); // 현재 선택된 정렬 옵션 전달
         return "shop/shop";
+    }
+
+    @GetMapping("/detail/{id}")
+    public String shopDetail(@PathVariable Long id, Model model, HttpServletRequest request, Principal principal) {
+        addUserInfoToModel(model, request, principal);
+        Product product = productService.getProductById(id);
+        model.addAttribute("product", product);
+        return "shop/shop-detail";
+    }
+
+    @PostMapping("/removeLastTwoDetailImages")
+    @ResponseBody
+    public ResponseEntity<String> removeLastTwoDetailImages() {
+        try {
+            productService.removeLastTwoDetailImages();
+            return ResponseEntity.ok("Successfully removed last two detail images from all products");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error removing detail images: " + e.getMessage());
+        }
+    }
+
+    private void addUserInfoToModel(Model model, HttpServletRequest request, Principal principal) {
+        if (principal != null) {
+            Member member = memberService.findBymEmail(principal.getName());
+            if (member != null) {
+                model.addAttribute("userName", member.getName());
+                model.addAttribute("point", member.getPoint());
+                model.addAttribute("isLoggedIn", true);
+            }
+        }
+        // 쿠키 처리는 유지
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("USER_INFO")) {
+                    String[] userInfo = cookie.getValue().split("★");
+                    if (userInfo.length >= 3 && !model.containsAttribute("userName")) {
+                        model.addAttribute("userName", userInfo[2]);
+                        Member member = memberService.findBymEmail(userInfo[1]);
+                        if (member != null) {
+                            model.addAttribute("point", member.getPoint());
+                        }
+                    }
+                    break;
+                }
+            }
+        }
     }
 }

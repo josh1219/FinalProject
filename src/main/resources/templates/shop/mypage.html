@@ -13,22 +13,25 @@
         body {
             margin: 0;
             padding: 0;
+            padding-top: 60px;
             background: #fff;
             color: #333;
             font-family: 'Noto Sans KR', sans-serif;
         }
         .mypage-container {
-            max-width: 1200px;
+            max-width: 768px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 16px;
         }
         .point-section {
+            margin-top: 0; /* 상단 여백 제거 */
             border-bottom: 1px solid #e5e5e5;
-            padding: 20px 0;
+            padding: 8px 0; /* 패딩도 줄임 */
         }
         .point-table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 0; /* 테이블 상단 여백 제거 */
         }
         .point-table tr {
             border-bottom: 1px solid #e5e5e5;
@@ -51,19 +54,22 @@
             cursor: pointer;
         }
         .order-status {
-            padding: 30px 0;
+            margin-top: 0;
+            padding: 0;
             border-bottom: 1px solid #e5e5e5;
         }
-        .status-title {
+        .order-status h3 {
+            margin: 0;
+            padding: 8px 0;
             font-size: 16px;
-            color: #333;
-            margin-bottom: 20px;
+            font-weight: 500;
         }
         .status-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            text-align: center;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin: 0;
+            padding-bottom: 8px;
         }
         .status-item {
             position: relative;
@@ -124,6 +130,17 @@
             margin: 0;
             line-height: 1.4;
         }
+        .page-header {
+            padding: 16px 0 8px; /* 하단 패딩 줄임 */
+            border-bottom: 1px solid #eee;
+            margin-bottom: 0; /* 하단 마진 제거 */
+        }
+        .page-header h2 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: 500;
+            color: #333;
+        }
     </style>
 </head>
 <body>
@@ -131,6 +148,9 @@
     <div th:replace="shop/shop-header :: shop-header"></div>
 
     <div class="mypage-container">
+        <div class="page-header">
+            <h2>마이페이지</h2>
+        </div>
         <!-- 포인트 섹션 -->
         <div class="point-section">
             <table class="point-table">
@@ -179,7 +199,7 @@
 
         <!-- 메뉴 그리드 -->
         <div class="menu-grid">
-            <div class="menu-item" onclick="location.href='/shop/order-list'">
+            <div class="menu-item" onclick="location.href='/shop/orders'">
                 <img src="/images/shop_order.png" alt="주문">
                 <h3>Order</h3>
                 <p>주문내역 조회</p>

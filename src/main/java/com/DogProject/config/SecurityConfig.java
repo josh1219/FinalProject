@@ -79,11 +79,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .authorizeRequests()
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/video/**","/member/**", "/error", 
-                        "/home", "/board", "/board/detail", "/dog/**", "/shop/**", "/chat/**", "/walk/**", "/api/**",
-                        "/uploads/**", "/schedule/**").permitAll()
+                        "/home", "/board", "/board/detail", "/dog/**", "/shop/**", "/shop/detail/**", "/chat/**", "/walk/**", "/api/**",
+                        "/uploads/**", "/schedule/**", "/ws/**", "/ws/chat/**", "/topic/**").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/member/checkEmail").permitAll()
                 .antMatchers("/board/create").authenticated()
+                .antMatchers("/shop/cart/**", "/shop/orders/**", "/shop/returns/**", "/shop/mypage/**", "/shop/purchase/**").authenticated()
                 .anyRequest().authenticated()
                 .and()
             .formLogin()

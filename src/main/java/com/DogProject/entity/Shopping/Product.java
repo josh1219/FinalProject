@@ -39,13 +39,15 @@ public class Product {
     @Comment("상품 수량")
     private int stock;          // 상품 수량
 
-    @Column(name = "imageUrl", length = 255)
-    @Comment("상품 메인이미지 URL") 
-    private String imageUrl;       // 상품 이미지 URL
+    @Column(name = "image_url", length = 255)
+    @Comment("상품 이미지 URL")
+    private String imageUrl;
 
-    @Column(name = "detail_imageUrl", length = 255)
-    @Comment("상품 디테일이미지 URL") 
-    private String detail_imageUrl;       // 상품 이미지 URL
+    @ElementCollection
+    @CollectionTable(name = "product_detail_images", joinColumns = @JoinColumn(name = "pidx"))
+    @Column(name = "detail_image_url")
+    @Comment("상품 상세 이미지 URL 목록")
+    private List<String> detailImageUrls = new ArrayList<>();
 
     @Column(name = "category", nullable = false, length = 50)
     @Comment("카테고리") 
@@ -54,13 +56,6 @@ public class Product {
     @Builder.Default
     @Column(nullable = false)
     private Integer salesCount = 0;  // 판매량 (기본값 0)
-
-    @ElementCollection
-    @CollectionTable(name = "product_detail_images", joinColumns = @JoinColumn(name = "pidx"))
-    @Column(name = "detail_image_url")
-    @Comment("상품 상세 이미지 URL 목록")
-    @Builder.Default
-    private List<String> detailImageUrls = new ArrayList<>();
 
     @CreationTimestamp
     @Column(updatable = false)

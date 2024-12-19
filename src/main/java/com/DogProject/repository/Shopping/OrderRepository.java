@@ -9,7 +9,7 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    List<Order> findByOrderDateAfter(LocalDateTime startDate);
-    List<Order> findByOrderDateAfterAndStatus(LocalDateTime startDate, String status);
-    List<Order> findByOrderDateAfterAndStatusIn(LocalDateTime startDate, List<String> statuses);
+    List<Order> findByMember_mIdxAndOrderDateAfter(int mIdx, LocalDateTime startDate);
+    List<Order> findByMember_mIdxAndOrderDateAfterAndStatus(int mIdx, LocalDateTime startDate, String status);
+    List<Order> findByMember_mIdxAndOrderDateAfterAndStatusIn(int mIdx, LocalDateTime startDate, List<String> statuses);
 }

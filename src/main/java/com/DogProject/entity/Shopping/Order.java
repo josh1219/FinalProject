@@ -1,5 +1,6 @@
 package com.DogProject.entity.Shopping;
 
+import com.DogProject.entity.Member;
 import lombok.*;
 import org.hibernate.annotations.Comment;
 
@@ -20,6 +21,11 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("주문 고유 ID")
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
+    @Comment("주문자")
+    private Member member;
 
     @Column(nullable = false)
     @Comment("주문 날짜")

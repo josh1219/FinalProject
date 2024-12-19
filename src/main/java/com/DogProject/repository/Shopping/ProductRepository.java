@@ -10,17 +10,17 @@ import java.util.List;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findByCategory(String category);
-    List<Product> findByNameContaining(String keyword);
+    List<Product> findByNameContainingIgnoreCase(String keyword);
 
-    // 신상품순 정렬
+    // 카테고리별 정렬
+    List<Product> findByCategoryOrderByCreatedAtDesc(String category);
+    List<Product> findByCategoryOrderBySalesCountDesc(String category);
+    List<Product> findByCategoryOrderByPriceAsc(String category);
+    List<Product> findByCategoryOrderByPriceDesc(String category);
+
+    // 전체 상품 정렬
     List<Product> findAllByOrderByCreatedAtDesc();
-    
-    // 인기순 정렬
     List<Product> findAllByOrderBySalesCountDesc();
-    
-    // 가격 낮은순 정렬
     List<Product> findAllByOrderByPriceAsc();
-    
-    // 가격 높은순 정렬
     List<Product> findAllByOrderByPriceDesc();
 }

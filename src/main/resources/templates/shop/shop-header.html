@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<header th:fragment="shop-header">
+<header th:fragment="shop-header" class="shop-header">
     <!-- 상단 메뉴 -->
-    <div class="shop-header">
-        <div class="header-content">
-            <button class="menu-button" onclick="toggleNav()">
-                <i class="fas fa-bars"></i>
-            </button>
-            <div class="logo">
-                <a href="/shop">
-                    <img src="/images/PETOPIA_LOGO.png" alt="PETOPIA" style="height: 40px;">
-                </a>
-            </div>
-            <div class="cart">
-                <a href="/shop/cart">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span class="cart-count" th:text="${cartCount ?: '0'}">0</span>
-                </a>
-            </div>
+    <div class="header-content">
+        <button class="menu-button" onclick="toggleNav()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="logo">
+            <a href="/home">
+                <img src="/images/PETOPIA_LOGO.png" alt="PETOPIA" style="height: 40px;">
+            </a>
+        </div>
+        <div class="cart">
+            <a href="/shop/cart">
+                <i class="fas fa-shopping-cart"></i>
+                <span class="cart-count" th:text="${cartCount ?: '0'}">0</span>
+            </a>
         </div>
     </div>
 
@@ -52,7 +50,7 @@
                     <i class="fas fa-user"></i>
                     <span>MY PAGE</span>
                 </a>
-                <a href="/shop/order" class="icon-item">
+                <a href="/shop/orders" class="icon-item">
                     <i class="fas fa-shopping-bag"></i>
                     <span>ORDER</span>
                 </a>
@@ -113,16 +111,18 @@
 
     <style>
         .shop-header {
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             background: white;
-            z-index: 100;
-            border-bottom: 1px solid #eee;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .header-content {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 15px 20px;
+            padding: 5px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -172,143 +172,111 @@
         .side-nav {
             position: fixed;
             top: 0;
-            left: -300px;
-            width: 300px;
+            left: -350px;
+            width: 350px;
             height: 100%;
-            background: #45f863;
-            z-index: 1000;
+            background: white;
+            z-index: 1001;
             transition: 0.3s;
             overflow-y: auto;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
         }
         .side-nav.active {
             left: 0;
         }
         .nav-header {
-            padding: 20px;
-            color: white;
-            text-align: center;
+            padding: 30px 25px 0 25px; /* 하단 패딩 제거 */
+            background: #f8f9fa;
+            border-bottom: 1px solid #eee;
+            color: #000;
         }
         .nav-header h2 {
-            font-size: 18px;
             margin: 0;
+            font-size: 24px;
+            font-weight: 500;
+            color: #000;
         }
         .nav-header h3 {
-            font-size: 16px;
-            margin: 5px 0;
+            margin: 5px 0 20px;
+            font-size: 18px;
+            color: #000;
         }
         .welcome-info {
-            margin-top: 15px;
-            font-size: 13px;
+            margin-top: 20px;
+            font-size: 15px;
+            color: #000;
         }
         .welcome-info p {
-            margin: 5px 0;
+            color: #000;
         }
         .menu-icons {
             display: flex;
-            justify-content: center;
-            gap: 30px;
-            margin-top: 15px;
+            justify-content: space-around;
+            padding: 20px 0;
+            border-top: 1px solid #eee;
+            margin-top: 20px;
         }
         .icon-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            text-align: center;
             text-decoration: none;
-            color: #333;
-            background-color: #f5f5f5;
-            width: 100px;
-            height: 60px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            transition: all 0.2s ease;
-        }
-        .icon-item:hover {
-            background-color: #e0e0e0;
-            transform: translateY(-2px);
+            color: #000;
         }
         .icon-item i {
-            margin-bottom: 4px;
-            font-size: 16px;
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #000;
         }
         .icon-item span {
-            font-size: 13px;
-            font-weight: 500;
-        }
-        .search-box {
-            padding: 15px;
-            background: white;
-            position: relative;
-        }
-        .search-box input {
-            width: 100%;
-            padding: 8px 30px 8px 10px;
-            border: none;
-            background: #f5f5f5;
-            border-radius: 5px;
-            font-size: 13px;
-        }
-        .search-box button {
-            position: absolute;
-            right: 25px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #666;
+            display: block;
+            font-size: 14px;
+            color: #000;
         }
         .nav-menu {
-            background: white;
-            padding: 0;
+            padding: 20px;
         }
         .menu-section {
-            padding: 15px;
+            margin-bottom: 15px;
             border-bottom: 1px solid #eee;
-        }
-        .menu-section h4 {
-            margin: 0;
-            font-size: 14px;
-            color: #333;
+            padding-bottom: 15px;
         }
         .menu-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 10px 15px;
+            font-size: 16px;
         }
         .menu-header span {
-            font-size: 14px;
-            color: #333;
+            font-weight: 500;
+            color: #000;
         }
         .view-btn {
-            padding: 2px 8px;
+            padding: 5px 15px;
+            border: 1px solid #ddd;
             background: none;
-            border: none;
-            color: #666;
-            font-size: 12px;
+            border-radius: 3px;
             cursor: pointer;
+            font-size: 14px;
+            color: #000;
         }
         .contact-info {
-            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            margin-top: 10px;
         }
         .contact-info h3 {
-            font-size: 18px;
-            margin: 10px 0;
-            color: #333;
+            margin: 0 0 10px;
+            font-size: 20px;
+            color: #000;
         }
-        .contact-info p, .company-info p {
+        .contact-info p {
             margin: 5px 0;
-            font-size: 12px;
-            color: #666;
+            font-size: 13px;
+            color: #000;
         }
         .close-btn {
-            position: absolute;
-            right: 15px;
-            top: 15px;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
+            color: #000;
         }
     </style>
 

@@ -2,6 +2,7 @@ package com.DogProject.service.Shopping;
 
 import com.DogProject.entity.Shopping.Order;
 import com.DogProject.repository.Shopping.OrderRepository;
+import com.DogProject.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,18 +16,23 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final MemberService memberService;
 
-    public List<Order> getOrderHistory(String period, String status) {
+    public List<Order> getOrderHistory(String userEmail, String period, String status) {
         LocalDateTime startDate = calculateStartDate(period);
+        int mIdx = memberService.findBymEmail(userEmail).getMIdx();
+        
         if (status != null && !status.isEmpty()) {
-            return orderRepository.findByOrderDateAfterAndStatus(startDate, status);
+            return orderRepository.findByMember_mIdxAndOrderDateAfterAndStatus(mIdx, startDate, status);
         }
-        return orderRepository.findByOrderDateAfter(startDate);
+        return orderRepository.findByMember_mIdxAndOrderDateAfter(mIdx, startDate);
     }
 
-    public List<Order> getReturnHistory(String period) {
+    public List<Order> getReturnHistory(String userEmail, String period) {
         LocalDateTime startDate = calculateStartDate(period);
-        return orderRepository.findByOrderDateAfterAndStatusIn(
+        int mIdx = memberService.findBymEmail(userEmail).getMIdx();
+        return orderRepository.findByMember_mIdxAndOrderDateAfterAndStatusIn(
+            mIdx, 
             startDate, 
             List.of("RETURNED", "RETURN_REQUESTED")
         );
@@ -34,22 +40,21 @@ public class OrderService {
 
     private LocalDateTime calculateStartDate(String period) {
         LocalDateTime now = LocalDateTime.now();
-        
-        if (period == null) {
-            return now.minusMonths(1); // 기본값: 1개월
+        if (period == null || period.isEmpty()) {
+            return now.minusMonths(3); // 기본값: 3개월
         }
-
+        
         switch (period) {
-            case "today":
-                return now.toLocalDate().atStartOfDay();
-            case "1month":
+            case "1w":
+                return now.minusWeeks(1);
+            case "1m":
                 return now.minusMonths(1);
-            case "3months":
+            case "3m":
                 return now.minusMonths(3);
-            case "6months":
+            case "6m":
                 return now.minusMonths(6);
             default:
-                return now.minusMonths(1); // 기본값: 1개월
+                return now.minusMonths(3);
         }
     }
 }

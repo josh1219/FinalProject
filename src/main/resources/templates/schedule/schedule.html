@@ -7,30 +7,27 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAyQygBh-3yT1w9IwEOALZVRr3833ZaD-8&libraries=geometry"></script>
     <!-- TOAST UI Calendar CSS -->
     <link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            background-color: #f5f6fa;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-family: Arial, sans-serif;
+            position: relative;
+            margin: 0;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+            height: calc(100vh - 110px); /* header(49px) + footer(60px) + 약간의 여유 공간 */
             max-width: 430px;
             margin: 0 auto;
             background: white;
-        }
-
-        .header {
+            overflow: hidden;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: white;
-            border-bottom: 1px solid #eee;
+            flex-direction: column;
         }
 
         .petopia {
@@ -46,22 +43,21 @@
         }
 
         .calendar-container {
-            height: calc(100vh - 150px);
-            overflow: hidden;
             display: flex;
             flex-direction: column;
             background: white;
-            margin: 1rem;
+            margin-top: 3rem;
             border-radius: 16px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            flex: 1;
         }
 
         .calendar-header {
-            padding: 1.25rem 1.25rem 0.75rem;
             display: flex;
             flex-direction: column;
             gap: 0.75rem;
+            margin-top: 35px;
             border-bottom: 1px solid #eee;
         }
 
@@ -128,16 +124,7 @@
 
         #calendar {
             flex: 1;
-            background: white;
-            padding: 1rem;
-        }
-
-        .footer {
-            display: flex;
-            justify-content: space-around;
-            padding: 0.75rem;
-            background: white;
-            border-top: 1px solid #eee;
+            overflow: hidden;
         }
 
         .nav-item {
@@ -748,15 +735,11 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="petopia">PETOPIA</div>
-            <div class="header-icons">
-                <img src="/images/notification0.svg" alt="알림" />
-                <img src="/images/group-500.svg" alt="프로필" />
-            </div>
-        </div>
+    <!-- header -->
+    <div th:replace="~{common/header :: header}"></div>
+    <!-- /header -->
 
+    <div class="container">
         <div class="calendar-container">
             <div class="calendar-header">
                 <div class="calendar-buttons">
@@ -777,28 +760,6 @@
             <div id="calendar"></div>
         </div>
 
-        <div class="footer">
-            <div class="nav-item">
-                <img src="/images/calendar1.svg" alt="캘린더" />
-                <div>캘린더</div>
-            </div>
-            <div class="nav-item">
-                <img src="/images/location0.svg" alt="산책" />
-                <div>산책</div>
-            </div>
-            <div class="nav-item">
-                <img src="/images/home1.svg" alt="홈" />
-                <div>홈</div>
-            </div>
-            <div class="nav-item">
-                <img src="/images/_3-user0.svg" alt="커뮤니티" />
-                <div>커뮤니티</div>
-            </div>
-            <div class="nav-item">
-                <img src="/images/category0.svg" alt="메뉴" />
-                <div>메뉴</div>
-            </div>
-        </div>
     </div>
 
     <!-- 일정 목록 모달 -->
@@ -912,6 +873,10 @@
             </form>
         </div>
     </div>
+
+    <!-- footer -->
+    <div th:replace="~{common/footer :: footer}"></div>
+    <!-- /footer -->
 
     <!-- TOAST UI Calendar JS -->
     <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>

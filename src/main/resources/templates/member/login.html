@@ -7,6 +7,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/header.css">
+
     <style>
         * {
             margin: 0;
@@ -23,12 +25,7 @@
             margin: 0 auto;
             padding: 20px;
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-        }
+
         .logo {
             font-size: 24px;
             font-weight: bold;
@@ -175,14 +172,12 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <header class="header">
-            <div class="logo">PETOPIA</div>
-            <a href="/">
-                <img src="/images/home0.svg" alt="홈으로" class="home-icon">
-            </a>
-        </header>
 
+    
+    <div class="container">
+        <!-- header -->
+    <div th:replace="~{common/header :: header}"></div>
+    <!-- /header -->
         <main>
             <div class="main-content">
                 <h1 class="main-title">모두 함께 건강한 세상!</h1>

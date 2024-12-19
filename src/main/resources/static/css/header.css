@@ -7,8 +7,8 @@
     background-color: white;
     position: fixed;
     top: 0;
-    left: 0;
-    right: 0;
+    left: -16px;
+    right: -16px;
     z-index: 1000;
     height: 70px;
 }
@@ -34,11 +34,11 @@ gap: 8px;
     font-size: 24px;
     font-weight: bold;
     text-align: center;
-    padding: 10px;
     color: #333;
     text-decoration: none;
     display: block;
 }
+
 .logo:hover {
     color: #333;
     text-decoration: none;

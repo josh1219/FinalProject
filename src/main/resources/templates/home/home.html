@@ -34,9 +34,9 @@
         .grid-container {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            grid-gap: 10px;
+            grid-gap: 5px;
             padding: 0 20px;
-            margin-bottom: 20px;
+            margin-bottom: 0px;
         }
         .grid-item {
             background-color: #D3D3D3;
@@ -130,37 +130,63 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            padding: 10px;
             background-color: white;
         }
 
         .overlay {
             position: absolute;
-            transform: none;
+            bottom: 10%; /* 하단에서 약간 위로 배치 */
+            left: 50%; /* 가로 중앙 정렬 */
+            transform: translateX(-50%); /* 가로 중앙 정렬을 위한 변환 */
             background: rgba(255, 255, 255, 0.9);
             padding: 8px 16px;
             border-radius: 15px;
             font-weight: bold;
             color: #333;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             font-size: 0.9em;
-            transition: transform 0.2s ease;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            text-align: center; /* 텍스트 정렬 */
         }
 
         /* 산책하기 버튼의 overlay - 상단 오른쪽 */
-        .walk-button .overlay {
-            top: 20px;
-            right: 20px;
+        .walk-overlay {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-size: 0.9em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+            z-index: 10;  /* 다른 요소들보다 위에 표시되도록 z-index 추가 */
         }
 
-        /* 등록하기와 목록 버튼의 overlay - 하단 오른쪽 */
-        .insertDog-button .overlay,
-        .dogList-button .overlay {
-            bottom: 20px;
-            right: 20px;
+        /* 등록하기와 목록 버튼의 overlay - 하단 가운데 배치 */
+        .insert-overlay, .list-overlay {
+            position: absolute;
+            bottom: 20px;         /* 하단에서 20px 위에 배치 */
+            left: 50%;           /* 수평 가운데 */
+            transform: translateX(-50%);  /* 수평 가운데 정렬을 위한 변환 */
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 16px;
+            border-radius: 15px;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-size: 0.9em;
+            white-space: nowrap;
+            min-width: 120px;
+            text-align: center;
+            z-index: 10;
         }
 
         .walk-button:hover .overlay,
@@ -185,7 +211,7 @@
             width: 100%;
             max-width: 800px;
             height: 300px;
-            margin: 20px auto;
+            margin: 0 auto;
             overflow: hidden;
             padding: 0;
         }
@@ -264,12 +290,14 @@
             right: 10px;
         }
         .main-content {
+            margin-top: 70px;
             margin-bottom: 60px; /* 하단 네비게이션 높이만큼 여백 */
         }
         
         .boardTop5 {
             padding: 20px;
-            margin: 20px;
+            margin-right: 20px;
+            margin-left: 20px;
             background-color: white;
             border-radius: 10px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
@@ -329,19 +357,19 @@
             <div class="withDogWalkButton">
                 <button onclick="location.href='/walk'" class="walk-button">
                     <img th:src="@{/images/withDogWalk.gif}" alt="산책하기">
-                    <div class="overlay">산책하러 가기</div>
+                    <div class="walk-overlay">산책하러 가기</div>
                 </button>
             </div>
             <div class="insertDogButton">
                 <button onclick="location.href='/dog/insert'" class="insertDog-button">
                     <img th:src="@{/images/doginsert.png}" alt="강아지 등록하기">
-                    <div class="overlay">강아지 등록하기</div>
+                    <div class="insert-overlay">강아지 등록하기</div>
                 </button>
             </div>
             <div class="dogListButton">
                 <button onclick="location.href='/dog/list'" class="dogList-button">
                     <img th:src="@{/images/dogList.png}" alt="강아지 목록">
-                    <div class="overlay">강아지 목록</div>
+                    <div class="list-overlay">강아지 목록</div>
                 </button>
             </div>
         </div>

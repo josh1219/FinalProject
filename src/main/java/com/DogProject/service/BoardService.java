@@ -4,15 +4,19 @@ import com.DogProject.entity.Board;
 import com.DogProject.entity.File;
 import com.DogProject.entity.Member;
 import com.DogProject.repository.BoardRepository;
+import com.DogProject.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 @Service
 @RequiredArgsConstructor
@@ -87,5 +91,67 @@ public class BoardService {
             board.setReadRate(board.getReadRate() + 1);
             boardRepository.save(board);
         }
+    }
+
+    // 게시글 삭제 (DB에서 실제로 삭제)
+    @Transactional
+    public void deletePost(int bIdx) {
+        Board board = boardRepository.findById(bIdx)
+            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+        boardRepository.delete(board);
+    }
+
+    // 게시글 수정
+    @Transactional
+    public Board updatePost(int bIdx, String category, String title, String content, List<MultipartFile> files, String remainingFiles) {
+        // 게시글 조회
+        Board board = boardRepository.findById(bIdx)
+            .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+
+        // 게시글 정보 업데이트
+        board.setBType(category);
+        board.setTitle(title);
+        board.setContent(content);
+
+        // 게시글 저장
+        board = boardRepository.save(board);
+
+        // 삭제되지 않은 파일 ID 목록
+        Set<Integer> remainingFileIds = new HashSet<>();
+        if (remainingFiles != null && !remainingFiles.isEmpty()) {
+            for (String fileId : remainingFiles.split(",")) {
+                try {
+                    remainingFileIds.add(Integer.parseInt(fileId.trim()));
+                } catch (NumberFormatException e) {
+                    // 잘못된 ID 형식은 무시
+                }
+            }
+        }
+
+        // 삭제된 파일만 삭제
+        List<File> existingFiles = fileService.findAllByTypeAndIdx(1, bIdx);
+        for (File file : existingFiles) {
+            if (!remainingFileIds.contains(file.getFIdx())) {
+                fileService.deleteFile(file);
+            }
+        }
+
+        // 새로운 파일 저장
+        if (files != null && !files.isEmpty()) {
+            for (MultipartFile multipartFile : files) {
+                if (!multipartFile.isEmpty()) {
+                    try {
+                        File file = new File();
+                        file.setFType(1); // 게시글 첨부파일 타입
+                        file.setTIdx(board.getBIdx()); // 게시글 번호 설정
+                        fileService.saveFile(file, multipartFile);
+                    } catch (Exception e) {
+                        throw new RuntimeException("파일 저장 중 오류가 발생했습니다: " + e.getMessage());
+                    }
+                }
+            }
+        }
+
+        return board;
     }
 }

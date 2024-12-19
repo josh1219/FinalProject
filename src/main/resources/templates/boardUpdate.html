@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>게시글 수정</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard Variable', sans-serif;
+            max-width: 414px;
+            margin: 0 auto;
+            background-color: #fff;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 60px;
+            padding: 0 20px;
+            background: #ffffff;
+            border-bottom: 1px solid #eee;
+            z-index: 100;
+        }
+
+        .header img {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .header-title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .char-count {
+            position: absolute;
+            right: 10px;
+            bottom: -20px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .category-select, .title-input, .content-textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .category-select:hover, .title-input:hover, .content-textarea:hover {
+            border-color: #4A90E2;
+        }
+
+        .category-select:focus, .title-input:focus, .content-textarea:focus {
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+            outline: none;
+        }
+
+        .content-textarea {
+            height: 300px;
+            resize: none;
+        }
+
+        .file-upload {
+            margin-top: 20px;
+        }
+
+        .file-upload-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .file-upload-btn:hover {
+            border-color: #4A90E2;
+            background: #f8f9fa;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .file-preview {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .preview-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .preview-video {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .file-preview-container {
+            position: relative;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .delete-button {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            background: white;
+            border-radius: 50%;
+            padding: 2px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            z-index: 10;
+        }
+
+        .footer {
+            height: 60px;
+            background: #ffffff;
+            border-top: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .footer img {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+
+        .existing-files {
+            margin-top: 10px;
+        }
+
+        .existing-file {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        .existing-file span {
+            flex: 1;
+            margin-right: 10px;
+        }
+
+        .delete-file-btn {
+            padding: 4px 12px;
+            background-color: #fff;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .delete-file-btn:hover {
+            background-color: #dc3545;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="/images/chevron-left.svg" alt="뒤로가기" onclick="history.back()"/>
+        <span class="header-title">게시글 수정</span>
+        <img src="/images/check.svg" alt="완료" onclick="submitForm()"/>
+    </div>
+
+    <div class="content">
+        <form id="updateForm" enctype="multipart/form-data">
+            <input type="hidden" id="bIdx" name="bIdx" th:value="${board.bIdx}">
+            
+            <div class="form-group">
+                <label for="bType">카테고리</label>
+                <select class="category-select" id="bType" th:value="${board.bType}" required>
+                    <option value="">카테고리 선택</option>
+                    <th:block th:if="${session.member != null && session.member.role.name() == 'ADMIN'}">
+                        <option value="공지사항" th:selected="${board.bType == '공지사항'}">공지사항</option>
+                        <option value="이벤트" th:selected="${board.bType == '이벤트'}">이벤트</option>
+                    </th:block>
+                    <option value="질문" th:selected="${board.bType == '질문'}">질문</option>
+                    <option value="자유" th:selected="${board.bType == '자유'}">자유</option>
+                    <option value="나눔" th:selected="${board.bType == '나눔'}">나눔</option>
+                </select>
+                <div class="error-message" id="category-error">카테고리를 선택해주세요.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="title">제목</label>
+                <input type="text" class="title-input" id="title" name="title" th:value="${board.title}" required maxlength="50">
+                <span class="char-count" id="title-count">0/50</span>
+            </div>
+
+            <div class="form-group">
+                <label for="content">내용</label>
+                <textarea class="content-textarea" id="content" name="content" required th:text="${board.content}" maxlength="3000"></textarea>
+                <span class="char-count" id="content-count">0/3000</span>
+            </div>
+
+            <div class="form-group">
+                <label for="files">파일 첨부</label>
+                <input type="file" id="files" name="files" multiple style="display: none;" accept="image/*, video/*">
+                <label for="files" class="file-upload-btn">
+                    <img src="/images/image-upload-icon.svg" alt="파일 업로드" style="width: 20px; height: 20px;">
+                    <span>이미지/동영상 추가</span>
+                </label>
+                
+                <!-- 통합된 파일 미리보기 영역 -->
+                <div id="file-preview" class="file-preview">
+                    <th:block th:each="file : ${boardFiles}">
+                        <div class="file-preview-container" th:data-fidx="${file.fIdx}">
+                            <img th:if="${#strings.toLowerCase(file.fileRealName).endsWith('.jpg') || 
+                                       #strings.toLowerCase(file.fileRealName).endsWith('.jpeg') || 
+                                       #strings.toLowerCase(file.fileRealName).endsWith('.png') || 
+                                       #strings.toLowerCase(file.fileRealName).endsWith('.gif')}"
+                                 th:src="@{'/uploads/' + ${file.fileSaveName}}"
+                                 class="preview-image"
+                                 th:alt="${file.fileRealName}">
+                            
+                            <video th:if="${#strings.toLowerCase(file.fileRealName).endsWith('.mp4') || 
+                                         #strings.toLowerCase(file.fileRealName).endsWith('.webm') || 
+                                         #strings.toLowerCase(file.fileRealName).endsWith('.ogg')}"
+                                   th:src="@{'/uploads/' + ${file.fileSaveName}}"
+                                   class="preview-video"
+                                   controls>
+                            </video>
+                            
+                            <img src="/images/deleteIcon.png" class="delete-button" onclick="removePreview(this)" alt="삭제">
+                        </div>
+                    </th:block>
+                </div>
+                <span class="error-message" id="file-error"></span>
+            </div>
+        </form>
+    </div>
+
+    <script th:inline="javascript">
+        const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            const titleInput = document.getElementById('title');
+            const titleCount = document.getElementById('title-count');
+            const titleMaxLength = titleInput.maxLength;
+
+            // 초기 제목 글자수 표시
+            titleCount.textContent = `${titleInput.value.length}/${titleMaxLength}`;
+
+            // 제목 입력할 때마다 글자수 업데이트
+            titleInput.addEventListener('input', function() {
+                titleCount.textContent = `${this.value.length}/${titleMaxLength}`;
+            });
+
+            const contentInput = document.getElementById('content');
+            const contentCount = document.getElementById('content-count');
+            const contentMaxLength = contentInput.maxLength;
+
+            // 초기 내용 글자수 표시
+            contentCount.textContent = `${contentInput.value.length}/${contentMaxLength}`;
+
+            // 내용 입력할 때마다 글자수 업데이트
+            contentInput.addEventListener('input', function() {
+                contentCount.textContent = `${this.value.length}/${contentMaxLength}`;
+            });
+        });
+
+        document.getElementById('files').addEventListener('change', function(e) {
+            const files = Array.from(e.target.files);
+            const preview = document.getElementById('file-preview');
+            const maxFiles = 4;
+            const currentFiles = preview.querySelectorAll('.file-preview-container').length;
+    
+            if (currentFiles + files.length > maxFiles) {
+                document.getElementById('file-error').style.display = 'block';
+                document.getElementById('file-error').textContent = `파일은 최대 ${maxFiles}개까지만 업로드할 수 있습니다.`;
+                return;
+            }
+    
+            for (const file of files) {
+                const container = document.createElement('div');
+                container.className = 'file-preview-container';
+    
+                if (file.type.startsWith('image/')) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = 'preview-image';
+                        container.appendChild(img);
+                    };
+                    reader.readAsDataURL(file);
+                } else if (file.type.startsWith('video/')) {
+                    const video = document.createElement('video');
+                    video.src = URL.createObjectURL(file);
+                    video.className = 'preview-video';
+                    video.controls = true;
+                    container.appendChild(video);
+                }
+    
+                const deleteButton = document.createElement('img');
+                deleteButton.src = '/images/deleteIcon.png';
+                deleteButton.className = 'delete-button';
+                deleteButton.alt = '삭제';
+                deleteButton.onclick = function() {
+                    container.remove();
+                    updateFileInput();
+                };
+    
+                container.appendChild(deleteButton);
+                preview.appendChild(container);
+            }
+    
+            document.getElementById('file-error').style.display = 'none';
+        });
+
+        function removePreview(button) {
+            const container = button.parentElement;
+            container.remove();
+            updateFileInput();
+        }
+
+        // 파일 input 업데이트
+        function updateFileInput() {
+            const fileInput = document.getElementById('files');
+            const preview = document.getElementById('file-preview');
+            const containers = preview.querySelectorAll('.file-preview-container:not([data-fidx])');
+            
+            // 새로운 FileList 객체 생성
+            const dataTransfer = new DataTransfer();
+            
+            // 현재 input의 파일들 중에서 미리보기에 있는 것만 유지
+            Array.from(fileInput.files).forEach((file, index) => {
+                if (containers[index]) {
+                    dataTransfer.items.add(file);
+                }
+            });
+            
+            // 업데이트된 FileList를 input에 설정
+            fileInput.files = dataTransfer.files;
+        }
+
+        function submitForm() {
+            const form = document.getElementById('updateForm');
+            const formData = new FormData(form);
+            
+            // 카테고리 값 추가
+            formData.set('category', document.getElementById('bType').value);
+
+            // 필수 입력값 검증
+            const title = formData.get('title');
+            const content = formData.get('content');
+            
+            if (!title || !content) {
+                alert('제목과 내용을 모두 입력해주세요.');
+                return;
+            }
+
+            // 남아있는 기존 파일들의 ID를 수집
+            const remainingFiles = [];
+            document.querySelectorAll('.file-preview-container[data-fidx]').forEach(container => {
+                remainingFiles.push(container.getAttribute('data-fidx'));
+            });
+            formData.append('remainingFiles', remainingFiles.join(','));
+
+            // 서버로 전송
+            fetch('/board/update', {
+                method: 'POST',
+                headers: {
+                    [header]: token
+                },
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text);
+                    });
+                }
+                return response.text();
+            })
+            .then(bIdx => {
+                alert('게시글이 성공적으로 수정되었습니다.');
+                window.location.href = '/board/detail?id=' + bIdx;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message || '수정 중 오류가 발생했습니다.');
+            });
+        }
+    </script>
+</body>
+</html>

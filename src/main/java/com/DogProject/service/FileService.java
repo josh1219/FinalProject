@@ -91,6 +91,24 @@ public class FileService {
         }
     }
 
+    @Transactional
+    public void deleteFile(int fIdx) {
+        File file = fileRepository.findById(fIdx)
+            .orElseThrow(() -> new RuntimeException("파일을 찾을 수 없습니다."));
+
+        // 실제 파일 삭제
+        try {
+            Resource resource = resourceLoader.getResource(uploadDirectory);
+            Path filePath = Paths.get(resource.getFile().getAbsolutePath(), file.getFileSaveName());
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            throw new RuntimeException("파일 삭제 중 오류가 발생했습니다.", e);
+        }
+
+        // DB에서 파일 정보 삭제
+        fileRepository.delete(file);
+    }
+
     @Transactional(readOnly = true)
     public Optional<File> findByTypeAndIdx(int fType, int tIdx) {
         return fileRepository.findByTypeAndIdx(fType, tIdx);

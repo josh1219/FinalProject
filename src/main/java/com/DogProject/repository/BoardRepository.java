@@ -14,8 +14,8 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
     @Query("SELECT b FROM Board b WHERE b.deleteCheck = :deleteCheck ORDER BY CASE WHEN b.bType = '공지사항' THEN 0 ELSE 1 END, b.bIdx DESC")
     List<Board> findByDeleteCheckOrderByBIdxDesc(@Param("deleteCheck") String deleteCheck);
     
-    // 카테고리별 게시글 목록 조회
-    @Query("SELECT b FROM Board b WHERE b.bType = :bType AND b.deleteCheck = :deleteCheck ORDER BY b.bIdx DESC")
+    // 카테고리별 게시글 목록 조회 (수정)
+    @Query(value = "SELECT b FROM Board b WHERE b.bType = :bType AND b.deleteCheck = :deleteCheck ORDER BY b.bIdx DESC")
     List<Board> findByBTypeAndDeleteCheck(@Param("bType") String bType, @Param("deleteCheck") String deleteCheck);
 
     @Query("SELECT b FROM Board b " +

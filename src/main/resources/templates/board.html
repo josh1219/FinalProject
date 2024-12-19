@@ -209,30 +209,52 @@
     }
 
     .board-title {
-      font-size: 16px;
-      font-weight: 500;
-      color: #333;
-      margin-bottom: 8px;
+        margin: 0;
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 500px;
+    }
+
+    .board-title.long-title {
+        position: relative;
+        display: inline-block;
     }
 
     .board-meta {
-      display: flex;
-      gap: 12px;
-      font-size: 12px;
-      color: #888;
-      align-items: center;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #666;
+        font-size: 14px;
     }
 
     .has-image {
-      display: flex;
-      align-items: center;
-      gap: 4px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background-color: #e8f4ff;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 13px;
+        color: #2196F3;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: 1px solid #d1e9ff;
     }
 
     .has-image img {
-      width: 16px;
-      height: 16px;
-      opacity: 0.6;
+        width: 16px;
+        height: 16px;
+    }
+
+    .has-image:hover {
+        background-color: #d1e9ff;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
     }
 
     .empty-state {
@@ -543,27 +565,27 @@
     </div>
 
     <div class="frame-232">
-        <div onclick="filterPosts('all')" class="active">
+        <div onclick="filterPosts('전체')" class="active">
             <img src="/images/home-4-home-house-roof-shelter1.svg" alt="전체">
             <div class="div3">전체</div>
         </div>
-        <div onclick="filterPosts('notice')">
+        <div onclick="filterPosts('공지사항')">
             <img src="/images/volume.svg" alt="공지">
             <div class="div5">공지</div>
         </div>
-        <div onclick="filterPosts('question')">
+        <div onclick="filterPosts('질문')">
             <img src="/images/union0.svg" alt="질문">
             <div class="div6">질문</div>
         </div>
-        <div onclick="filterPosts('free')">
+        <div onclick="filterPosts('자유')">
             <img src="/images/chat-bubble-square-write-messages-message-bubble-chat-square-write-review-pen-pencil-compose1.svg" alt="자유">
             <div class="div7">자유</div>
         </div>
-        <div onclick="filterPosts('share')">
+        <div onclick="filterPosts('나눔')">
             <img src="/images/coin-share-payment-cash-money-finance-receive-give-coin-hand1.svg" alt="나눔">
             <div class="div8">나눔</div>
         </div>
-        <div onclick="filterPosts('event')">
+        <div onclick="filterPosts('이벤트')">
             <img src="/images/gift-reward-box-social-present-gift-media-rating-bow1.svg" alt="이벤트">
             <div class="div10">이벤트</div>
         </div>
@@ -586,13 +608,16 @@
                         <div class="board-info">
                             <span class="board-category" th:text="${board.bType}">카테고리</span>
                         </div>
-                        <h3 class="board-title" th:text="${board.title}">제목</h3>
+                        <h3 class="board-title" th:classappend="${#strings.length(board.title) > 20} ? 'long-title'" 
+                            th:text="${#strings.length(board.title) > 20} ? ${#strings.substring(board.title,0,20) + '...'} : ${board.title}">제목</h3>
                         <div class="board-meta">
                             <span th:text="${board.member.name}">작성자</span>
                             <span th:text="${board.insertDate}">작성일</span>
-                            <span class="has-image" th:if="${board.content.contains('[첨부파일]')}">
-                                <img src="/images/image.svg" alt="이미지">
-                                첨부파일
+                            <span class="has-image" th:if="${attachmentCounts.get(board.bIdx) > 0}">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                                </svg>
+                                <span th:text="${attachmentCounts.get(board.bIdx)}">0</span>
                             </span>
                         </div>
                     </div>
@@ -647,15 +672,8 @@
         
         // 카테고리에 따른 URL 설정
         let url = '/board';
-        if (type !== 'all') {
-            const categoryMap = {
-                'notice': '공지사항',
-                'event': '이벤트',
-                'question': '질문',
-                'free': '자유',
-                'share': '나눔'
-            };
-            url += '?category=' + categoryMap[type];
+        if (type !== '전체') {
+            url += '?category=' + type;
         }
         
         // 페이지 이동
@@ -665,18 +683,9 @@
     // 현재 카테고리에 따라 버튼 활성화
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
-        const category = urlParams.get('category');
+        const category = urlParams.get('category') || '전체';
         
-        const reverseMap = {
-            '공지사항': 'notice',
-            '이벤트': 'event',
-            '질문': 'question',
-            '자유': 'free',
-            '나눔': 'share'
-        };
-        
-        const type = category ? reverseMap[category] : 'all';
-        const targetDiv = document.querySelector(`.frame-232 > div[onclick="filterPosts('${type}')"]`);
+        const targetDiv = document.querySelector(`.frame-232 > div[onclick="filterPosts('${category}')"]`);
         if (targetDiv) {
             document.querySelectorAll('.frame-232 > div').forEach(div => {
                 div.classList.remove('active');

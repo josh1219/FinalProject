@@ -11,7 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -80,6 +79,11 @@ public class CartController {
                         Map<String, Object> response = oauth2User.getAttribute("response");
                         if (response != null) {
                             userEmail = (String) response.get("email");
+                        }
+                    } else if ("kakao".equals(provider)) {
+                        Map<String, Object> kakaoAccount = oauth2User.getAttribute("kakao_account");
+                        if (kakaoAccount != null) {
+                            userEmail = (String) kakaoAccount.get("email");
                         }
                     }
                     System.out.println("OAuth2 email: " + userEmail);

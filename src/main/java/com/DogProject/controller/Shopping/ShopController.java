@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -82,6 +83,42 @@ public class ShopController {
         Product product = productService.getProductById(id);
         model.addAttribute("product", product);
         return "shop/shop-detail";
+    }
+
+    @GetMapping("/purchase/{productId}")
+    public String purchasePage(@PathVariable Long productId, 
+                             @RequestParam(required = false) Integer quantity,
+                             Model model,
+                             Authentication authentication) {
+        // 로그인 체크
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/member/login";
+        }
+
+        // 상품 정보 조회
+        Product product = productService.getProductById(productId);
+        if (product == null) {
+            return "redirect:/shop";
+        }
+
+        // 구매 수량이 지정되지 않은 경우 기본값 1로 설정
+        if (quantity == null || quantity < 1) {
+            quantity = 1;
+        }
+
+        // 사용자 정보 조회 및 모델에 추가
+        Member member = memberService.findBymEmail(authentication.getName());
+        if (member != null) {
+            model.addAttribute("memberName", member.getName());
+            model.addAttribute("memberPhone", member.getPhone());
+            model.addAttribute("memberAddress", member.getAddress());
+            model.addAttribute("isLoggedIn", true);
+        }
+
+        model.addAttribute("product", product);
+        model.addAttribute("quantity", quantity);
+        
+        return "shop/purchase";
     }
 
     @PostMapping("/removeLastTwoDetailImages")

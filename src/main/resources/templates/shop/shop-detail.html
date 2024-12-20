@@ -524,7 +524,8 @@
         }
         
         function confirmPurchase() {
-            location.href = `/shop/order?productId=${productId}&quantity=${quantity}`;
+            const quantity = document.getElementById('quantityInput').value;
+            window.location.href = `/shop/purchase/${productId}?quantity=${quantity}`;
         }
     /*]]>*/
     </script>

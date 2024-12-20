@@ -35,6 +35,7 @@
         .grid-container {
             display: grid;
             grid-template-columns: 2fr 1fr;
+            grid-template-rows: repeat(4, auto);
             grid-gap: 5px;
             padding: 0 20px;
             margin-bottom: 0px;
@@ -96,13 +97,24 @@
             position: relative;
             width: 100%;
             height: 100%;
-            border: none;
-            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
             cursor: pointer;
-            overflow: hidden;
-            background: none;
+            border: none;
             transition: transform 0.3s ease;
-            grid-row: span 2;
+        }
+
+        .walk-button:hover {
+            transform: scale(1.02);
+        }
+
+        .walk-button img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: white;
         }
 
         .insertDog-button, .dogList-button {
@@ -119,12 +131,6 @@
 
         .walk-button:hover, .insertDog-button:hover, .dogList-button:hover {
             transform: scale(1.02);
-        }
-
-        .walk-button img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
         }
 
         .insertDog-button img, .dogList-button img {
@@ -155,8 +161,9 @@
         /* 산책하기 버튼의 overlay - 상단 오른쪽 */
         .walk-overlay {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background: rgba(255, 255, 255, 0.9);
             padding: 8px 16px;
             border-radius: 15px;
@@ -168,7 +175,7 @@
             overflow: hidden;
             text-overflow: ellipsis;
             text-align: center;
-            z-index: 10;  /* 다른 요소들보다 위에 표시되도록 z-index 추가 */
+            z-index: 10;
         }
 
         /* 등록하기와 목록 버튼의 overlay - 하단 가운데 배치 */
@@ -196,14 +203,57 @@
             transform: scale(1.05);
         }
 
-        .withDogWalkButton {
-            grid-row: span 2;
-            height: 400px;
+        .withDogWalkButton, .dogShopButton {
+            grid-column: 1;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .insertDogButton, .dogListButton {
-            height: 195px;
+        .insertDogButton {
+            grid-column: 2;
+            grid-row: 1;
+            height: 200px;
             background-color: white;
+        }
+
+        .dogListButton {
+            grid-column: 2;
+            grid-row: 2;
+            height: 200px;
+            background-color: white;
+        }
+
+        .dogShopButton {
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dogShop-button {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.3s ease;
+        }
+
+        .dogShop-button img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: white;
+        }
+
+        .dogShop-button:hover {
+            transform: scale(1.02);
         }
 
         /* 이미지 슬라이더 스타일 */
@@ -369,8 +419,14 @@
             </div>
             <div class="dogListButton">
                 <button onclick="location.href='/dog/list'" class="dogList-button">
-                    <img th:src="@{/images/dogList.png}" alt="강아지 목록">
+                    <img th:src="@{/images/doglist.png}" alt="강아지 목록">
                     <div class="list-overlay">강아지 목록</div>
+                </button>
+            </div>
+            <div class="dogShopButton">
+                <button onclick="location.href='/dogShop'" class="dogShop-button">
+                    <img th:src="@{/images/dogWithShop.gif}" alt="쇼핑하기">
+                    <div class="walk-overlay">쇼핑하러 가기</div>
                 </button>
             </div>
         </div>

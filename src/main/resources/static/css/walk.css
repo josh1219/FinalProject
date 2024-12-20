@@ -167,7 +167,7 @@
   position: absolute;
   right: 20px;
   left: 19px;
-  top: 78px;
+  top: 65px;
   overflow: hidden;
 }
 .div8 {
@@ -248,6 +248,7 @@
   width: 430px;
   height: calc(100% - 68px); /* 푸터 높이만큼 자동 조정 */
   position: absolute;
+  top: 240px;
   left: 0px;
   top: 250px;
   bottom: 0px; /* 푸터와 자연스럽게 겹치도록 설정 */
@@ -364,7 +365,7 @@
   height: 95px;
   position: absolute;
   left: 0px;
-  top: 150px;
+  top: 135px;
   overflow: hidden;
 }
 .div13 {

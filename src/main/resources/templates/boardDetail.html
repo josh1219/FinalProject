@@ -14,47 +14,20 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
+
     <style>
         /* Reset and Global Styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: Arial, sans-serif;
+            padding-bottom: 60px;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px 0;
-        }
-
-        .community {
-            background: white;
-            width: 414px;
-            height: 852px;
             position: relative;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Header Styles */
-        .header {
-            padding: 5px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-            background: white;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            margin: 0;
+            padding-top: 70px;
         }
 
         .back-button {
@@ -68,10 +41,10 @@
         }
 
         .petopia {
-            font-size: 24px;
-            font-weight: bold;
-            color: #FF4081;
-        }
+        color: #000000;
+        font-weight: 700;
+        font-size: 20px;
+    }
 
         .icon-buttons {
             display: flex;
@@ -89,9 +62,11 @@
 
         /* Post Content Styles */
         .post-container {
-            flex: 1;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            overflow-y: auto;
+            margin-top: 20px;
         }
 
         .post-header {
@@ -223,60 +198,6 @@
             border-width: 6px 6px 6px 0;
             border-style: solid;
             border-color: transparent #FF9EBB transparent transparent;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0);
-            }
-            50% {
-                transform: translateY(-5px);
-            }
-        }
-
-        /* Footer Styles */
-        .footer {
-            position: sticky;
-            bottom: 0;
-            width: 100%;
-            height: 85px;
-            background: #FFFFFF;
-            border-top: 1px solid #EEEEEE;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 0;
-            z-index: 100;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .nav-item img {
-            width: 24px;
-            height: 24px;
-            opacity: 0.5;
-        }
-
-        .nav-item.active img {
-            opacity: 1;
-        }
-
-        .nav-item span {
-            font-size: 12px;
-            color: #666666;
-        }
-
-        .nav-item.active span {
-            color: #0C098C;
-            font-weight: 500;
         }
 
         /* Action Buttons */
@@ -508,7 +429,7 @@
             box-shadow: 0 2px 4px rgba(255, 105, 180, 0.1);
         }
 
-        .chat-button {
+        .chat-button01 {
             width: 100%;
             padding: 12px;
             background-color: #ff69b4;
@@ -520,7 +441,7 @@
             transition: background-color 0.3s;
         }
 
-        .chat-button:hover {
+        .chat-button01:hover {
             background-color: #ff1493;
         }
 
@@ -863,262 +784,231 @@
     </style>
 </head>
 <body>
-    <div class="community">
-        <!-- Header -->
-        <div class="header">
-            <div class="back-button" onclick="location.href='/board'">
-                <img src="/images/arrow-left0.svg" alt="뒤로가기">
-            </div>
-            <div class="icon-buttons">
-                <div class="icon-button">
-                    <img src="/images/notification0.svg" alt="알림" onclick="location.href='/'">
+
+    <!-- header -->
+    <div th:replace="~{common/header :: header}"></div>
+    <!-- /header -->
+
+    <div class="post-container">
+        <div class="post-header">
+            <h1 class="post-title" th:text="${board.title}">게시글 제목</h1>
+            <div class="post-info">
+                <div class="post-author-wrapper">
+                    <!-- 관리자가 아닐 때만 클릭 가능하고 툴팁 표시 -->
+                    <span th:if="${board.member.role.name() != 'ADMIN'}" 
+                          class="post-author clickable user" 
+                          onclick="openProfileModal()" 
+                          th:text="${board.member.name}">
+                    </span>
+                    <!-- 관리자일 때는 클릭 불가능하고 툴팁 없음 -->
+                    <span th:if="${board.member.role.name() == 'ADMIN'}" 
+                          class="post-author admin"
+                          th:text="${board.member.name}">
+                    </span>
+                    <span th:if="${board.member.role.name() != 'ADMIN'}" class="tooltip">눌러서 채팅 시작! 💬</span>
                 </div>
-                <div class="icon-button">
-                    <img src="/images/mypage.svg" alt="마이페이지" onclick="location.href='/'">
-                </div>
+                <span class="post-date" th:text="${board.insertDate}"></span>
             </div>
         </div>
 
-        <!-- Post Content -->
-        <div class="post-container">
-            <div class="post-header">
-                <h1 class="post-title" th:text="${board.title}">게시글 제목</h1>
-                <div class="post-info">
-                    <div class="post-author-wrapper">
-                        <!-- 관리자가 아닐 때만 클릭 가능하고 툴팁 표시 -->
-                        <span th:if="${board.member.role.name() != 'ADMIN'}" 
-                              class="post-author clickable user" 
-                              onclick="openProfileModal()" 
-                              th:text="${board.member.name}">
-                        </span>
-                        <!-- 관리자일 때는 클릭 불가능하고 툴팁 없음 -->
-                        <span th:if="${board.member.role.name() == 'ADMIN'}" 
-                              class="post-author admin"
-                              th:text="${board.member.name}">
-                        </span>
-                        <span th:if="${board.member.role.name() != 'ADMIN'}" class="tooltip">눌러서 채팅 시작! 💬</span>
+        <div class="post-content" th:text="${board.content}">
+            게시글 내용
+        </div>
+
+        <div class="post-media" th:if="${boardFiles != null}">
+            <th:block th:each="file : ${boardFiles}">
+                <!-- 이미지 -->
+                <img th:if="${file.fileRealName.toLowerCase().endsWith('.jpg') || 
+                            file.fileRealName.toLowerCase().endsWith('.jpeg') || 
+                            file.fileRealName.toLowerCase().endsWith('.png') || 
+                            file.fileRealName.toLowerCase().endsWith('.gif')}"
+                     class="post-image" 
+                     th:src="@{'/uploads/' + ${file.fileSaveName}}"
+                     th:onclick="'openModal(\'' + @{'/uploads/' + ${file.fileSaveName}} + '\', \'image\')'">
+                
+                <!-- 비디오 -->
+                <div class="video-wrapper" th:if="${file.fileRealName.toLowerCase().endsWith('.mp4') || 
+                              file.fileRealName.toLowerCase().endsWith('.webm') || 
+                              file.fileRealName.toLowerCase().endsWith('.ogg')}"
+                     th:onclick="'openModal(\'' + @{'/uploads/' + ${file.fileSaveName}} + '\', \'video\')'">
+                    <video class="post-video"
+                           th:src="@{'/uploads/' + ${file.fileSaveName}}"
+                           autoplay
+                           loop
+                           muted
+                           playsinline
+                           controls>
+                        이 브라우저는 동영상 재생을 지원하지 않습니다.
+                    </video>
+                </div>
+            </th:block>
+        </div>
+
+        <!-- 수정/삭제 버튼 -->
+        <div class="post-actions">
+            <!-- 작성자 본인일 때 -->
+            <th:block th:if="${isAuthor}">
+                <button class="edit-button" th:onclick="'confirmEdit(' + ${board.bIdx} + ')'">수정</button>
+                <button class="delete-button" th:onclick="'deletePost(' + ${board.bIdx} + ')'">삭제</button>
+            </th:block>
+            <!-- 관리자가 다른 사람의 글을 볼 때 -->
+            <th:block th:if="${isAdmin and !isAuthor}">
+                <button class="delete-button admin-delete" th:onclick="'confirmAdminDelete()'">관리자 삭제</button>
+            </th:block>
+        </div>
+
+        <!-- 댓글 섹션 -->
+        <div class="reply-section mt-3">
+            <h5 class="mb-2">댓글 <span class="text-muted" th:text="|(${#lists.size(replies.?[parent == null])})|"></span></h5>
+            
+            <!-- 댓글 작성 폼 -->
+            <div class="mb-3">
+                <form id="replyForm" class="needs-validation" novalidate th:if="${sessionMember != null}">
+                    <div class="form-group">
+                        <textarea class="form-control" id="replyContent" rows="3" 
+                            placeholder="댓글을 입력하세요..." required></textarea>
                     </div>
-                    <span class="post-date" th:text="${board.insertDate}"></span>
+                    <div class="text-end mt-2">
+                        <button type="submit" class="reply-submit">댓글 작성</button>
+                    </div>
+                </form>
+                <div class="alert alert-info" th:unless="${sessionMember != null}">
+                    댓글을 작성하려면 <a href="/member/login" class="alert-link">로그인</a>이 필요합니다.
                 </div>
             </div>
-
-            <div class="post-content" th:text="${board.content}">
-                게시글 내용
-            </div>
-
-            <div class="post-media" th:if="${boardFiles != null}">
-                <th:block th:each="file : ${boardFiles}">
-                    <!-- 이미지 -->
-                    <img th:if="${file.fileRealName.toLowerCase().endsWith('.jpg') || 
-                                file.fileRealName.toLowerCase().endsWith('.jpeg') || 
-                                file.fileRealName.toLowerCase().endsWith('.png') || 
-                                file.fileRealName.toLowerCase().endsWith('.gif')}"
-                         class="post-image" 
-                         th:src="@{'/uploads/' + ${file.fileSaveName}}"
-                         th:onclick="'openModal(\'' + @{'/uploads/' + ${file.fileSaveName}} + '\', \'image\')'">
-                    
-                    <!-- 비디오 -->
-                    <div class="video-wrapper" th:if="${file.fileRealName.toLowerCase().endsWith('.mp4') || 
-                                  file.fileRealName.toLowerCase().endsWith('.webm') || 
-                                  file.fileRealName.toLowerCase().endsWith('.ogg')}"
-                         th:onclick="'openModal(\'' + @{'/uploads/' + ${file.fileSaveName}} + '\', \'video\')'">
-                        <video class="post-video"
-                               th:src="@{'/uploads/' + ${file.fileSaveName}}"
-                               autoplay
-                               loop
-                               muted
-                               playsinline
-                               controls>
-                            이 브라우저는 동영상 재생을 지원하지 않습니다.
-                        </video>
-                    </div>
-                </th:block>
-            </div>
-
-            <!-- 수정/삭제 버튼 -->
-            <div class="post-actions">
-                <!-- 작성자 본인일 때 -->
-                <th:block th:if="${isAuthor}">
-                    <button class="edit-button" th:onclick="'confirmEdit(' + ${board.bIdx} + ')'">수정</button>
-                    <button class="delete-button" th:onclick="'deletePost(' + ${board.bIdx} + ')'">삭제</button>
-                </th:block>
-                <!-- 관리자가 다른 사람의 글을 볼 때 -->
-                <th:block th:if="${isAdmin and !isAuthor}">
-                    <button class="delete-button admin-delete" th:onclick="'confirmAdminDelete()'">관리자 삭제</button>
-                </th:block>
-            </div>
-
-            <!-- 댓글 섹션 -->
-            <div class="reply-section mt-3">
-                <h5 class="mb-2">댓글</h5>
-                
-                <!-- 댓글 작성 폼 -->
-                <div class="mb-3">
-                    <form id="replyForm" class="needs-validation" novalidate th:if="${sessionMember != null}">
-                        <div class="form-group">
-                            <textarea class="form-control" id="replyContent" rows="3" 
-                                placeholder="댓글을 입력하세요..." required></textarea>
+            
+            <!-- 댓글 목록 -->
+            <div class="reply-list">
+                <div th:each="reply : ${replies}" th:if="${reply.deleteCheck != 'Y' && reply.parent == null}" 
+                     class="reply-item border-bottom pb-2 mb-2">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <span class="fw-bold" th:text="${reply.member.name}"></span>
+                            <span class="author-tag" th:if="${reply.member.MIdx == board.member.MIdx}">작성자</span>
+                            <small class="text-muted ms-2" 
+                                   th:text="${#temporals.format(reply.insertDate, 'yyyy.MM.dd HH:mm')}"></small>
                         </div>
-                        <div class="text-end mt-2">
-                            <button type="submit" class="reply-submit">댓글 작성</button>
+                        <div th:if="${sessionMember != null && (sessionMember.MIdx == reply.member.MIdx || sessionMember.role.name() == 'ADMIN')}">
+                            <button class="delete-reply" 
+                                    th:data-id="${reply.rIdx}">✕</button>
                         </div>
-                    </form>
-                    <div class="alert alert-info" th:unless="${sessionMember != null}">
-                        댓글을 작성하려면 <a href="/member/login" class="alert-link">로그인</a>이 필요합니다.
                     </div>
-                </div>
-                
-                <!-- 댓글 목록 -->
-                <div class="reply-list">
-                    <div th:each="reply : ${replies}" th:if="${reply.deleteCheck != 'Y' && reply.parent == null}" 
-                         class="reply-item border-bottom pb-2 mb-2">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <span class="fw-bold" th:text="${reply.member.name}"></span>
-                                <span class="author-tag" th:if="${reply.member.MIdx == board.member.MIdx}">작성자</span>
-                                <small class="text-muted ms-2" 
-                                       th:text="${#temporals.format(reply.insertDate, 'yyyy.MM.dd HH:mm')}"></small>
-                            </div>
-                            <div th:if="${sessionMember != null && (sessionMember.MIdx == reply.member.MIdx || sessionMember.role.name() == 'ADMIN')}">
-                                <button class="delete-reply" 
-                                        th:data-id="${reply.rIdx}">✕</button>
+                    <div class="reply-content mt-1" th:text="${reply.content}"></div>
+                    <!-- 답글 버튼과 토글 버튼 -->
+                    <div class="reply-actions" th:if="${sessionMember != null}">
+                        <button class="toggle-replies collapsed" th:if="${not #lists.isEmpty(reply.children) || sessionMember != null}"
+                                th:data-count="${#lists.size(reply.children)}"
+                                th:data-id="${reply.rIdx}">
+                            <i>▼</i> 답글 <span th:text="${#lists.size(reply.children)}"></span>개
+                        </button>
+                    </div>
+                    <!-- 답글 목록과 입력 폼 -->
+                    <div class="nested-replies">
+                        <!-- 답글 작성 폼 -->
+                        <div class="reply-form mb-3" th:if="${sessionMember != null}">
+                            <textarea class="reply-textarea" placeholder="답글을 입력하세요..."></textarea>
+                            <div class="text-end mt-2">
+                                <button class="reply-submit submit-reply" th:data-parent-id="${reply.rIdx}">등록</button>
                             </div>
                         </div>
-                        <div class="reply-content mt-1" th:text="${reply.content}"></div>
-                        <!-- 답글 버튼과 토글 버튼 -->
-                        <div class="reply-actions" th:if="${sessionMember != null}">
-                            <button class="toggle-replies collapsed" th:if="${not #lists.isEmpty(reply.children) || sessionMember != null}"
-                                    th:data-count="${#lists.size(reply.children)}"
-                                    th:data-id="${reply.rIdx}">
-                                <i>▼</i> 답글 <span th:text="${#lists.size(reply.children)}"></span>개
-                            </button>
-                        </div>
-                        <!-- 답글 목록과 입력 폼 -->
-                        <div class="nested-replies">
-                            <!-- 답글 작성 폼 -->
-                            <div class="reply-form mb-3" th:if="${sessionMember != null}">
-                                <textarea class="reply-textarea" placeholder="답글을 입력하세요..."></textarea>
-                                <div class="text-end mt-2">
-                                    <button class="reply-submit submit-reply" th:data-parent-id="${reply.rIdx}">등록</button>
+                        <!-- 답글 목록 -->
+                        <div th:each="childReply : ${reply.children}" th:if="${childReply.deleteCheck != 'Y'}"
+                             class="reply-item nested-reply mb-2">
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <span class="fw-bold" th:text="${childReply.member.name}"></span>
+                                    <span class="author-tag" th:if="${childReply.member.MIdx == board.member.MIdx}">(작성자)</span>
+                                    <small class="text-muted ms-2" 
+                                           th:text="${#temporals.format(childReply.insertDate, 'yyyy.MM.dd HH:mm')}"></small>
+                                </div>
+                                <div th:if="${sessionMember != null && (sessionMember.MIdx == childReply.member.MIdx || sessionMember.role.name() == 'ADMIN')}">
+                                    <button class="delete-reply" 
+                                            th:data-id="${childReply.rIdx}">✕</button>
                                 </div>
                             </div>
-                            <!-- 답글 목록 -->
-                            <div th:each="childReply : ${reply.children}" th:if="${childReply.deleteCheck != 'Y'}"
-                                 class="reply-item nested-reply mb-2">
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <span class="fw-bold" th:text="${childReply.member.name}"></span>
-                                        <span class="author-tag" th:if="${childReply.member.MIdx == board.member.MIdx}">(작성자)</span>
-                                        <small class="text-muted ms-2" 
-                                               th:text="${#temporals.format(childReply.insertDate, 'yyyy.MM.dd HH:mm')}"></small>
-                                    </div>
-                                    <div th:if="${sessionMember != null && (sessionMember.MIdx == childReply.member.MIdx || sessionMember.role.name() == 'ADMIN')}">
-                                        <button class="delete-reply" 
-                                                th:data-id="${childReply.rIdx}">✕</button>
-                                    </div>
-                                </div>
-                                <div class="reply-content mt-1" th:text="${childReply.content}"></div>
-                            </div>
+                            <div class="reply-content mt-1" th:text="${childReply.content}"></div>
                         </div>
                     </div>
-                    
-                    <!-- 댓글이 없는 경우 -->
-                    <div th:if="${#lists.isEmpty(replies)}" class="text-center text-muted py-2">
-                        <p class="mb-0">첫 번째 댓글을 작성해보세요!</p>
-                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Modal -->
-        <div class="modal" id="mediaModal">
-            <span class="modal-close" onclick="closeModal()">&times;</span>
-            <img class="modal-content" id="modalImage">
-            <video class="modal-content" id="modalVideo" controls autoplay>
-                <source id="modalVideoSource" src="" type="video/mp4">
-                Your browser does not support the video tag.
-            </video>
-        </div>
-
-        <!-- User Profile Modal -->
-        <div id="profileModal" class="profile-modal">
-            <div class="profile-modal-content">
-                <span class="close-profile" onclick="closeProfileModal()">&times;</span>
-                <div class="profile-header">
-                    <div class="profile-image">🐕</div>
-                    <div class="profile-name" th:text="${board.member.name}"></div>
+                
+                <!-- 댓글이 없는 경우 -->
+                <div th:if="${#lists.isEmpty(replies)}" class="text-center text-muted py-2">
+                    <p class="mb-0">첫 번째 댓글을 작성해보세요!</p>
                 </div>
-                <div class="profile-info">
-                    <div class="profile-info-item">
-                        <strong>활동 등급</strong>
-                        <span>
-                            <th:block th:if="${board.member.point >= 1000}">🏆 골드</th:block>
-                            <th:block th:if="${board.member.point >= 500 && board.member.point < 1000}">🥈 실버</th:block>
-                            <th:block th:if="${board.member.point < 500}">🥉 브론즈</th:block>
-                        </span>
-                    </div>
-                    <div class="profile-info-item">
-                        <strong>산책 거리</strong>
-                        <span th:if="${board.member.point != null}" th:text="${board.member.point * 100 + 'm'}">0m</span>
-                    </div>
-                    <div class="profile-info-item">
-                        <strong>작성 게시글</strong>
-                        <span th:text="${board.member.boards.size() + '개'}">0개</span>
-                    </div>
-                    <div class="profile-info-item">
-                        <strong>가입일</strong>
-                        <span th:text="${#temporals.format(board.member.lastLoginDate, 'yyyy년 MM월 dd일')}"></span>
-                    </div>
-                </div>
-                <div class="profile-pets">
-                    <div class="profile-pets-title">반려동물</div>
-                    <div class="pet-list">
-                        <th:block th:if="${not #lists.isEmpty(board.member.dogs)}">
-                            <span class="pet-tag" th:each="dog : ${board.member.dogs}">
-                                🐕 <span th:text="${dog.name}"></span>
-                            </span>
-                        </th:block>
-                        <th:block th:if="${#lists.isEmpty(board.member.dogs)}">
-                            <span class="pet-tag">아직 등록된 반려동물이 없어요</span>
-                        </th:block>
-                    </div>
-                </div>
-                <button class="chat-button" onclick="startChat()">💌 1:1 채팅하기</button>
-            </div>
-        </div>
-
-        <!-- Loading Modal -->
-        <div id="loadingModal" class="loading-modal">
-            <div class="loading-content">
-                <div class="loading-dog">🐕</div>
-                <div class="loading-text">채팅방으로 이동중...</div>
-            </div>
-        </div>
-
-        <!-- Footer -->
-        <div class="footer">
-            <div class="nav-item" onclick="location.href='/'">
-                <img src="/images/home1.svg" alt="홈">
-                <span>홈</span>
-            </div>
-            <div class="nav-item" onclick="location.href='/calendar'">
-                <img src="/images/calendar0.svg" alt="캘린더">
-                <span>캘린더</span>
-            </div>
-            <div class="nav-item" onclick="location.href='/walk'">
-                <img src="/images/location0.svg" alt="산책">
-                <span>산책</span>
-            </div>
-            <div class="nav-item active" onclick="location.href='/board'">
-                <img src="/images/_3-user0.svg" alt="커뮤니티">
-                <span>커뮤니티</span>
-            </div>
-            <div class="nav-item" onclick="toggleMenu()">
-                <img src="/images/category0.svg" alt="메뉴">
-                <span>메뉴</span>
             </div>
         </div>
     </div>
+
+    <!-- Modal -->
+    <div class="modal" id="mediaModal">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage">
+        <video class="modal-content" id="modalVideo" controls autoplay>
+            <source id="modalVideoSource" src="" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="profileModal" class="profile-modal">
+        <div class="profile-modal-content">
+            <span class="close-profile" onclick="closeProfileModal()">&times;</span>
+            <div class="profile-header">
+                <div class="profile-image">🐕</div>
+                <div class="profile-name" th:text="${board.member.name}"></div>
+            </div>
+            <div class="profile-info">
+                <div class="profile-info-item">
+                    <strong>활동 등급</strong>
+                    <span>
+                        <th:block th:if="${board.member.point >= 1000}">🏆 골드</th:block>
+                        <th:block th:if="${board.member.point >= 500 && board.member.point < 1000}">🥈 실버</th:block>
+                        <th:block th:if="${board.member.point < 500}">🥉 브론즈</th:block>
+                    </span>
+                </div>
+                <div class="profile-info-item">
+                    <strong>산책 거리</strong>
+                    <span th:if="${board.member.point != null}" th:text="${board.member.point * 100 + 'm'}">0m</span>
+                </div>
+                <div class="profile-info-item">
+                    <strong>작성 게시글</strong>
+                    <span th:text="${board.member.boards.size() + '개'}">0개</span>
+                </div>
+                <div class="profile-info-item">
+                    <strong>가입일</strong>
+                    <span th:text="${#temporals.format(board.member.lastLoginDate, 'yyyy년 MM월 dd일')}"></span>
+                </div>
+            </div>
+            <div class="profile-pets">
+                <div class="profile-pets-title">반려동물</div>
+                <div class="pet-list">
+                    <th:block th:if="${not #lists.isEmpty(board.member.dogs)}">
+                        <span class="pet-tag" th:each="dog : ${board.member.dogs}">
+                            🐕 <span th:text="${dog.name}"></span>
+                        </span>
+                    </th:block>
+                    <th:block th:if="${#lists.isEmpty(board.member.dogs)}">
+                        <span class="pet-tag">아직 등록된 반려동물이 없어요</span>
+                    </th:block>
+                </div>
+            </div>
+            <button class="chat-button01" onclick="startChat()">💌 1:1 채팅하기</button>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <div th:replace="~{common/footer :: footer}"></div>
+    <!-- /footer -->
+
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="loading-modal">
+        <div class="loading-content">
+            <div class="loading-dog">🐕</div>
+            <div class="loading-text">채팅방으로 이동중...</div>
+        </div>
+    </div>
+
+   
 
     <script th:inline="javascript">
         const boardId = [[${board.BIdx}]];

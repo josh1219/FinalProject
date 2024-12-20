@@ -579,7 +579,7 @@
                   <th:block th:if="${not #lists.isEmpty(boardList)}" th:each="board : ${boardList}">
                       <div class="board-item" 
                            th:classappend="${board.bType == '공지사항'} ? 'notice-post' : (${board.member != null && board.member.role != null && board.member.role.name() == 'ADMIN'} ? 'admin-post')"
-                           th:onclick="'location.href=\'/board/detail?id=' + ${board.bIdx} + '\''">
+                           th:onclick="'location.href=\'/board/detail/' + ${board.bIdx} + '\''">
                           <div class="board-content">
                               <div class="board-info">
                                   <span class="board-category" th:text="${board.bType}">카테고리</span>

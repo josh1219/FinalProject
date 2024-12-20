@@ -3,7 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title th:text="${sessionMember != null && sessionMember.role.name() == 'ADMIN'} ? 'PETOPIA - 관리자 로그인' : 'PETOPIA'">PETOPIA</title>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    
     <style>
         /* Reset and Global Styles */
         * {
@@ -138,7 +149,14 @@
         }
 
         .modal video {
-            pointer-events: all;
+            width: 100%;
+            max-height: 90vh;
+        }
+
+        .modal img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
         }
 
         /* Post Author Link Style */
@@ -228,7 +246,7 @@
             justify-content: space-around;
             align-items: center;
             padding: 0;
-            z-index: 1000;
+            z-index: 100;
         }
 
         .nav-item {
@@ -339,45 +357,42 @@
         .modal {
             display: none;
             position: fixed;
-            top: 0;
+            z-index: 9999;
+            padding-top: 100px; /* 상단 여백을 늘림 */
             left: 0;
+            top: 0;
             width: 100%;
             height: 100%;
             background-color: rgba(0, 0, 0, 0.9);
-            z-index: 2000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal.show {
-            display: flex;
+            overflow: hidden;
         }
 
         .modal-content {
+            margin: auto;
+            display: block;
             max-width: 90%;
-            max-height: 90%;
-            object-fit: contain;
+            max-height: 80vh;
+            position: relative;
+            top: 50px; /* 컨텐츠를 아래로 내림 */
         }
 
         .modal-close {
             position: absolute;
-            top: 15px;
-            right: 15px;
-            color: #fff;
-            font-size: 30px;
+            right: 35px;
+            top: 35px; /* 닫기 버튼 위치를 아래로 내림 */
+            color: #f1f1f1;
+            font-size: 40px;
             font-weight: bold;
             cursor: pointer;
+            z-index: 10000; /* 닫기 버튼이 항상 위에 보이도록 */
         }
 
-        .modal video {
-            width: 100%;
-            max-height: 90vh;
-        }
-
-        .modal img {
-            max-width: 100%;
-            max-height: 90vh;
-            object-fit: contain;
+        #modalImage, #modalVideo {
+            width: auto;
+            max-width: 90%;
+            margin: auto;
+            position: relative;
+            top: 50px; /* 이미지/비디오를 아래로 내림 */
         }
 
         /* User Profile Modal Styles */
@@ -520,6 +535,29 @@
             }
         }
 
+        .comments-section {
+            margin-top: 30px;
+            margin-bottom: 100px;
+        }
+
+        .comment-form {
+            margin: 20px 0;
+        }
+
+        .comments-list {
+            margin-top: 20px;
+        }
+
+        .comment-item {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #eee;
+        }
+
+        .comment-header {
+            margin-bottom: 10px;
+        }
+
         @keyframes modalFadeOut {
             from {
                 opacity: 1;
@@ -594,6 +632,234 @@
                 transform: translateY(-20px);
             }
         }
+
+        /* 댓글 섹션 디자인 */
+        .reply-section {
+            border-top: 1px solid #e0e0e0;
+            margin-top: 30px;
+            padding-top: 20px;
+        }
+
+        .reply-list {
+            margin-top: 20px;
+        }
+
+        .reply-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .reply-item:last-child {
+            border-bottom: none;
+        }
+
+        .reply-content {
+            font-size: 16px;
+            color: #666;
+        }
+
+        .delete-reply {
+            padding: 3px 8px;
+            font-size: 12px;
+            color: #999;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        /* 댓글 버튼 스타일 */
+        .reply-submit {
+            padding: 8px 16px;
+            font-size: 14px;
+            color: #666;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .reply-submit:hover {
+            background-color: #e9ecef;
+            border-color: #ced4da;
+        }
+
+        /* 댓글 입력 폼 스타일 */
+        .form-control {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: #FF4081;
+            box-shadow: 0 0 0 0.2rem rgba(255, 64, 129, 0.25);
+        }
+
+        /* 댓글 아이템 스타일 */
+        .reply-item {
+            background-color: #fff;
+            border-bottom: 1px solid #eee !important;
+            padding: 15px 0;
+            margin-bottom: 10px;
+        }
+
+        .reply-content {
+            color: #333;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        /* 로그인 알림 스타일 */
+        .alert-info {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .alert-info .alert-link {
+            color: #FF4081;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .alert-info .alert-link:hover {
+            text-decoration: underline;
+        }
+
+        /* 답글 스타일 */
+        .reply-actions {
+            margin-top: 5px;
+        }
+
+        .reply-button {
+            font-size: 12px;
+            color: #999;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 3px 8px;
+            margin-right: 10px;
+        }
+
+        .reply-button:hover {
+            color: #666;
+        }
+
+        .reply-form {
+            margin-top: 10px;
+            margin-left: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .nested-reply {
+            margin-left: 20px;
+            padding-left: 20px;
+            border-left: 2px solid #eee;
+        }
+
+        .reply-textarea {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            resize: vertical;
+        }
+
+        /* 답글 펼치기/접기 기능 */
+        .toggle-replies {
+            font-size: 12px;
+            color: #666;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 3px 8px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-replies:hover {
+            color: #333;
+        }
+
+        .toggle-replies i {
+            font-size: 14px;
+            margin-right: 4px;
+            transition: transform 0.2s;
+        }
+
+        .toggle-replies.collapsed i {
+            transform: rotate(-90deg);
+        }
+
+        .nested-replies {
+            display: none;
+            font-size: 0.95em;
+        }
+
+        .nested-replies .reply-form {
+            margin-top: 8px;
+            margin-left: 20px;
+            padding: 8px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .nested-replies .reply-textarea {
+            width: 100%;
+            min-height: 50px;
+            padding: 6px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            resize: vertical;
+            font-size: 0.95em;
+        }
+
+        .nested-replies .reply-submit {
+            font-size: 0.9em;
+            padding: 4px 12px;
+        }
+
+        .nested-replies .fw-bold {
+            font-size: 0.95em;
+        }
+
+        .nested-replies .text-muted {
+            font-size: 0.85em;
+        }
+
+        .nested-replies .delete-reply {
+            font-size: 0.9em;
+            padding: 2px 6px;
+        }
+
+        .nested-replies .reply-content {
+            font-size: 0.95em;
+            margin-top: 4px;
+        }
+
+        /* 작성자 표시 스타일 */
+        .author-tag {
+            font-size: 0.85em;
+            color: #666;
+            background-color: #f0f0f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: 6px;
+        }
+
+        .nested-replies .author-tag {
+            font-size: 0.8em;
+            padding: 1px 5px;
+        }
     </style>
 </head>
 <body>
@@ -648,15 +914,14 @@
                                 file.fileRealName.toLowerCase().endsWith('.png') || 
                                 file.fileRealName.toLowerCase().endsWith('.gif')}"
                          class="post-image" 
-                         th:src="@{'/uploads/' + ${file.fileSaveName}}" 
-                         th:onclick="'openModal(this)'"
-                         alt="첨부 이미지">
+                         th:src="@{'/uploads/' + ${file.fileSaveName}}"
+                         th:onclick="'openModal(\'' + @{'/uploads/' + ${file.fileSaveName}} + '\', \'image\')'">
                     
                     <!-- 비디오 -->
                     <div class="video-wrapper" th:if="${file.fileRealName.toLowerCase().endsWith('.mp4') || 
                                   file.fileRealName.toLowerCase().endsWith('.webm') || 
                                   file.fileRealName.toLowerCase().endsWith('.ogg')}"
-                         th:onclick="'openModal(this.querySelector(\'video\'))'">
+                         th:onclick="'openModal(\'' + @{'/uploads/' + ${file.fileSaveName}} + '\', \'video\')'">
                         <video class="post-video"
                                th:src="@{'/uploads/' + ${file.fileSaveName}}"
                                autoplay
@@ -682,12 +947,97 @@
                     <button class="delete-button admin-delete" th:onclick="'confirmAdminDelete()'">관리자 삭제</button>
                 </th:block>
             </div>
+
+            <!-- 댓글 섹션 -->
+            <div class="reply-section mt-3">
+                <h5 class="mb-2">댓글</h5>
+                
+                <!-- 댓글 작성 폼 -->
+                <div class="mb-3">
+                    <form id="replyForm" class="needs-validation" novalidate th:if="${sessionMember != null}">
+                        <div class="form-group">
+                            <textarea class="form-control" id="replyContent" rows="3" 
+                                placeholder="댓글을 입력하세요..." required></textarea>
+                        </div>
+                        <div class="text-end mt-2">
+                            <button type="submit" class="reply-submit">댓글 작성</button>
+                        </div>
+                    </form>
+                    <div class="alert alert-info" th:unless="${sessionMember != null}">
+                        댓글을 작성하려면 <a href="/member/login" class="alert-link">로그인</a>이 필요합니다.
+                    </div>
+                </div>
+                
+                <!-- 댓글 목록 -->
+                <div class="reply-list">
+                    <div th:each="reply : ${replies}" th:if="${reply.deleteCheck != 'Y' && reply.parent == null}" 
+                         class="reply-item border-bottom pb-2 mb-2">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <span class="fw-bold" th:text="${reply.member.name}"></span>
+                                <span class="author-tag" th:if="${reply.member.MIdx == board.member.MIdx}">작성자</span>
+                                <small class="text-muted ms-2" 
+                                       th:text="${#temporals.format(reply.insertDate, 'yyyy.MM.dd HH:mm')}"></small>
+                            </div>
+                            <div th:if="${sessionMember != null && (sessionMember.MIdx == reply.member.MIdx || sessionMember.role.name() == 'ADMIN')}">
+                                <button class="delete-reply" 
+                                        th:data-id="${reply.rIdx}">✕</button>
+                            </div>
+                        </div>
+                        <div class="reply-content mt-1" th:text="${reply.content}"></div>
+                        <!-- 답글 버튼과 토글 버튼 -->
+                        <div class="reply-actions" th:if="${sessionMember != null}">
+                            <button class="toggle-replies collapsed" th:if="${not #lists.isEmpty(reply.children) || sessionMember != null}"
+                                    th:data-count="${#lists.size(reply.children)}"
+                                    th:data-id="${reply.rIdx}">
+                                <i>▼</i> 답글 <span th:text="${#lists.size(reply.children)}"></span>개
+                            </button>
+                        </div>
+                        <!-- 답글 목록과 입력 폼 -->
+                        <div class="nested-replies">
+                            <!-- 답글 작성 폼 -->
+                            <div class="reply-form mb-3" th:if="${sessionMember != null}">
+                                <textarea class="reply-textarea" placeholder="답글을 입력하세요..."></textarea>
+                                <div class="text-end mt-2">
+                                    <button class="reply-submit submit-reply" th:data-parent-id="${reply.rIdx}">등록</button>
+                                </div>
+                            </div>
+                            <!-- 답글 목록 -->
+                            <div th:each="childReply : ${reply.children}" th:if="${childReply.deleteCheck != 'Y'}"
+                                 class="reply-item nested-reply mb-2">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <span class="fw-bold" th:text="${childReply.member.name}"></span>
+                                        <span class="author-tag" th:if="${childReply.member.MIdx == board.member.MIdx}">(작성자)</span>
+                                        <small class="text-muted ms-2" 
+                                               th:text="${#temporals.format(childReply.insertDate, 'yyyy.MM.dd HH:mm')}"></small>
+                                    </div>
+                                    <div th:if="${sessionMember != null && (sessionMember.MIdx == childReply.member.MIdx || sessionMember.role.name() == 'ADMIN')}">
+                                        <button class="delete-reply" 
+                                                th:data-id="${childReply.rIdx}">✕</button>
+                                    </div>
+                                </div>
+                                <div class="reply-content mt-1" th:text="${childReply.content}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 댓글이 없는 경우 -->
+                    <div th:if="${#lists.isEmpty(replies)}" class="text-center text-muted py-2">
+                        <p class="mb-0">첫 번째 댓글을 작성해보세요!</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Modal -->
         <div class="modal" id="mediaModal">
             <span class="modal-close" onclick="closeModal()">&times;</span>
-            <div class="modal-content"></div>
+            <img class="modal-content" id="modalImage">
+            <video class="modal-content" id="modalVideo" controls autoplay>
+                <source id="modalVideoSource" src="" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
         </div>
 
         <!-- User Profile Modal -->
@@ -771,131 +1121,297 @@
     </div>
 
     <script th:inline="javascript">
-        function confirmEdit(boardId) {
+        const boardId = [[${board.BIdx}]];
+
+        // 게시글 삭제 함수
+        function deletePost(bIdx) {
+            if (confirm('정말로 이 게시글을 삭제하시겠습니까?')) {
+                $.ajax({
+                    url: '/board/delete/' + bIdx,
+                    type: 'DELETE',
+                    beforeSend: function(xhr) {
+                        var header = $("meta[name='_csrf_header']").attr("content");
+                        var token = $("meta[name='_csrf']").attr("content");
+                        xhr.setRequestHeader(header, token);
+                    },
+                    success: function() {
+                        alert('게시글이 삭제되었습니다.');
+                        window.location.href = '/board';
+                    },
+                    error: function(xhr) {
+                        alert('게시글 삭제에 실패했습니다.');
+                    }
+                });
+            }
+        }
+
+        // 게시글 수정 확인 함수
+        function confirmEdit() {
             if (confirm('게시글을 수정하시겠습니까?')) {
                 window.location.href = '/board/edit?id=' + boardId;
             }
         }
 
-        function deletePost(boardId) {
-            if (confirm('정말로 삭제하시겠습니까?')) {
-                fetch('/board/delete/' + boardId)
-                    .then(response => {
-                        if (response.ok) {
-                            alert('게시글이 삭제되었습니다.');
-                            window.location.href = '/board';
-                        } else {
-                            response.text().then(text => alert(text));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('삭제 중 오류가 발생했습니다.');
-                    });
+        // 관리자 삭제 확인 함수
+        function confirmAdminDelete() {
+            if (confirm('관리자 권한으로 이 게시글을 삭제하시겠습니까?')) {
+                deletePost(boardId);
             }
         }
 
-        function toggleMenu() {
-            location.href = '/menu';
-        }
-
-        // 모달 관련 함수
-        const modal = document.getElementById('mediaModal');
-        const modalContent = modal.querySelector('.modal-content');
-
-        function openModal(element) {
-            const clone = element.cloneNode(true);
-            modalContent.innerHTML = '';
-            modalContent.appendChild(clone);
-            
-            if (clone.tagName === 'VIDEO') {
-                clone.setAttribute('controls', 'true');
-                clone.removeAttribute('onclick');
-            }
-            
-            modal.classList.add('show');
-        }
-
-        function closeModal() {
-            modal.classList.remove('show');
-            modalContent.innerHTML = '';
-        }
-
-        // 모달 외부 클릭시 닫기
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeModal();
-            }
-        });
-
-        // ESC 키로 모달 닫기
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modal.classList.contains('show')) {
-                closeModal();
-            }
-        });
-
-        // 프로필 모달 관련 함수
+        // 프로필 모달 함수들
         function openProfileModal() {
             const modal = document.getElementById('profileModal');
             modal.style.display = 'block';
-            // 약간의 지연 후 애니메이션 적용
-            setTimeout(() => {
-                modal.classList.add('show');
-            }, 10);
-            document.body.style.overflow = 'hidden';
         }
 
         function closeProfileModal() {
             const modal = document.getElementById('profileModal');
-            const content = modal.querySelector('.profile-modal-content');
-            content.style.animation = 'modalFadeOut 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-            
-            setTimeout(() => {
+            modal.style.display = 'none';
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('profileModal');
+            if (event.target == modal) {
                 modal.style.display = 'none';
-                content.style.animation = 'modalFadeIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
-                document.body.style.overflow = '';
-            }, 450);
-        }
-
-        // 프로필 모달 외부 클릭시 닫기
-        document.getElementById('profileModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeProfileModal();
             }
-        });
-
-        function startChat() {
-            const loadingModal = document.getElementById('loadingModal');
-            loadingModal.style.display = 'flex';
-            
-            const currentId = [[${sessionMember.mIdx}]];
-            const targetId = [[${board.member.mIdx}]];
-            const id1 = Math.min(currentId, targetId);
-            const id2 = Math.max(currentId, targetId);
-            
-            setTimeout(() => {
-                window.location.href = `/chat/${id1}_${id2}`;
-            }, 1500); // 1.5초 후에 채팅방으로 이동
         }
 
-        function confirmAdminDelete() {
-            if(confirm('관리자 권한으로 이 게시글을 삭제하시겠습니까?')) {
-                fetch('/board/delete/' + [[${board.bIdx}]])
-                    .then(response => {
-                        if (response.ok) {
-                            alert('게시글이 관리자 권한으로 삭제되었습니다.');
-                            window.location.href = '/board';
-                        } else {
-                            response.text().then(text => alert(text));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('삭제 중 오류가 발생했습니다.');
-                    });
+        // 채팅 시작 함수
+        function startChat() {
+            const memberId = [[${board.member.MIdx}]];
+            const memberName = [[${board.member.name}]];
+            
+            // 로딩 모달 표시
+            document.getElementById('loadingModal').style.display = 'flex';
+            
+            // 채팅방으로 이동
+            setTimeout(function() {
+                location.href = `/chat/room?targetMemberId=${memberId}&targetMemberName=${memberName}`;
+            }, 1500);
+        }
+
+        $(document).ready(function() {
+            // CSRF 토큰 설정
+            const csrfToken = $("meta[name='_csrf']").attr("content");
+            const csrfHeader = $("meta[name='_csrf_header']").attr("content");
+
+            // AJAX 설정
+            $.ajaxSetup({
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader(csrfHeader, csrfToken);
+                }
+            });
+
+            // 댓글 작성
+            $('#replyForm').on('submit', function(e) {
+                e.preventDefault();
+                
+                const content = $('#replyContent').val().trim();
+                if (!content) {
+                    showToast('error', '댓글 내용을 입력해주세요.');
+                    return;
+                }
+
+                const requestData = {
+                    content: content,
+                    boardId: boardId
+                };
+                console.log('Board ID type:', typeof boardId);
+                console.log('Sending reply:', requestData);
+
+                $.ajax({
+                    url: '/reply/add',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(requestData),
+                    success: function(response) {
+                        showToast('success', '댓글이 등록되었습니다.');
+                        // URL에서 해시 제거하고 새로고침
+                        window.location.href = window.location.href.split('#')[0];
+                    },
+                    error: function(xhr) {
+                        showToast('error', xhr.responseText || '댓글 등록에 실패했습니다.');
+                    }
+                });
+            });
+
+            // 댓글 삭제
+            $(document).on('click', '.delete-reply', function() {
+                if (!confirm('정말 이 댓글을 삭제하시겠습니까?')) {
+                    return;
+                }
+
+                const replyId = $(this).data('id');
+                $.ajax({
+                    url: '/reply/delete',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        rIdx: replyId
+                    }),
+                    success: function(response) {
+                        showToast('success', '댓글이 삭제되었습니다.');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        console.error('Error:', xhr.responseText);
+                        showToast('error', xhr.responseText || '댓글 삭제에 실패했습니다.');
+                    }
+                });
+            });
+
+            // 답글 관련 JavaScript
+            $('.submit-reply').on('click', function() {
+                const form = $(this).closest('.reply-form');
+                const content = form.find('.reply-textarea').val();
+                const parentId = $(this).data('parent-id');
+                const replySection = $(this).closest('.nested-replies');
+
+                if (!content.trim()) {
+                    showToast('error', '답글 내용을 입력해주세요.');
+                    return;
+                }
+
+                $.ajax({
+                    url: '/reply/addReply',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        content: content,
+                        parentId: parentId
+                    }),
+                    beforeSend: function(xhr) {
+                        var header = $("meta[name='_csrf_header']").attr("content");
+                        var token = $("meta[name='_csrf']").attr("content");
+                        xhr.setRequestHeader(header, token);
+                    },
+                    success: function(response) {
+                        showToast('success', '답글이 등록되었습니다.');
+                        // 현재 URL을 가져옴
+                        const currentUrl = window.location.href;
+                        // URL에 해시 추가
+                        const urlWithHash = currentUrl.split('#')[0] + '#reply-' + parentId;
+                        // 페이지 새로고침하면서 해시 유지
+                        window.location.href = urlWithHash;
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        showToast('error', xhr.responseText || '답글 등록에 실패했습니다.');
+                    }
+                });
+            });
+
+            // 답글 펼치기/접기 기능
+            $(document).on('click', '.toggle-replies', function() {
+                const nestedReplies = $(this).closest('.reply-item').find('.nested-replies');
+                $(this).toggleClass('collapsed');
+                
+                if ($(this).hasClass('collapsed')) {
+                    nestedReplies.slideUp();
+                    $(this).find('i').text('▼');
+                } else {
+                    nestedReplies.slideDown();
+                    $(this).find('i').text('▲');
+                }
+            });
+
+            // 페이지 로드 시 해시가 있으면 해당 답글 영역 펼치기
+            $(window).on('load', function() {
+                const hash = window.location.hash;
+                if (hash && hash.startsWith('#reply-')) {
+                    const replyId = hash.replace('#reply-', '');
+                    const toggleButton = $(`[data-id="${replyId}"]`);
+                    if (toggleButton.length) {
+                        toggleButton.removeClass('collapsed');
+                        toggleButton.find('i').text('▲');
+                        toggleButton.closest('.reply-item').find('.nested-replies').show();
+                    }
+                }
+            });
+
+            // 토스트 메시지 표시 함수
+            function showToast(type, message) {
+                const toast = $(`
+                    <div class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" 
+                         role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="d-flex">
+                            <div class="toast-body">
+                                ${message}
+                            </div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" 
+                                    data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                    </div>
+                `);
+
+                $('.toast-container').append(toast);
+                const bsToast = new bootstrap.Toast(toast);
+                bsToast.show();
+
+                toast.on('hidden.bs.toast', function() {
+                    toast.remove();
+                });
+            }
+
+            // 댓글과 답글 입력창에 엔터키 이벤트 추가
+            $('#replyContent').on('keypress', function(e) {
+                if (e.which === 13 && !e.shiftKey) {  // shift + enter가 아닌 엔터키만 눌렀을 때
+                    e.preventDefault();
+                    $('#replyForm').submit();
+                }
+            });
+
+            $(document).on('keypress', '.reply-textarea', function(e) {
+                if (e.which === 13 && !e.shiftKey) {  // shift + enter가 아닌 엔터키만 눌렀을 때
+                    e.preventDefault();
+                    $(this).closest('.reply-form').find('.submit-reply').click();
+                }
+            });
+        });
+    </script>
+
+    <script>
+        function openModal(mediaUrl, type) {
+            const modal = document.getElementById('mediaModal');
+            const modalImage = document.getElementById('modalImage');
+            const modalVideo = document.getElementById('modalVideo');
+            const modalVideoSource = document.getElementById('modalVideoSource');
+
+            modal.style.display = "block";
+
+            if (type === 'image') {
+                modalImage.style.display = "block";
+                modalVideo.style.display = "none";
+                modalImage.src = mediaUrl;
+            } else if (type === 'video') {
+                modalImage.style.display = "none";
+                modalVideo.style.display = "block";
+                modalVideoSource.src = mediaUrl;
+                modalVideo.load();
+                modalVideo.play(); // 비디오 자동 재생
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('mediaModal');
+            const modalVideo = document.getElementById('modalVideo');
+            modalVideo.pause(); // 비디오 정지
+            modalVideo.currentTime = 0; // 비디오 시간을 처음으로 되돌림
+            modal.style.display = "none";
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('mediaModal');
+            if (event.target == modal) {
+                closeModal();
             }
         }
     </script>
+
+    <!-- 토스트 컨테이너 -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 </body>
 </html>

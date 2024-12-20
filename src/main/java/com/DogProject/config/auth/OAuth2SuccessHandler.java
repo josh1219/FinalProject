@@ -204,7 +204,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
     private void setLoginSession(HttpServletResponse response, Member member) {
         // 세션에 로그인 정보 저장
         HttpSession session = httpSession;
-        session.setAttribute("member", member);
+        session.setAttribute("sessionMember", member);
         session.setAttribute("isLoggedIn", true);
         session.setAttribute("mIdx", member.getMIdx());
         session.setAttribute("email", member.getMEmail());

@@ -1,48 +1,55 @@
 package com.DogProject.entity;
 
+import lombok.*;
 import javax.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.Comment;
-import org.springframework.context.annotation.DependsOn;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
-@DependsOn({"board", "member"})
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Reply {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Comment("댓글 고유 ID")
-    private int rIdx;
+    private Integer rIdx;
 
-    @Comment("댓글 작성 날짜")
-    private String insertDate;
-
-    @Comment("댓글 수정 날짜")
-    private String updateDate;
-
-    @Column(name = "delete_check", length = 1, columnDefinition = "CHAR(1) CHECK (delete_check IN ('Y', 'N'))")
-    @Comment("댓글 삭제 여부")
-    private String deleteCheck;
-
-    @Comment("댓글 좋아요 수")
-    private int likeCount;
-
-    @Comment("댓글 신고 수")
-    private int report;
-
-    @Comment("댓글 내용")
-    @Column(name = "content", columnDefinition = "VARCHAR(3000)")
+    @Column(nullable = false)
     private String content;
 
-    @ManyToOne
-    @JoinColumn(name = "bidx")
-    @Comment("댓글이 속한 게시글")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "bIdx")
     private Board board;
 
-    @ManyToOne
-    @JoinColumn(name = "midx")
-    @Comment("댓글 작성자")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "mIdx")
     private Member member;
+
+    @Column(nullable = false)
+    private LocalDateTime insertDate;
+
+    @Column(length = 1)
+    private String deleteCheck;
+
+    @Builder.Default
+    @Column(name = "like_count")
+    private Integer likeCount = 0;
+
+    @Builder.Default
+    @Column(name = "report")
+    private Integer report = 0;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private Reply parent;
+
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+    @OrderBy("insertDate DESC")
+    private List<Reply> children = new ArrayList<>();
+
+    private int depth;
 }

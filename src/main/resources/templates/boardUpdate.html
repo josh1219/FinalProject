@@ -396,6 +396,11 @@
         }
 
         function submitForm() {
+            // 수정 확인
+            if (!confirm('이대로 수정하시겠습니까?')) {
+                return;
+            }
+
             const form = document.getElementById('updateForm');
             const formData = new FormData(form);
             
@@ -436,7 +441,7 @@
             })
             .then(bIdx => {
                 alert('게시글이 성공적으로 수정되었습니다.');
-                window.location.href = '/board/detail?id=' + bIdx;
+                window.location.href = '/board/detail/' + bIdx;
             })
             .catch(error => {
                 console.error('Error:', error);

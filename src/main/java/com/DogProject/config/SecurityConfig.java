@@ -63,7 +63,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
             .csrf()
                 .ignoringAntMatchers("/member/checkEmail", "/api/**", "/dog/insert", "/dog/update/**", 
-                    "/uploads/**", "/schedule/save", "/schedule/update")
+                    "/uploads/**", "/schedule/save", "/schedule/update", "/reply/**", "/board/delete/**")
                 .and()
             .sessionManagement()
                 .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)
@@ -104,6 +104,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     // 세션에 로그인 정보 저장 (mIdx를 Integer로 저장)
                     HttpSession session = request.getSession();
                     session.setAttribute("member", member);
+                    session.setAttribute("sessionMember", member);
                     session.setAttribute("isLoggedIn", true);
                     session.setAttribute("mIdx", member.getMIdx());
                     session.setAttribute("email", userEmail);

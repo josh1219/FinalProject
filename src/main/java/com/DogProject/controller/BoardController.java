@@ -9,14 +9,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.DogProject.entity.Board;
 import com.DogProject.entity.File;
 import com.DogProject.entity.Member;
+import com.DogProject.entity.Reply;
 import com.DogProject.service.BoardService;
 import com.DogProject.service.FileService;
 import com.DogProject.service.MemberService;
+import com.DogProject.service.ReplyService;
 import com.DogProject.constant.Role;
 import com.DogProject.repository.FileRepository;
 
@@ -50,6 +53,7 @@ public class BoardController {
     private final MemberService memberService;
     private final FileService fileService;
     private final FileRepository fileRepository;
+    private final ReplyService replyService;
 
     // 게시판 목록 페이지
     @GetMapping({"", "/"})
@@ -103,7 +107,7 @@ public class BoardController {
 
             // 세션에서 member 정보 확인
             HttpSession session = request.getSession();
-            Member member = (Member) session.getAttribute("member");
+            Member member = (Member) session.getAttribute("sessionMember");
             
             System.out.println("=== Session Debug ===");
             System.out.println("Session ID: " + session.getId());
@@ -141,7 +145,7 @@ public class BoardController {
                 }
                 
                 // 세션에 member 저장
-                session.setAttribute("member", member);
+                session.setAttribute("sessionMember", member);
             }
 
             // 관리자가 아닌 경우 공지사항/이벤트 카테고리 제한
@@ -164,8 +168,8 @@ public class BoardController {
     }
 
     // 게시글 상세 페이지
-    @GetMapping("/detail")
-    public String boardDetail(@RequestParam("id") int bIdx, Model model, HttpSession session) {
+    @GetMapping("/detail/{bIdx}")
+    public String boardDetail(@PathVariable int bIdx, Model model, HttpSession session) {
         try {
             // 게시글 조회
             Board board = boardService.getBoardByIdx(bIdx);
@@ -174,7 +178,7 @@ public class BoardController {
             }
 
             // 현재 로그인한 사용자 정보를 세션에서 가져오기
-            Member sessionMember = (Member) session.getAttribute("member");
+            Member sessionMember = (Member) session.getAttribute("sessionMember");
             
             // 디버그 로그 추가
             System.out.println("=== Session Debug in BoardDetail ===");
@@ -200,6 +204,10 @@ public class BoardController {
                 model.addAttribute("boardFiles", boardFiles);
             }
 
+            // 댓글 목록 조회
+            List<Reply> replies = replyService.findByBoardId(bIdx);
+            model.addAttribute("replies", replies);
+
             model.addAttribute("board", board);
             model.addAttribute("sessionMember", sessionMember); // 세션 멤버 정보 전달
             
@@ -219,7 +227,7 @@ public class BoardController {
     }
 
     // 게시글 삭제
-    @GetMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     @ResponseBody
     public ResponseEntity<String> deletePost(@PathVariable("id") int bIdx, HttpSession session) {
         try {
@@ -231,7 +239,7 @@ public class BoardController {
             }
 
             // 현재 로그인한 사용자 정보를 세션에서 가져오기
-            Member sessionMember = (Member) session.getAttribute("member");
+            Member sessionMember = (Member) session.getAttribute("sessionMember");
             
             // 권한 체크: 작성자 본인이거나 관리자만 삭제 가능
             if (sessionMember == null || 
@@ -263,7 +271,7 @@ public class BoardController {
             }
 
             // 현재 로그인한 사용자 정보를 세션에서 가져오기
-            Member sessionMember = (Member) session.getAttribute("member");
+            Member sessionMember = (Member) session.getAttribute("sessionMember");
             
             // 권한 체크: 작성자 본인만 수정 가능
             if (sessionMember == null || sessionMember.getMIdx() != board.getMember().getMIdx()) {
@@ -306,7 +314,7 @@ public class BoardController {
             }
 
             // 현재 로그인한 사용자 정보를 세션에서 가져오기
-            Member sessionMember = (Member) session.getAttribute("member");
+            Member sessionMember = (Member) session.getAttribute("sessionMember");
             
             // 권한 체크: 작성자 본인만 수정 가능
             if (sessionMember == null || sessionMember.getMIdx() != board.getMember().getMIdx()) {

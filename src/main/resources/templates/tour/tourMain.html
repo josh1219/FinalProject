@@ -115,6 +115,7 @@
             height: 100%;
             overflow-y: auto;
             padding: 10px;
+            margin-bottom: 52px;
         }
 
         .search-box {
@@ -377,7 +378,6 @@
 
             .detail-category {
                 font-size: 12px;
-                padding: 4px 8px;
             }
 
             .detail-content {
@@ -453,16 +453,16 @@
             }
 
             .place-item {
-                padding: 8px;
-                font-size: 12px;
+                padding: 6px;
+                font-size: 11px;
             }
 
             .place-name {
-                font-size: 13px;
+                font-size: 12px;
             }
 
             .place-address, .place-distance {
-                font-size: 11px;
+                font-size: 10px;
             }
 
             .pagination-controls button {
@@ -509,6 +509,11 @@
             }
 
             .pagination-controls {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin-top: -5px;
+                margin-bottom: 15px;
                 padding: 10px;
                 gap: 8px;
             }
@@ -1068,22 +1073,7 @@
                     <input type="text" class="search-input" placeholder="장소 검색..." id="searchInput">
                     <button class="search-button" onclick="handleSearch()">검색</button>
                 </div>
-                <div id="places-list">
-                    <!-- 장소 목록이 여기에 동적으로 추가됨 -->
-                </div>
-                <div class="pagination">
-                    <button class="pagination-btn" onclick="goToPage(currentPage - 1)" id="prevPage">
-                        <span class="pagination-arrow">‹</span>
-                    </button>
-                    <button class="pagination-btn" onclick="goToPage(1)">1</button>
-                    <button class="pagination-btn" onclick="goToPage(2)">2</button>
-                    <button class="pagination-btn" onclick="goToPage(3)">3</button>
-                    <button class="pagination-btn" onclick="goToPage(4)">4</button>
-                    <button class="pagination-btn" onclick="goToPage(5)">5</button>
-                    <button class="pagination-btn" onclick="goToPage(currentPage + 1)" id="nextPage">
-                        <span class="pagination-arrow">›</span>
-                    </button>
-                </div>
+                <div id="places-list" style="overflow-y: auto; height: 100%;"></div>
             </div>
         </div>
         <div class="category-list">
@@ -1198,7 +1188,8 @@
         let tourData = [];  // 전체 데이터 저장
         let filteredPlaces = [];
         let currentPage = 1;
-        const itemsPerPage = 10;
+        let itemsPerPage = 10;
+        let isLoading = false;
         const markerIcons = {
             '동물병원': '/images/markers/hospital.png',
             '동물약국': '/images/markers/pharmacy.png',
@@ -1418,7 +1409,6 @@
                 filteredPlaces = [];
                 showMarkers();
                 displayCurrentPage();
-                updatePagination();
                 return;
             }
             
@@ -1477,7 +1467,6 @@
             showMarkers();
             currentPage = 1;
             displayCurrentPage();
-            updatePagination();
         }
 
         // 검색 처리 함수 수정
@@ -1544,15 +1533,32 @@
             showMarkers();
             currentPage = 1;
             displayCurrentPage();
-            updatePagination();
         }
 
         // 장소 리스트 표시
         function displayCurrentPage() {
             const placesList = document.getElementById('places-list');
-            placesList.innerHTML = '';
+            placesList.innerHTML = ''; // 리스트 초기화
+            currentPage = 1; // 페이지 초기화
+            loadMoreItems(); // 첫 페이지 아이템 로드
+        }
+
+        // 스크롤 이벤트 리스너 추가
+        document.getElementById('places-list').addEventListener('scroll', function(e) {
+            const element = e.target;
+            if (element.scrollHeight - element.scrollTop <= element.clientHeight + 1 && !isLoading) {
+                loadMoreItems();
+            }
+        });
+
+        // 추가 아이템 로딩
+        function loadMoreItems() {
+            if (isLoading) return;
             
             const startIndex = (currentPage - 1) * itemsPerPage;
+            if (startIndex >= filteredPlaces.length) return;
+            
+            isLoading = true;
             const endIndex = Math.min(startIndex + itemsPerPage, filteredPlaces.length);
             
             for (let i = startIndex; i < endIndex; i++) {
@@ -1560,20 +1566,23 @@
                 const distanceText = place.distance != null ? 
                     (place.distance < 1000 ? 
                         `${Math.round(place.distance)}m` : 
-                        `${(place.distance / 1000).toFixed(1)}km`) : 
-                    '';
-                
-                const listItem = document.createElement('div');
-                listItem.className = 'place-item';
-                listItem.innerHTML = `
-                    <div class="place-name">${place.name}</div>
-                    <div class="place-category">${place.category}</div>
-                    <div class="place-address">${place.address}</div>
-                    ${distanceText ? `<div class="place-distance">현재 위치에서 ${distanceText}</div>` : ''}
+                        `${(place.distance / 1000).toFixed(1)}km`) : '';
+
+                const placeItem = document.createElement('div');
+                placeItem.className = 'place-item';
+                placeItem.innerHTML = `
+                    <div class="place-info">
+                        <div class="place-header">
+                            <span class="place-name">${place.name}</span>
+                            ${distanceText ? `<span class="distance">${distanceText}</span>` : ''}
+                        </div>
+                        <div class="place-category">${place.category}</div>
+                        <div class="place-address">${place.address}</div>
+                    </div>
                 `;
-                
+
                 // 장소 아이템 클릭 이벤트 추가
-                listItem.addEventListener('click', () => {
+                placeItem.addEventListener('click', () => {
                     // 해당 위치로 지도 이동
                     map.panTo(place.position);
                     map.setZoom(17);
@@ -1591,9 +1600,12 @@
                         }
                     });
                 });
-                
-                placesList.appendChild(listItem);
+
+                document.getElementById('places-list').appendChild(placeItem);
             }
+            
+            currentPage++;
+            isLoading = false;
         }
 
         // 마커 표시 함수
@@ -1759,32 +1771,6 @@
             const container = document.querySelector('.side-panel-container');
             container.classList.remove('collapsed');
         }
-
-        function updatePagination() {
-            const totalPages = Math.ceil(filteredPlaces.length / itemsPerPage);
-            document.getElementById('currentPage').textContent = currentPage;
-            document.getElementById('totalPages').textContent = totalPages;
-            
-            document.getElementById('prevPage').disabled = currentPage === 1;
-            document.getElementById('nextPage').disabled = currentPage === totalPages;
-        }
-
-        function changePage(direction) {
-            if (direction === 'prev' && currentPage > 1) {
-                currentPage--;
-            } else if (direction === 'next' && currentPage < Math.ceil(filteredPlaces.length / itemsPerPage)) {
-                currentPage++;
-            }
-            updatePagination();
-            displayCurrentPage();
-        }
-
-        // Enter 키 이벤트 처리
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                handleSearch();
-            }
-        });
 
         function showPlaceInfo(place) {
             console.log("*************************");

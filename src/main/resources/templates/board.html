@@ -32,7 +32,6 @@
             min-height: 100vh;
             position: relative;
         }
-
     
     .category-buttons {
         display: flex;
@@ -476,6 +475,68 @@
         background-repeat: no-repeat;
     }
 
+    /* 전광판 스타일 */
+    .notice-ticker-container {
+        width: 100%;
+        height: 30px;
+        background: linear-gradient(to bottom, #FFF5EC, #FFE4CC);
+        overflow: hidden;
+        position: relative;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 4px rgba(255, 145, 77, 0.15);
+        border: 1px solid #FFE4CC;
+    }
+
+    .notice-ticker {
+        white-space: nowrap;
+        position: absolute;
+        animation: ticker 12s linear infinite; /* 20초에서 12초로 단축 */
+        color: #FF914D;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 5px 15px;
+        display: flex;
+        align-items: center;
+        width: max-content;
+        text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+        letter-spacing: 0.3px;
+        left: 0;
+    }
+
+    .notice-ticker::before {
+        content: "📢";
+        margin-right: 8px;
+        filter: drop-shadow(0 1px 1px rgba(255, 255, 255, 0.8));
+    }
+
+    @keyframes ticker {
+        0% { transform: translateX(100%); }
+        100% { transform: translateX(-100%); }
+    }
+
+    /* 전광판 반짝임 효과 */
+    .notice-ticker-container::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -50%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0) 0%,
+            rgba(255, 255, 255, 0.3) 50%,
+            rgba(255, 255, 255, 0) 100%
+        );
+        animation: shine 3s infinite;
+    }
+
+    @keyframes shine {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(400%); }
+    }
+
     /* 스크롤 버튼 스타일 */
     #top-btn {
         position: fixed;
@@ -544,7 +605,10 @@
         color: #333;
     }
 
-    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
   </style>
 </head>
 
@@ -588,6 +652,13 @@
         </div>
       
           <div class="posts-container">
+              <!-- 전광판 공지사항 -->
+              <div class="notice-ticker-container">
+                  <div class="notice-ticker">
+                      타인을 향한 욕설, 비방글은 삭제 조치될 수 있습니다. 상호 배려하는 마음으로 건전한 커뮤니티를 만들어주세요! 🐾
+                  </div>
+              </div>
+
               <div id="boardList">
                   <!-- 게시글이 없을 때 표시할 메시지 -->
                   <div th:if="${#lists.isEmpty(boardList)}" class="no-posts">
@@ -672,14 +743,15 @@
     }
 
     function handleWriteButton(isLoggedIn) {
+        const isLoggedIn = [[${session.member != null}]];
         const writeButton = document.querySelector('.write-button');
         
-        if (isLoggedIn === true) {
+        if (isLoggedIn) {
             writeButton.classList.add('show-tooltip');
             setTimeout(() => {
                 writeButton.classList.remove('show-tooltip');
                 location.href = '/board/create';
-            }, 800);
+            }, 800); // 툴팁이 보일 시간
         } else {
             alert('로그인이 필요한 서비스입니다.');
             location.href = '/member/login';
@@ -784,6 +856,17 @@
             location.href = '/member/login';
         }
     }
+
+    // 전광판 애니메이션 재시작
+    function restartTicker() {
+        const ticker = document.querySelector('.notice-ticker');
+        ticker.style.animation = 'none';
+        ticker.offsetHeight; // Trigger reflow
+        ticker.style.animation = null;
+    }
+
+    // 전광판이 끝에 도달하면 자동으로 재시작
+    document.querySelector('.notice-ticker').addEventListener('animationend', restartTicker);
   </script>
 </body>
 </html>

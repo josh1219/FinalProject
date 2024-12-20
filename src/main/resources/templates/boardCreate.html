@@ -177,11 +177,64 @@
       height: 24px;
       cursor: pointer;
     }
+
+    /* 로딩 모달 스타일 */
+    .loading-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loading-content {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .loading-dog {
+        font-size: 40px;
+        animation: bounce 0.8s infinite;
+    }
+
+    .loading-text {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #333;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    .back-button {
+        cursor: pointer;
+        padding: 8px;
+        transition: transform 0.2s ease;
+    }
+
+    .back-button:hover {
+        transform: scale(1.1);
+    }
+
+    .back-button:active {
+        transform: scale(0.95);
+    }
   </style>
 </head>
 <body>
   <div class="header">
-    <img src="/images/chevron-left.svg" alt="뒤로가기" onclick="history.back()"/>
+    <div class="back-button" onclick="handleBackButton()" title="게시판으로 돌아가기">
+        <img src="/images/chevron-left.svg" alt="뒤로가기"/>
+    </div>
     <span class="header-title">게시글 작성</span>
     <img src="/images/check.svg" alt="완료" onclick="submitPost()"/>
   </div>
@@ -420,9 +473,28 @@
         
         input.files = dt.files;
       }
+
+      function handleBackButton() {
+        if (!confirm('게시글 작성을 취소하시겠습니까?')) {
+          return;
+        }
+        
+        const loadingModal = document.getElementById('loadingModal');
+        loadingModal.style.display = 'flex';
+        
+        setTimeout(() => {
+          location.href = '/board';
+        }, 500);
+      }
     </script>
   </div>
 
-  
+  <!-- Loading Modal -->
+  <div id="loadingModal" class="loading-modal">
+      <div class="loading-content">
+          <div class="loading-dog">🐕</div>
+          <div class="loading-text">게시판으로 돌아가는 중...</div>
+      </div>
+  </div>
 </body>
 </html>

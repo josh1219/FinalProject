@@ -36,7 +36,7 @@
             display: grid;
             grid-template-columns: 2fr 1fr;
             grid-template-rows: repeat(4, auto);
-            grid-gap: 5px;
+            grid-gap: 0px;
             padding: 0 20px;
             margin-bottom: 0px;
         }
@@ -110,9 +110,9 @@
             transform: scale(1.02);
         }
 
-        .walk-button img {
-            width: 100%;
-            height: 100%;
+        .walk-button img, .dogShop-button img {
+            width: 276.66px;
+            height: 200px;
             object-fit: contain;
             background-color: white;
         }
@@ -197,47 +197,17 @@
             z-index: 10;
         }
 
-        .walk-button:hover .overlay,
-        .insertDog-button:hover .overlay,
-        .dogList-button:hover .overlay {
-            transform: scale(1.05);
-        }
+        
 
-        .withDogWalkButton, .dogShopButton, .insertDogButton, .dogListButton {
-            border: 2px solid #000;
-            border-radius: 10px;
-            overflow: hidden;
-        }
+        
 
-        .walk-button, .dogShop-button, .insertDog-button, .dogList-button {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: white;
-            cursor: pointer;
-            border: none;
-            transition: transform 0.3s ease;
-        }
+        
 
-        .dogShop-button {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: white;
-            cursor: pointer;
-            border: none;
-            transition: transform 0.3s ease;
-        }
+        
 
         .dogShop-button img {
-            width: 100%;
-            height: 100%;
+            width: 276.66px;
+            height: 200px;
             object-fit: contain;
             background-color: white;
         }
@@ -392,11 +362,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 12px solid #e8f4e5;
-            border-radius: 20px;
             overflow: hidden;
-            background-color: #e8f4e5;
-            padding: 5px;
+            padding: 0px;
         }
 
         .insertDogButton {
@@ -406,11 +373,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 12px solid #fff5e6;
-            border-radius: 20px;
             overflow: hidden;
-            background-color: #fff5e6;
-            padding: 5px;
         }
 
         .dogListButton {
@@ -420,11 +383,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 12px solid #e6f3ff;
-            border-radius: 20px;
             overflow: hidden;
-            background-color: #e6f3ff;
-            padding: 5px;
         }
 
         .walk-button, .dogShop-button, .insertDog-button, .dogList-button {
@@ -453,7 +412,7 @@
         <div class="grid-container">
             <div class="withDogWalkButton">
                 <button onclick="location.href='/walk'" class="walk-button">
-                    <img th:src="@{/images/withDogWalk.gif}" alt="산책하기">
+                    <img th:src="@{/images/withDogWalk_resized.gif}" alt="산책하기">
                     <div class="walk-overlay">산책하러 가기</div>
                 </button>
             </div>
@@ -470,8 +429,8 @@
                 </button>
             </div>
             <div class="dogShopButton">
-                <button onclick="location.href='/shop'" class="dogShop-button">
-                    <img th:src="@{/images/dogWithShop.gif}" alt="쇼핑하기">
+                <button onclick="location.href='/shop/shop'" class="dogShop-button">
+                    <img th:src="@{/images/dogWithShop_resized.gif}" alt="쇼핑하기">
                     <div class="walk-overlay">쇼핑하러 가기</div>
                 </button>
             </div>

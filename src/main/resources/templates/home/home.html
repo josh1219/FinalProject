@@ -14,7 +14,7 @@
         }
         body {
             font-family: Arial, sans-serif;
-            padding-bottom: 60px; /* 하단 네비게이션 높이만큼 여백 추가 */
+            padding-bottom: 60px; /* 하단 네비게이션 높이만큼 여백 */
             min-height: 100vh;
             position: relative;
         }
@@ -203,33 +203,23 @@
             transform: scale(1.05);
         }
 
-        .withDogWalkButton, .dogShopButton {
-            grid-column: 1;
-            height: 200px;
+        .withDogWalkButton, .dogShopButton, .insertDogButton, .dogListButton {
+            border: 2px solid #000;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .walk-button, .dogShop-button, .insertDog-button, .dogList-button {
+            position: relative;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .insertDogButton {
-            grid-column: 2;
-            grid-row: 1;
-            height: 200px;
             background-color: white;
-        }
-
-        .dogListButton {
-            grid-column: 2;
-            grid-row: 2;
-            height: 200px;
-            background-color: white;
-        }
-
-        .dogShopButton {
-            height: 200px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.3s ease;
         }
 
         .dogShop-button {
@@ -394,6 +384,62 @@
             color: #888;
             font-size: 0.9em;
             white-space: nowrap;
+        }
+
+        .withDogWalkButton, .dogShopButton {
+            grid-column: 1;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 12px solid #e8f4e5;
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: #e8f4e5;
+            padding: 5px;
+        }
+
+        .insertDogButton {
+            grid-column: 2;
+            grid-row: 1;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 12px solid #fff5e6;
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: #fff5e6;
+            padding: 5px;
+        }
+
+        .dogListButton {
+            grid-column: 2;
+            grid-row: 2;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 12px solid #e6f3ff;
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: #e6f3ff;
+            padding: 5px;
+        }
+
+        .walk-button, .dogShop-button, .insertDog-button, .dogList-button {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            cursor: pointer;
+            border: none;
+            transition: transform 0.3s ease;
+            border-radius: 10px;
+            overflow: hidden;
         }
     </style>
 </head>

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PETOPIA 산책</title>
     <link rel="stylesheet" href="/css/walk.css">
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAyQygBh-3yT1w9IwEOALZVRr3833ZaD-8&libraries=geometry"></script>
+    <script th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${googleMapsKey} + '&libraries=geometry'}"></script>
     <script src="/js/jquery-3.7.1.min.js"></script>
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/footer.css">
@@ -34,14 +34,8 @@
 
         #map {
             height: 480px;
-            width: calc(100% - 40px);  /* 전체 너비에서 좌우 마진 40px 제외 */
-            margin: 0 20px;  /* 좌우 20px씩 동일한 마진 적용 */
-        }
-
-        #controls {
-            margin: 20px;
-            padding: 10px;
-            background-color: #f4f4f4;
+            width: calc(100% - 40px);
+            margin: 0 20px;
         }
 
         .warning-message {
@@ -65,6 +59,17 @@
             opacity: 1;
         }
 
+        .walkmap {
+            max-width: 400px;
+            margin: 80px auto 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #fff;
+        }
+        
         .div9 {
             display: flex;
                 /* align-items: center; */
@@ -84,18 +89,30 @@
             display: none;
         }
 
-        .walkmap {
-            max-width: 400px;
-            margin: 80px auto 0;
-            box-sizing: border-box;
+        .Go-button-site {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #4285f4;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            z-index: 1000;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            transition: background-color 0.3s;
         }
-        body {
-            font-family: 'Noto Sans KR', sans-serif;
-            background-color: #fff;
-        }
-    
 
-</style>
+        .Go-button-site.stop {
+            background-color: #ff4444;
+        }
+    </style>
 </head>
 <body>
     <!-- header -->
@@ -119,32 +136,29 @@
     <div class="walkmap">
         <div class="map" id="map"></div>
     </div>
-        
-        
-        </div>
 
-        <div class="timeanddistance">
-            <div class="div13">
-                <div class="walk-distance">
-                    <div class="div14">누적 산책 거리</div>
-                    <div class="_0-m" id="distance">0m</div>
-                </div>
-            </div>
-            <div class="div15">
-                <div class="walk-time">
-                    <div class="div16">누적 산책 시간</div>
-                    <div class="_02">00:00:00</div>
-                </div>
+    <div class="Go-button-container">
+        <div class="ellipse-1">
+            <div class="go">GO!</div>
+        </div>
+    </div>
+
+    <div class="timeanddistance">
+        <div class="div13">
+            <div class="walk-distance">
+                <div class="div14">누적 산책 거리</div>
+                <div class="_0-m" id="distance">0m</div>
             </div>
         </div>
+        <div class="div15">
+            <div class="walk-time">
+                <div class="div16">누적 산책 시간</div>
+                <div class="_02">00:00:00</div>
+            </div>
+        </div>
+    </div>
 
     <div id="warningMessage" class="warning-message"></div>
-
-
-    <!-- <div id="test-controls" style="position: absolute; top: 10px; right: 10px; z-index: 1000; background: white; padding: 10px; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
-        <button onclick="startTestWalk()" style="margin: 5px; padding: 5px 10px; background: #4CAF50; color: white; border-radius: 4px; cursor: pointer;">테스트 시작</button>
-        <button onclick="stopTestWalk()" style="margin: 5px; padding: 5px 10px; background: #f44336; color: white; border-radius: 4px; cursor: pointer;">테스트 중지</button>
-    </div> -->
 
     <!-- footer -->
     <div th:replace="~{common/footer :: footer}"></div>
@@ -258,11 +272,47 @@
             // GO 버튼 클릭 이벤트
             document.querySelector('.Go-button-site').addEventListener('click', function() {
                 if (!isTracking) {
-                    startWalk();
+                    requestLocationPermission();
                 } else {
                     stopWalk();
                 }
             });
+        }
+
+        // 위치 권한 요청 함수
+        function requestLocationPermission() {
+            if (!navigator.geolocation) {
+                alert('이 브라우저에서는 위치 기능을 지원하지 않습니다.');
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    console.log('위치 권한이 허용되었습니다.');
+                    startWalk(); // 권한이 허용되면 산책 시작
+                },
+                function(error) {
+                    handleLocationError(error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 5000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // 위치 에러 핸들러
+        function handleLocationError(error) {
+            console.error('Error getting location:', error);
+            if (error.code === 1) {
+                alert('산책 기능을 사용하려면 위치 권한이 필요합니다.\n브라우저 설정에서 위치 권한을 허용해주세요.');
+            } else if (error.code === 2) {
+                alert('위치를 확인할 수 없습니다. GPS 신호가 잘 잡히는 곳으로 이동해주세요.');
+            } else if (error.code === 3) {
+                alert('위치 확인 시간이 초과되었습니다. 다시 시도해주세요.');
+            }
+            stopWalk();
         }
 
         // 타이머 시작 함수
@@ -355,8 +405,8 @@
                         startTimer();
 
                         // UI 업데이트
-                        $('.go').text('STOP');
-                        $('.ellipse-1').css('background', 'rgba(255, 0, 0, 0.63)');
+                        document.querySelector('.Go-button-site').textContent = 'STOP';
+                        document.querySelector('.Go-button-site').classList.add('stop');
 
                         // 정지 상태 체크 인터벌 시작
                         stationaryCheckInterval = setInterval(checkStationary, 1000);
@@ -382,8 +432,8 @@
         
             if (totalDistance < 100) {
                 isTracking = false;
-                $('.go').text('GO!');
-                $('.ellipse-1').css('background', 'rgba(0, 68, 151, 0.63)');
+                document.querySelector('.Go-button-site').textContent = 'GO!';
+                document.querySelector('.Go-button-site').classList.remove('stop');
             
                 // 경로 초기화
                 pathCoordinates = [];
@@ -410,8 +460,8 @@
                 },
                 success: function(response) {
                     isTracking = false;
-                    $('.go').text('GO!');
-                    $('.ellipse-1').css('background', 'rgba(0, 68, 151, 0.63)');
+                    document.querySelector('.Go-button-site').textContent = 'GO!';
+                    document.querySelector('.Go-button-site').classList.remove('stop');
                 
                     // 획득한 포인트 표시 (100m 단위로 내림)
                     const earnedPoints = response.earnedPoint;
@@ -592,47 +642,6 @@
             warningTimeout = setTimeout(() => {
                 warningElement.classList.remove('show');
             }, 3000);
-        }
-
-        let testWalkInterval = null;
-        let testLocationIndex = 0;
-        let testLocations = [];
-
-        function startTestWalk() {
-            if (testWalkInterval) return; // 이미 테스트가 진행 중이면 중복 실행 방지
-
-            // 테스트 관련 변수 초기화
-            testLocations = [];
-            testLocationIndex = 0;
-
-            // 현재 위치를 첫 번째 테스트 위치로 설정
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition((position) => {
-                    // 테스트 위치 생성
-                    testLocations.push({ lat: position.coords.latitude, lng: position.coords.longitude });
-                    testLocations.push({ lat: position.coords.latitude + 0.0001, lng: position.coords.longitude + 0.0001 });
-                    testLocations.push({ lat: position.coords.latitude + 0.0002, lng: position.coords.longitude + 0.0002 });
-                    testLocations.push({ lat: position.coords.latitude + 0.0003, lng: position.coords.longitude + 0.0003 });
-                    testLocations.push({ lat: position.coords.latitude + 0.0004, lng: position.coords.longitude + 0.0004 });
-                    testLocations.push({ lat: position.coords.latitude + 0.0005, lng: position.coords.longitude + 0.0005 });
-                    testLocations.push({ lat: position.coords.latitude + 0.0006, lng: position.coords.longitude + 0.0006 });
-                    testLocations.push({ lat: position.coords.latitude + 0.0007, lng: position.coords.longitude + 0.0007 });
-                    testLocations.push({ lat: position.coords.latitude + 0.0008, lng: position.coords.longitude + 0.0008 });
-                    testLocations.push({ lat: position.coords.latitude + 0.0009, lng: position.coords.longitude + 0.0009 });
-
-                    testWalkInterval = setInterval(() => {
-                        if (!isTracking) return;
-                        const location = testLocations[testLocationIndex];
-                        handleLocationUpdate({ coords: { latitude: location.lat, longitude: location.lng } });
-                        testLocationIndex = (testLocationIndex + 1) % testLocations.length;
-                    }, 3000); // 3초 간격으로 수정
-                });
-            }
-        }
-
-        function stopTestWalk() {
-            clearInterval(testWalkInterval);
-            testWalkInterval = null;
         }
 
         window.onload = initMap;

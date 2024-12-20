@@ -26,6 +26,8 @@ import java.util.stream.Collectors;
 import java.util.Set;
 import java.util.HashSet;
 
+import org.springframework.beans.factory.annotation.Value;
+
 @Controller
 @RequestMapping("/walk")
 public class WalkController {
@@ -34,6 +36,9 @@ public class WalkController {
     private final PathRepository pathRepository;
     private final MemberService memberService;
     private final MemberRepository memberRepository;
+
+    @Value("${google.maps.key}")
+    private String googleMapsKey;
 
     public WalkController(WalkSessionRepository walkSessionRepository,
                          PathRepository pathRepository,
@@ -61,6 +66,7 @@ public class WalkController {
 
         model.addAttribute("member", member);
         model.addAttribute("currentPoint", member.getPoint());
+        model.addAttribute("googleMapsKey", googleMapsKey);
         return "walk/walk";
     }
 

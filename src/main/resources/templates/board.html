@@ -347,7 +347,7 @@
     }
 
     .write-button::before {
-        content: "글을 작성해볼까요? 🐾";
+        content: "멋진 글을 작성해볼까요? 🐾";
         position: absolute;
         bottom: 100%;
         right: 0;
@@ -525,6 +525,43 @@
         transform: translateX(-50%) translateY(0);
         pointer-events: auto;
     }
+
+    /* 로딩 모달 스타일 */
+    .loading-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .loading-content {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        text-align: center;
+    }
+
+    .loading-dog {
+        font-size: 40px;
+        animation: bounce 0.8s infinite;
+    }
+
+    .loading-text {
+        margin-top: 10px;
+        font-size: 16px;
+        color: #333;
+    }
+
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
   </style>
 </head>
 
@@ -602,14 +639,19 @@
               </div>
           </div>
       
-          <!-- 글쓰기 버튼 -->
-          <div class="write-button" 
-               th:onclick="handleWriteButton()"
-               title="글쓰기">
-              <img src="/images/write-button.svg" alt="글쓰기">
-          </div>
-        
-
+        <!-- 글쓰기 버튼 -->
+        <div class="write-button" 
+            th:if="${session.sessionMember != null}"
+            onclick="handleWriteButtonClick()"
+            title="글쓰기">
+            <img src="/images/write-button.svg" alt="글쓰기">
+        </div>
+        <div class="write-button" 
+            th:unless="${session.sessionMember != null}"
+            onclick="alert('로그인이 필요한 서비스입니다.'); location.href='/member/login';"
+            title="글쓰기">
+            <img src="/images/write-button.svg" alt="글쓰기">
+        </div>
     </div>
 
   
@@ -618,7 +660,49 @@
   <div th:replace="~{common/footer :: footer}"></div>
   <!-- /footer -->
 
+    <!-- Loading Modal -->
+    <div id="loadingModal" class="loading-modal">
+        <div class="loading-content">
+            <div class="loading-dog">🐕</div>
+            <div class="loading-text">글쓰기 페이지로 이동중...</div>
+        </div>
+    </div>
+
   <script>
+    function handleWriteButtonClick() {
+        const writeButton = document.querySelector('.write-button');
+        const loadingModal = document.getElementById('loadingModal');
+        
+        // 먼저 툴팁 보여주기
+        writeButton.classList.add('show-tooltip');
+        
+        // 1초 후에 툴팁 숨기고 로딩 모달 보여주기
+        setTimeout(() => {
+            writeButton.classList.remove('show-tooltip');
+            loadingModal.style.display = 'flex';
+            
+            // 0.5초 후에 페이지 이동
+            setTimeout(() => {
+                location.href = '/board/create';
+            }, 500);
+        }, 1000);
+    }
+
+    function handleWriteButton(isLoggedIn) {
+        const writeButton = document.querySelector('.write-button');
+        
+        if (isLoggedIn === true) {
+            writeButton.classList.add('show-tooltip');
+            setTimeout(() => {
+                writeButton.classList.remove('show-tooltip');
+                location.href = '/board/create';
+            }, 800);
+        } else {
+            alert('로그인이 필요한 서비스입니다.');
+            location.href = '/member/login';
+        }
+    }
+
     function filterPosts(type) {
         // 모든 카테고리 버튼의 active 클래스 제거
         document.querySelectorAll('.boardMenu > div').forEach(div => {

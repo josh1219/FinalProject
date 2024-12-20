@@ -6,6 +6,7 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>장바구니 - PETOPIA</title>
+    <link rel="stylesheet" href="/css/alert.css">
     <link rel="stylesheet" href="/css/shop.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
@@ -66,7 +67,7 @@
         .item-price {
             font-size: 18px;
             font-weight: 600;
-            color: #4B50E6;
+            color: #040516;
         }
         .quantity-controls {
             display: flex;
@@ -96,6 +97,8 @@
             text-align: center;
             font-size: 16px;
             margin: 0 8px;
+            font-family: 'Noto Sans KR', sans-serif;
+            padding: 1px 2px;
         }
         .remove-btn {
             padding: 8px 16px;
@@ -168,6 +171,54 @@
             background: #fff;
             border-radius: 8px;
         }
+        
+        /* 배송정보 스타일 추가 */
+        .shipping-info {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .shipping-info h3 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0 0 16px 0;
+            color: #333;
+        }
+        .shipping-field {
+            margin-bottom: 16px;
+        }
+        .shipping-field label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .shipping-field input {
+            width: 95%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .shipping-field input:focus {
+            outline: none;
+            border-color: #4B50E6;
+            background: white;
+        }
+        .shipping-note {
+            width: 95%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 60px;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
     </style>
 </head>
 <body>
@@ -200,6 +251,38 @@
                     <button class="quantity-btn" th:onclick="'updateQuantity(' + ${item.product.pidx} + ', -1, this)'" type="button">-</button>
                     <input type="number" class="quantity-input" th:value="${item.quantity}" readonly>
                     <button class="quantity-btn" th:onclick="'updateQuantity(' + ${item.product.pidx} + ', 1, this)'" type="button">+</button>
+                </div>
+            </div>
+            
+            <!-- 배송정보 섹션 추가 -->
+            <div class="shipping-info">
+                <h3>배송정보</h3>
+                <div class="shipping-field">
+                    <label>이름 (필수)</label>
+                    <input type="text" id="recipientName" placeholder="받으실 분의 이름을 입력해주세요" maxlength="5">
+                    <span class="error-message" id="nameError" style="display: none; color: red; font-size: 12px;"></span>
+                </div>
+                <div class="shipping-field">
+                    <label>휴대폰 번호 (필수)</label>
+                    <input type="tel" id="recipientPhone" 
+                           th:value="${memberPhone}"
+                           th:placeholder="${memberPhone != null ? memberPhone : '010-0000-0000'}" 
+                           pattern="010-\d{4}-\d{4}"
+                           title="010-XXXX-XXXX 형식으로 입력해주세요">
+                    <span class="error-message" id="phoneError" style="display: none; color: red; font-size: 12px;"></span>
+                </div>
+                <div class="shipping-field">
+                    <label>배송지 (필수)</label>
+                    <input type="text" id="recipientAddress" 
+                           th:value="${memberAddress}" 
+                           th:data-address="${memberAddress}"
+                           th:placeholder="${memberAddress != null ? memberAddress : '주소를 입력해주세요'}" 
+                           readonly>
+                    <span th:if="${memberAddress == null}" style="color: #666; font-size: 12px;">* 회원 정보에 저장된 주소가 없습니다.</span>
+                </div>
+                <div class="shipping-field">
+                    <label>배송 요청사항</label>
+                    <textarea class="shipping-note" id="shippingNote" placeholder="예) 안전한 배송 부탁드려요"></textarea>
                 </div>
             </div>
         </div>
@@ -250,13 +333,13 @@
             const newQuantity = currentQuantity + change;
             
             if (newQuantity < 1) {
-                alert('수량은 1개 이상이어야 합니다.');
+                showAlert('수량은 1개 이상이어야 합니다.');
                 return;
             }
 
             quantityInput.value = newQuantity;
             updateTotalPrice();
-
+            
             fetch('/shop/cart/update', {
                 method: 'POST',
                 headers: {
@@ -270,20 +353,20 @@
                 if(result !== 'success') {
                     quantityInput.value = currentQuantity;
                     updateTotalPrice();
-                    alert('수량 변경 중 오류가 발생했습니다.');
+                    showAlert('수량 변경 중 오류가 발생했습니다.');
+                } else {
+                    updateCartCount();
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 quantityInput.value = currentQuantity;
                 updateTotalPrice();
-                alert('수량 변경 중 오류가 발생했습니다.');
+                showAlert('수량 변경 중 오류가 발생했습니다.');
             });
         }
 
         function removeItem(productId) {
-            if(!confirm('상품을 장바구니에서 삭제하시겠습니까?')) return;
-
             const cartItem = document.querySelector(`.cart-item[data-product-id="${productId}"]`);
             cartItem.style.opacity = '0.5';
 
@@ -301,20 +384,92 @@
                     cartItem.remove();
                     updateTotalPrice();
                     
+                    // 남은 모든 상품의 수량을 합산하여 장바구니 카운트 업데이트
+                    let totalCount = 0;
+                    document.querySelectorAll('.cart-item input[type="number"]').forEach(input => {
+                        totalCount += parseInt(input.value) || 0;
+                    });
+                    
+                    // shop-header의 장바구니 카운트 업데이트 (모든 가능한 선택자 시도)
+                    const headerCartCounts = document.querySelectorAll('.cart-count, #cartCount, .shopping-cart-badge');
+                    headerCartCounts.forEach(countElement => {
+                        if (countElement) {
+                            countElement.textContent = totalCount;
+                        }
+                    });
+                    
+                    // 삭제 완료 알림
+                    showAlert('제품이 삭제되었습니다.');
+                    
                     if(document.querySelectorAll('.cart-item').length === 0) {
                         location.reload();
                     }
                 } else {
                     cartItem.style.opacity = '1';
-                    alert('상품 삭제 중 오류가 발생했습니다.');
+                    showAlert('상품 삭제 중 오류가 발생했습니다.');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 cartItem.style.opacity = '1';
-                alert('상품 삭제 중 오류가 발생했습니다.');
+                showAlert('상품 삭제 중 오류가 발생했습니다.');
             });
         }
+
+        // 장바구니 총 수량 업데이트 함수
+        function updateCartCount() {
+            const cartItems = document.querySelectorAll('.cart-item');
+            let totalCount = 0;
+            
+            cartItems.forEach(item => {
+                const quantity = parseInt(item.querySelector('input[type="number"]').value);
+                if (!isNaN(quantity)) {
+                    totalCount += quantity;
+                }
+            });
+            
+            // shop-header의 장바구니 카운트 업데이트
+            const headerCartCount = document.querySelector('#shop-header .cart-count');
+            if (headerCartCount) {
+                headerCartCount.textContent = totalCount;
+            }
+        }
+        
+        // 배송정보 유효성 검사
+        document.getElementById('recipientName').addEventListener('input', function(e) {
+            const nameRegex = /^[가-힣]{2,5}$/;
+            const errorElement = document.getElementById('nameError');
+            
+            if (!nameRegex.test(this.value)) {
+                errorElement.textContent = '이름은 한글 2~5글자로 입력해주세요.';
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+        });
+
+        document.getElementById('recipientPhone').addEventListener('input', function(e) {
+            let value = this.value.replace(/[^0-9]/g, '');
+            
+            if (value.length > 3 && value.length <= 7) {
+                value = value.slice(0, 3) + '-' + value.slice(3);
+            } else if (value.length > 7) {
+                value = value.slice(0, 3) + '-' + value.slice(3, 7) + '-' + value.slice(7, 11);
+            }
+            
+            this.value = value;
+            
+            const phoneRegex = /^010-\d{4}-\d{4}$/;
+            const errorElement = document.getElementById('phoneError');
+            
+            if (!phoneRegex.test(this.value) && this.value.length > 0) {
+                errorElement.textContent = '올바른 휴대폰 번호 형식이 아닙니다.';
+                errorElement.style.display = 'block';
+            } else {
+                errorElement.style.display = 'none';
+            }
+        });
     </script>
+    <script src="/js/alert.js"></script>
 </body>
 </html>

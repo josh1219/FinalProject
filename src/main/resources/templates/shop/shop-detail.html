@@ -7,6 +7,7 @@
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <meta name="isLoggedIn" th:if="${isLoggedIn}"/>
     <title>PETOPIA 상품 상세</title>
+    <link rel="stylesheet" href="/css/alert.css">
     <link rel="stylesheet" href="/css/shop.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="//fonts.googleapis.com">
@@ -259,8 +260,8 @@
         .quantity-control {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-left: 20px;
+            gap: 0;
+            margin-right: 20px;
         }
         
         .quantity-btn {
@@ -278,13 +279,13 @@
         }
         
         .quantity-input {
-            width: 30px;
+            width: 34px;
+            height: 20px;
             text-align: center;
-            border: none;
-            background: transparent;
-            font-size: 16px;
-            font-weight: 400;
-            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: "Noto Sans KR", sans-serif;
+            padding: 1px 2px;
         }
         
         .total-section {
@@ -453,8 +454,7 @@
                     const cartBtn = document.querySelector('.btn-cart');
                     cartBtn.classList.add('in-cart');
                     updateHeaderCartCount(1);
-                    alert('상품이 장바구니에 추가되었습니다.');
-                    // 장바구니 상태 갱신
+                    showAlert('상품이 장바구니에 추가되었습니다.');
                     checkCartStatus();
                 } else {
                     throw new Error('Failed to add to cart');
@@ -462,7 +462,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('장바구니 추가 중 오류가 발생했습니다.');
+                showAlert('장바구니 추가 중 오류가 발생했습니다.');
             });
         }
 
@@ -481,8 +481,7 @@
                     const cartBtn = document.querySelector('.btn-cart');
                     cartBtn.classList.remove('in-cart');
                     updateHeaderCartCount(-1);
-                    alert('상품이 장바구니에서 제거되었습니다.');
-                    // 장바구니 상태 갱신
+                    showAlert('상품이 장바구니에서 제거되었습니다.');
                     checkCartStatus();
                 } else {
                     throw new Error('Failed to remove from cart');
@@ -490,7 +489,7 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('장바구니 제거 중 오류가 발생했습니다.');
+                showAlert('장바구니 제거 중 오류가 발생했습니다.');
             });
         }
 
@@ -529,5 +528,6 @@
         }
     /*]]>*/
     </script>
+    <script src="/js/alert.js"></script>
 </body>
 </html>

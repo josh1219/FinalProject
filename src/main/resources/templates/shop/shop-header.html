@@ -25,12 +25,11 @@
         <div class="nav-header">
             <button class="close-btn" onclick="toggleNav()">×</button>
             <h2>안녕하세요 !</h2>
-            <h3>PETOPIA 입니다</h3>
             <div class="welcome-info">
                 <div th:if="${userName != null}">
                     <p><span th:text="${userName}"></span>님</p>
                     <p>포인트 : <span th:text="${point}"></span>원</p>
-                    <p style="font-size: 9px; color: #0a0000;">*PETOPIA 산책 서비스를 통해 포인트를 얻으실수 있습니다.</p>
+                    <p style="font-size: 12px; color: #0a0000;">*PETOPIA 산책 서비스를 통해 포인트를 얻으실수 있습니다.</p>
                 </div>
                 <div th:unless="${userName != null}" style="text-align: center;">
                     <a href="/member/login" class="login-btn" style="
@@ -192,7 +191,7 @@
         }
         .nav-header h2 {
             margin: 0;
-            font-size: 24px;
+            font-size: 40px;
             font-weight: 500;
             color: #000;
         }
@@ -202,11 +201,12 @@
             color: #000;
         }
         .welcome-info {
-            margin-top: 20px;
-            font-size: 15px;
+            font-size: 25px;
             color: #000;
         }
         .welcome-info p {
+            margin: 0;
+            padding: 0;
             color: #000;
         }
         .menu-icons {

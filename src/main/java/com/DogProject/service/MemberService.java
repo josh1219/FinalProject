@@ -105,4 +105,8 @@ public class MemberService implements UserDetailsService {
         return memberRepository.findById(mIdx)
                 .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다. ID: " + mIdx));
     }
+
+    public Member getMemberByEmail(String email) {
+        return memberRepository.findBymEmail(email).orElse(null);
+    }
 }

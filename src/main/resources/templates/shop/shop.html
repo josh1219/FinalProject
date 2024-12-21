@@ -308,6 +308,14 @@
     if (cartMessage) {
         showAlert(cartMessage);
     }
+
+    // 마우스 휠로 가로 스크롤
+    document.querySelector('.category-nav').addEventListener('wheel', function(e) {
+        if (e.deltaY !== 0) {
+            e.preventDefault(); // 기본 세로 스크롤 방지
+            this.scrollLeft += e.deltaY;
+        }
+    });
     </script>
 </body>
 </html>

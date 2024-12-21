@@ -60,6 +60,7 @@ public class CartController {
                 // OAuth2 인증 정보에서 이메일 가져오기
                 Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                 String userEmail = null;
+                Member member = null;
                 
                 if (authentication != null && authentication.getPrincipal() instanceof OAuth2User) {
                     OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
@@ -81,9 +82,15 @@ public class CartController {
                             userEmail = (String) response.get("email");
                         }
                     } else if ("kakao".equals(provider)) {
-                        Map<String, Object> kakaoAccount = oauth2User.getAttribute("kakao_account");
-                        if (kakaoAccount != null) {
-                            userEmail = (String) kakaoAccount.get("email");
+                        // 카카오의 경우 ID를 통해 회원 조회
+                        Object kakaoId = oauth2User.getAttribute("id");
+                        String socialId = kakaoId != null ? String.valueOf(kakaoId) : null;
+                        if (socialId != null) {
+                            member = memberService.findByProviderAndSocialId("kakao", socialId);
+                            if (member != null) {
+                                userEmail = member.getMEmail();
+                            }
+                            System.out.println("Kakao social ID: " + socialId);
                         }
                     }
                     System.out.println("OAuth2 email: " + userEmail);
@@ -92,47 +99,46 @@ public class CartController {
                     System.out.println("Regular email: " + userEmail);
                 }
                 
-                if (userEmail != null) {
-                    Member member = memberService.getMemberByEmail(userEmail);
-                    if (member != null) {
-                        System.out.println("Found member with email: " + member.getMEmail());
-                        System.out.println("Member m_idx: " + member.getMIdx());
+                if (userEmail != null && member == null) {
+                    member = memberService.getMemberByEmail(userEmail);
+                }
+                
+                if (member != null) {
+                    System.out.println("Found member with email: " + member.getMEmail());
+                    System.out.println("Member m_idx: " + member.getMIdx());
+                    
+                    try {
+                        Member memberWithAddress = memberService.findByMIdx(member.getMIdx());
+                        System.out.println("Found member by m_idx: " + memberWithAddress.getMIdx());
+                        System.out.println("Raw address: " + memberWithAddress.getAddress());
                         
-                        try {
-                            Member memberWithAddress = memberService.findByMIdx(member.getMIdx());
-                            System.out.println("Found member by m_idx: " + memberWithAddress.getMIdx());
-                            System.out.println("Raw address: " + memberWithAddress.getAddress());
-                            
-                            if (memberWithAddress.getAddress() != null) {
-                                model.addAttribute("memberAddress", memberWithAddress.getAddress());
-                                System.out.println("Added address to model: " + memberWithAddress.getAddress());
-                            } else {
-                                System.out.println("Address is null");
-                            }
-                            
-                            // 전화번호 추가
-                            if (memberWithAddress.getPhone() != null) {
-                                String phone = memberWithAddress.getPhone();
-                                // 전화번호에 하이픈 추가
-                                if (phone.length() == 11 && !phone.contains("-")) {
-                                    phone = phone.substring(0, 3) + "-" 
-                                         + phone.substring(3, 7) + "-"
-                                         + phone.substring(7);
-                                }
-                                model.addAttribute("memberPhone", phone);
-                                System.out.println("Added phone to model: " + phone);
-                            } else {
-                                System.out.println("Phone is null");
-                            }
-                        } catch (Exception e) {
-                            System.out.println("Error finding member by m_idx: " + e.getMessage());
-                            e.printStackTrace();
+                        if (memberWithAddress.getAddress() != null) {
+                            model.addAttribute("memberAddress", memberWithAddress.getAddress());
+                            System.out.println("Added address to model: " + memberWithAddress.getAddress());
+                        } else {
+                            System.out.println("Address is null");
                         }
-                    } else {
-                        System.out.println("Member not found for email: " + userEmail);
+                        
+                        // 전화번호 추가
+                        if (memberWithAddress.getPhone() != null) {
+                            String phone = memberWithAddress.getPhone();
+                            // 전화번호에 하이픈 추가
+                            if (phone.length() == 11 && !phone.contains("-")) {
+                                phone = phone.substring(0, 3) + "-" 
+                                     + phone.substring(3, 7) + "-"
+                                     + phone.substring(7);
+                            }
+                            model.addAttribute("memberPhone", phone);
+                            System.out.println("Added phone to model: " + phone);
+                        } else {
+                            System.out.println("Phone is null");
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error finding member by m_idx: " + e.getMessage());
+                        e.printStackTrace();
                     }
                 } else {
-                    System.out.println("Could not determine user email");
+                    System.out.println("Member not found for email: " + userEmail);
                 }
             } else {
                 System.out.println("Principal is null - user not logged in");

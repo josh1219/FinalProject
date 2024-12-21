@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Cookie;
 import java.security.Principal;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/shop")
@@ -107,17 +110,74 @@ public class ShopController {
         }
 
         // 사용자 정보 조회 및 모델에 추가
-        Member member = memberService.findBymEmail(authentication.getName());
-        if (member != null) {
-            model.addAttribute("memberName", member.getName());
-            model.addAttribute("memberPhone", member.getPhone());
-            model.addAttribute("memberAddress", member.getAddress());
-            model.addAttribute("isLoggedIn", true);
+        String userEmail = null;
+        
+        if (authentication.getPrincipal() instanceof OAuth2User) {
+            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+            
+            // OAuth2 제공자 확인
+            String provider = "";
+            if (authentication instanceof OAuth2AuthenticationToken) {
+                provider = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
+            }
+            
+            // 제공자별로 이메일 속성 이름이 다름
+            if ("google".equals(provider)) {
+                userEmail = oauth2User.getAttribute("email");
+            } else if ("naver".equals(provider)) {
+                Map<String, Object> response = oauth2User.getAttribute("response");
+                if (response != null) {
+                    userEmail = (String) response.get("email");
+                }
+            } else if ("kakao".equals(provider)) {
+                // 카카오의 경우 ID를 통해 회원 조회
+                Object kakaoId = oauth2User.getAttribute("id");
+                String socialId = kakaoId != null ? String.valueOf(kakaoId) : null;
+                if (socialId != null) {
+                    Member kakaoMember = memberService.findByProviderAndSocialId("kakao", socialId);
+                    if (kakaoMember != null) {
+                        userEmail = kakaoMember.getMEmail();
+                    }
+                }
+            }
+        } else {
+            userEmail = authentication.getName();
+        }
+
+        if (userEmail != null) {
+            Member member = memberService.getMemberByEmail(userEmail);
+            if (member != null) {
+                try {
+                    Member memberWithAddress = memberService.findByMIdx(member.getMIdx());
+                    if (memberWithAddress != null) {
+                        if (memberWithAddress.getAddress() != null) {
+                            model.addAttribute("memberAddress", memberWithAddress.getAddress());
+                        }
+                        
+                        // 전화번호 처리
+                        if (memberWithAddress.getPhone() != null) {
+                            String phone = memberWithAddress.getPhone();
+                            // 전화번호에 하이픈 추가
+                            if (phone.length() == 11 && !phone.contains("-")) {
+                                phone = phone.substring(0, 3) + "-" 
+                                     + phone.substring(3, 7) + "-"
+                                     + phone.substring(7);
+                            }
+                            model.addAttribute("memberPhone", phone);
+                        }
+                        
+                        model.addAttribute("memberName", memberWithAddress.getName());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
         }
 
         model.addAttribute("product", product);
         model.addAttribute("quantity", quantity);
-        
+        model.addAttribute("isLoggedIn", true);
+
         return "shop/purchase";
     }
 

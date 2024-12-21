@@ -215,9 +215,12 @@
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 14px;
-            resize: vertical;
-            min-height: 60px;
+            height: 48px;
+            min-height: 48px;
             font-family: 'Noto Sans KR', sans-serif;
+        }
+        .custom-note {
+            margin-top: 8px;
         }
     </style>
 </head>
@@ -282,7 +285,16 @@
                 </div>
                 <div class="shipping-field">
                     <label>배송 요청사항</label>
-                    <textarea class="shipping-note" id="shippingNote" placeholder="안전한 배송 부탁드려요"></textarea>
+                    <select id="shippingRequest" class="shipping-note" onchange="this.value==='direct' ? document.getElementById('customShippingRequest').style.display='block' : document.getElementById('customShippingRequest').style.display='none'">
+                        <option value="">배송 시 요청사항을 선택해주세요</option>
+                        <option value="부재시 경비실에 맡겨주세요">부재시 경비실에 맡겨주세요</option>
+                        <option value="부재시 문앞에 놓아주세요">부재시 문앞에 놓아주세요</option>
+                        <option value="배송 전 연락바랍니다">배송 전 연락바랍니다</option>
+                        <option value="direct">직접입력</option>
+                    </select>
+                    <textarea id="customShippingRequest" class="shipping-note custom-note" 
+                        style="display: none;" placeholder="배송 요청사항을 입력해주세요 (최대 50자)"
+                        maxlength="50"></textarea>
                 </div>
             </div>
         </div>

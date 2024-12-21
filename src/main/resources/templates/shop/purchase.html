@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-    <title>구매하기 - PETOPIA</title>
+    <title>결제하기 - PETOPIA</title>
     <link rel="stylesheet" href="/css/alert.css">
     <link rel="stylesheet" href="/css/shop.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -33,14 +33,11 @@
             font-weight: 500;
             color: #333;
         }
-        .purchase-items {
-            margin-top: 16px;
-        }
         .purchase-item {
             background: white;
             border-radius: 12px;
             padding: 16px;
-            margin-bottom: 12px;
+            margin-top: 16px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .item-header {
@@ -69,36 +66,59 @@
             font-weight: 600;
             color: #040516;
         }
-        .quantity-controls {
-            display: flex;
-            align-items: center;
+        .quantity-display {
             background: #f8f9fa;
             border-radius: 8px;
-            padding: 8px;
-            width: fit-content;
+            padding: 8px 16px;
+            margin-top: 12px;
+            font-size: 16px;
+            color: #333;
         }
-        .quantity-btn {
-            width: 28px;
-            height: 28px;
-            border: none;
+        .shipping-info {
             background: white;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            color: #4B50E6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
-        .quantity-input {
-            width: 40px;
-            border: none;
-            background: transparent;
-            text-align: center;
-            font-size: 16px;
-            margin: 0 8px;
+        .shipping-info h3 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0 0 16px 0;
+            color: #333;
+        }
+        .shipping-field {
+            margin-bottom: 16px;
+        }
+        .shipping-field label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .shipping-field input {
+            width: 95%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .shipping-field .error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 4px;
+        }
+        .shipping-note {
+            width: 95%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            height: 48px;
             font-family: 'Noto Sans KR', sans-serif;
-            padding: 1px 2px;
+        }
+        .custom-note {
+            margin-top: 8px;
         }
         .purchase-summary {
             position: fixed;
@@ -130,7 +150,7 @@
             font-weight: 600;
             font-size: 18px;
         }
-        .checkout-btn {
+        .purchase-btn {
             display: block;
             width: 100%;
             padding: 16px;
@@ -143,47 +163,6 @@
             font-weight: 700;
             cursor: pointer;
         }
-        .shipping-info {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 24px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            font-family: 'Noto Sans KR', sans-serif;
-        }
-        .shipping-info h3 {
-            font-size: 18px;
-            font-weight: 500;
-            margin: 0 0 16px 0;
-            color: #333;
-        }
-        .shipping-field {
-            margin-bottom: 16px;
-        }
-        .shipping-field label {
-            display: block;
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 8px;
-        }
-        .shipping-field input {
-            width: 95%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: 'Noto Sans KR', sans-serif;
-        }
-        .shipping-field textarea {
-            width: 95%;
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-            font-family: 'Noto Sans KR', sans-serif;
-            resize: vertical;
-            min-height: 60px;
-        }
     </style>
 </head>
 <body>
@@ -191,23 +170,22 @@
 
     <div class="purchase-container">
         <div class="purchase-header">
-            <h2>구매하기</h2>
+            <h2>결제하기</h2>
         </div>
-        
-        <div class="purchase-items">
-            <div class="purchase-item">
-                <div class="item-header">
-                    <img th:src="${product.mainImage}" alt="상품 이미지" class="item-image">
-                    <div class="item-info">
-                        <div class="item-name" th:text="${product.name}">상품명</div>
-                        <div class="item-price" th:text="${#numbers.formatInteger(product.price, 0, 'COMMA') + '원'}">가격</div>
-                        <div class="quantity-controls">
-                            <button class="quantity-btn" onclick="updateQuantity(-1)">-</button>
-                            <input type="number" class="quantity-input" th:value="${quantity}" readonly>
-                            <button class="quantity-btn" onclick="updateQuantity(1)">+</button>
-                        </div>
-                    </div>
+
+        <div class="purchase-item">
+            <div class="item-header">
+                <img th:src="${product.imageUrl}" alt="상품 이미지" class="item-image">
+                <div class="item-info">
+                    <div class="item-name" th:text="${product.name}">상품명</div>
+                    <div class="item-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">가격</div>
                 </div>
+            </div>
+            <div class="quantity-display">
+                수량: <span th:text="${quantity}">1</span>개
+                <span style="float: right;">
+                    <span th:text="${#numbers.formatDecimal(product.price * quantity, 0, 'COMMA', 0, 'POINT')}">0</span>원
+                </span>
             </div>
         </div>
 
@@ -215,9 +193,8 @@
             <h3>배송 정보</h3>
             <div class="shipping-field">
                 <label>이름 (필수)</label>
-                <input type="text" id="recipientName" placeholder="받으실 분의 이름을 입력해주세요" maxlength="5"
-                       th:value="${memberName}">
-                <span class="error-message" id="nameError" style="display: none; color: red; font-size: 12px;"></span>
+                <input type="text" id="recipientName" placeholder="받으실 분의 이름을 입력해주세요" maxlength="5">
+                    <span class="error-message" id="nameError" style="display: none; color: red; font-size: 12px;"></span>
             </div>
             <div class="shipping-field">
                 <label>휴대폰 번호 (필수)</label>
@@ -239,7 +216,16 @@
             </div>
             <div class="shipping-field">
                 <label>배송 요청사항</label>
-                <textarea class="shipping-note" id="shippingNote" placeholder="안전한 배송 부탁드려요"></textarea>
+                <select id="shippingRequest" class="shipping-note" onchange="this.value==='direct' ? document.getElementById('customShippingRequest').style.display='block' : document.getElementById('customShippingRequest').style.display='none'">
+                    <option value="">배송 시 요청사항을 선택해주세요</option>
+                    <option value="부재시 경비실에 맡겨주세요">부재시 경비실에 맡겨주세요</option>
+                    <option value="부재시 문앞에 놓아주세요">부재시 문앞에 놓아주세요</option>
+                    <option value="배송 전 연락바랍니다">배송 전 연락바랍니다</option>
+                    <option value="direct">직접입력</option>
+                </select>
+                <textarea id="customShippingRequest" class="shipping-note custom-note" 
+                    style="display: none;" placeholder="배송 요청사항을 입력해주세요 (최대 50자)"
+                    maxlength="50"></textarea>
             </div>
         </div>
     </div>
@@ -252,41 +238,20 @@
             </div>
             <div class="price-row">
                 <span>배송비</span>
-                <span>무료</span>
+                <span>3,000원</span>
             </div>
             <div class="total-row">
                 <span>결제금액</span>
-                <span th:text="${#numbers.formatInteger(product.price * quantity, 0, 'COMMA') + '원'}">0원</span>
+                <span th:text="${#numbers.formatInteger(product.price * quantity + 3000, 0, 'COMMA') + '원'}">0원</span>
             </div>
-            <button class="checkout-btn" onclick="proceedToCheckout()">결제하기</button>
+            <button class="purchase-btn" onclick="processPurchase()">결제하기</button>
         </div>
     </div>
 
     <script th:inline="javascript">
-        let currentQuantity = [[${quantity}]];
-        const productPrice = [[${product.price}]];
-        
-        function updateQuantity(change) {
-            const newQuantity = currentQuantity + change;
-            if (newQuantity < 1) return;
-            
-            currentQuantity = newQuantity;
-            document.querySelector('.quantity-input').value = currentQuantity;
-            updateTotalPrice();
-        }
-        
-        function updateTotalPrice() {
-            const totalPrice = productPrice * currentQuantity;
-            const formattedPrice = new Intl.NumberFormat('ko-KR').format(totalPrice) + '원';
-            
-            document.querySelector('.price-row:first-child span:last-child').textContent = formattedPrice;
-            document.querySelector('.total-row span:last-child').textContent = formattedPrice;
-        }
-        
-        function proceedToCheckout() {
-            // 여기에 결제 로직 추가
-            alert('결제 기능은 준비 중입니다.');
-        }
+        // CSRF 토큰 설정
+        const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+        const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
 
         // 배송정보 유효성 검사
         document.getElementById('recipientName').addEventListener('input', function(e) {
@@ -322,7 +287,76 @@
                 errorElement.style.display = 'none';
             }
         });
+
+        document.getElementById('shippingRequest').addEventListener('change', function() {
+            const customField = document.getElementById('customShippingRequest');
+            if (this.value === 'direct') {
+                customField.style.display = 'block';
+                customField.value = '';
+            } else {
+                customField.style.display = 'none';
+            }
+        });
+
+        function processPurchase() {
+            const recipientName = document.getElementById('recipientName').value;
+            const recipientPhone = document.getElementById('recipientPhone').value;
+            const address = document.getElementById('recipientAddress').value;
+            const shippingRequestSelect = document.getElementById('shippingRequest');
+            const customShippingRequest = document.getElementById('customShippingRequest');
+            const shippingRequest = shippingRequestSelect.value === "direct" ? customShippingRequest.value : shippingRequestSelect.value;
+
+            // 유효성 검사
+            if (!recipientName || !recipientPhone || !address) {
+                alert('모든 필수 배송정보를 입력해주세요.');
+                return;
+            }
+
+            const nameRegex = /^[가-힣]{2,5}$/;
+            const phoneRegex = /^010-\d{4}-\d{4}$/;
+
+            if (!nameRegex.test(recipientName)) {
+                alert('올바른 이름을 입력해주세요.');
+                return;
+            }
+
+            if (!phoneRegex.test(recipientPhone)) {
+                alert('올바른 휴대폰 번호를 입력해주세요.');
+                return;
+            }
+
+            // 결제 처리 요청
+            const purchaseData = {
+                productId: /*[[${product.id}]]*/ null,
+                quantity: /*[[${quantity}]]*/ 1,
+                recipientName: recipientName,
+                recipientPhone: recipientPhone,
+                address: address,
+                shippingRequest: shippingRequest
+            };
+
+            fetch('/api/purchase', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [header]: token
+                },
+                body: JSON.stringify(purchaseData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('결제가 완료되었습니다.');
+                    window.location.href = '/shop';
+                } else {
+                    alert(data.message || '결제 처리 중 오류가 발생했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('결제 처리 중 오류가 발생했습니다.');
+            });
+        }
     </script>
-    <script src="/js/alert.js"></script>
 </body>
 </html>

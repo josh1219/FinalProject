@@ -723,40 +723,24 @@
     </div>
 
   <script>
-    function handleWriteButtonClick() {
-        const writeButton = document.querySelector('.write-button');
-        const loadingModal = document.getElementById('loadingModal');
-        
-        // 먼저 툴팁 보여주기
-        writeButton.classList.add('show-tooltip');
-        
-        // 1초 후에 툴팁 숨기고 로딩 모달 보여주기
-        setTimeout(() => {
-            writeButton.classList.remove('show-tooltip');
-            loadingModal.style.display = 'flex';
+        function handleWriteButtonClick() {
+            const writeButton = document.querySelector('.write-button');
+            const loadingModal = document.getElementById('loadingModal');
             
-            // 0.5초 후에 페이지 이동
-            setTimeout(() => {
-                location.href = '/board/create';
-            }, 500);
-        }, 1000);
-    }
-
-    function handleWriteButton(isLoggedIn) {
-        const isLoggedIn = [[${session.member != null}]];
-        const writeButton = document.querySelector('.write-button');
-        
-        if (isLoggedIn) {
+            // 먼저 툴팁 보여주기
             writeButton.classList.add('show-tooltip');
+            
+            // 1초 후에 툴팁 숨기고 로딩 모달 보여주기
             setTimeout(() => {
                 writeButton.classList.remove('show-tooltip');
-                location.href = '/board/create';
-            }, 800); // 툴팁이 보일 시간
-        } else {
-            alert('로그인이 필요한 서비스입니다.');
-            location.href = '/member/login';
+                loadingModal.style.display = 'flex';
+                
+                // 0.5초 후에 페이지 이동
+                setTimeout(() => {
+                    location.href = '/board/create';
+                }, 500);
+            }, 1000);
         }
-    }
 
     function filterPosts(type) {
         // 모든 카테고리 버튼의 active 클래스 제거

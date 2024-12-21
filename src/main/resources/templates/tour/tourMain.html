@@ -36,7 +36,7 @@
         .category-list {
             position: absolute;
             top: 10px;
-            left: 150px;
+            left: 10px;
             z-index: 1;
             background-color: transparent;
             padding: 10px;
@@ -422,17 +422,17 @@
 
             /* 현재 위치 버튼 */
             .custom-map-control {
-                width: 35px !important;
-                height: 35px !important;
+                width: 32px !important;
+                height: 32px !important;
                 padding: 6px !important;
                 margin: 8px !important;
-                top: 35px !important;
-                right: 8px !important;
+                top: 60px !important;
+                right: 1px !important;
             }
 
             .custom-map-control img {
-                width: 22px !important;
-                height: 22px !important;
+                width: 20px !important;
+                height: 20px !important;
             }
         }
 
@@ -662,7 +662,7 @@
         @media screen and (max-width: 768px) {
             .category-list {
                 bottom: auto;
-                top: 10px;
+                top: 19px;
                 right: 10px;
                 left: auto;
                 display: flex;
@@ -1236,25 +1236,53 @@
             const locationButton = document.createElement("button");
             locationButton.classList.add("custom-map-control");
             locationButton.innerHTML = `
-                <img src="/images/markers/location.png" alt="현재 위치" style="width: 35px; height: 35px;">
+                <img src="/images/markers/location.png" alt="현재 위치" style="width: 20px; height: 20px;">
             `;
             locationButton.style.cssText = `
-                background-color: rgba(0, 0, 0, 0.1);
+                background-color: rgba(0, 0, 0, -0.9);
                 border: none;
                 border-radius: 2px;
-                box-shadow: 2px 0 5px rgba(0,0,0,0.3);
-                margin: 10px;
-                padding: 8px;
+                box-shadow: 0px 0 5px rgba(0,0,0,0.3);
+                margin: 8px;
+                padding: 6px;
                 cursor: pointer;
-                width: 40px;
-                height: 40px;
+                width: 32px;
+                height: 32px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                top: 40px;
+                top: 65px;
                 right: 15px;
             `;
 
+            // 홈 버튼 추가
+            const homeButton = document.createElement('button');
+            homeButton.innerHTML = `
+                <img src="/images/home.png" alt="홈으로" style="width: 30px; height: 30px;">
+            `;
+            homeButton.style.cssText = `
+                background-color: rgba(0, 0, 0, -0.9);
+                border: none;
+                border-radius: 2px;
+                box-shadow: 0px 0 5px rgba(0,0,0,0.3);
+                margin: 10px;
+                padding: 8px;
+                cursor: pointer;
+                position: absolute;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                top: 15px;
+                right: 15px;
+                width: 32px;
+                height: 32px;
+            `;
+
+            homeButton.addEventListener('click', () => {
+                window.location.href = '/';
+            });
+
+            map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(homeButton);
             map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(locationButton);
 
             // 현재 위치 마커
@@ -1591,8 +1619,9 @@
                     showPlaceInfo(place);
                     
                     // 해당 마커 강조 표시
+                    const placeLatLng = new google.maps.LatLng(place.position.lat, place.position.lng);
                     markers.forEach(marker => {
-                        if (marker.getPosition().equals(place.position)) {
+                        if (marker.getPosition().equals(placeLatLng)) {
                             marker.setAnimation(google.maps.Animation.BOUNCE);
                             setTimeout(() => {
                                 marker.setAnimation(null);
@@ -1763,7 +1792,12 @@
 
         // 패널 핸들 클릭으로 토글
         panelHandle.addEventListener('click', function() {
-            togglePanel();
+            const container = document.querySelector('.side-panel-container');
+            if (container.style.transform === 'translateY(calc(100% - 52px))') {
+                container.style.transform = 'translateY(0)';
+            } else {
+                container.style.transform = 'translateY(calc(100% - 52px))';
+            }
         });
 
         // 패널의 드래그 기능과 토글 기능을 구현했습니다. 사용자가 핸들을 드래그하여 패널의 높이를 조절할 수 있고, 클릭하여 패널을 접을 수 있습니다.

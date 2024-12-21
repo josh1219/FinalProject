@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>마이페이지</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .mb-3 {
+            margin-bottom: 0rem !important; 
+        }
+        .container.mt-3 {
+            margin-top: 3.8rem !important;
+        }
+        .profile-section {
+            background: white;
+            padding: 17px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .menu-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .menu-item {
+            background: white;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .menu-link {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            color: #333;
+            text-decoration: none;
+        }
+        .menu-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+        }
+        .menu-text {
+            flex-grow: 1;
+        }
+        .arrow-icon {
+            color: #ccc;
+        }
+        .rounded-circle{
+            border-radius: 50%;
+        }
+        .profile-image {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+        }
+    </style>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- header -->
+    <div th:replace="~{common/header :: header}"></div>
+    <!-- /header -->
+
+    <div class="container mt-3">
+        <!-- 프로필 섹션 -->
+        <div class="profile-section">
+            <div class="d-flex align-items-center mb-3">
+                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center" 
+                     style="width: 70px; height: 70px;">
+                    <!-- 프로필 사진이 있는 경우 -->
+                    <img th:if="${member != null && member.picture != null}" 
+                         th:src="${member.picture}"
+                         class="rounded-circle profile-image"
+                         alt="프로필 사진">
+                    <!-- 프로필 사진이 없는 경우 -->
+                    <i th:if="${member == null || member.picture == null}"
+                       class="fas fa-user fa-2x"></i>
+                </div>
+                <div class="ms-3">
+                    <h5 class="mb-1" th:text="${member?.name}">사용자 이름</h5>
+                    <small class="text-muted" th:text="${member?.mEmail}">user@email.com</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- 메뉴 리스트 -->
+        <ul class="menu-list">
+            <li class="menu-item">
+                <a href="/member/profile" class="menu-link">
+                    <i class="fas fa-user-edit menu-icon"></i>
+                    <span class="menu-text">프로필 수정</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="/dog/list" class="menu-link">
+                    <i class="fas fa-dog menu-icon"></i>
+                    <span class="menu-text">나의 반려견</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="/schedule/schedule" class="menu-link">
+                    <i class="fas fa-calendar-alt menu-icon"></i>
+                    <span class="menu-text">스케줄</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="/walk/history" class="menu-link">
+                    <i class="fas fa-walking menu-icon"></i>
+                    <span class="menu-text">산책 기록</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+            </li>
+            <li class="menu-item">
+                <a href="/board/myPosts" class="menu-link">
+                    <i class="fas fa-clipboard-list menu-icon"></i>
+                    <span class="menu-text">내가 쓴 게시글</span>
+                    <i class="fas fa-chevron-right arrow-icon"></i>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- footer -->
+    <div th:replace="~{common/footer :: footer}"></div>
+    <!-- /footer -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

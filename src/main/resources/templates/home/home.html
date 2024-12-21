@@ -118,6 +118,10 @@
             background-color: white;
         }
 
+        .dogShop-button:hover {
+            transform: scale(1.02);
+        }
+
         .insertDog-button, .dogList-button {
             position: relative;
             width: 100%;
@@ -198,109 +202,66 @@
             z-index: 10;
         }
 
-        
-
-        
-
-        
-
-        
-
-        .dogShop-button img {
-            width: 276.66px;
-            height: 200px;
-            object-fit: contain;
-            background-color: white;
-        }
-
-        .dogShop-button:hover {
-            transform: scale(1.02);
-        }
-
-        /* 이미지 슬라이더 스타일 */
-        .advertisement {
+        .gotoPetopia {
             position: relative;
-            width: 100%;
-            max-width: 800px;
-            height: 300px;
-            margin: 0 auto;
+            margin: 20px;
+            cursor: pointer;
             overflow: hidden;
-            padding: 0;
+            max-height: 200px;  /* 높이 제한 추가 */
         }
 
-        .slider {
-            display: flex;
-            width: 500%;
+        .gotoPetopia .slider {
+            position: relative;
             height: 100%;
-            transition: transform 0.5s ease-in-out;
         }
 
-        .slide {
-            width: 20%;
-            height: 100%;
-            padding: 10px 20px;
-            box-sizing: border-box;
-        }
-
-        .slide img {
+        .gotoPetopia .slide img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: 200px;  /* 고정 높이 설정 */
+            object-fit: cover;  /* 이미지 비율 유지하면서 채우기 */
+            display: block;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .gotoPetopia::before {
+            content: "Go to PETOPIA!";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2em;
+            font-weight: bold;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            white-space: nowrap;  /* 텍스트가 한 줄로 유지되도록 설정 */
+        }
+
+        .gotoPetopia::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.3s ease;
             border-radius: 10px;
         }
 
-        .slider-counter {
-            position: absolute;
-            bottom: 20px;
-            right: 30px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 14px;
-            z-index: 1;
+        .gotoPetopia:hover::before,
+        .gotoPetopia:hover::after {
+            opacity: 1;
         }
 
-        .slider-nav {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 10px;
+        .gotoPetopia:hover .slide img {
+            transform: scale(1.05);
         }
 
-        .slider-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            cursor: pointer;
-        }
-
-        .slider-dot.active {
-            background: white;
-        }
-
-        .slider-btn {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            background: rgba(255, 255, 255, 0.5);
-            border: none;
-            padding: 10px;
-            cursor: pointer;
-            font-size: 18px;
-            border-radius: 50%;
-        }
-
-        .prev-btn {
-            left: 10px;
-        }
-
-        .next-btn {
-            right: 10px;
-        }
         .main-content {
             margin-top: 70px;
             margin-bottom: 60px; /* 하단 네비게이션 높이만큼 여백 */
@@ -619,35 +580,11 @@
             </div>
         </div>
         
-        <div class="advertisement">
+        <div class="gotoPetopia" onclick="location.href='/tour/map'">
             <div class="slider">
                 <div class="slide">
-                    <img th:src="@{/images/애견팬션01.jpeg}" alt="여행지 1">
+                    <img th:src="@{/images/map2D.png}" alt="여행지 1">
                 </div>
-                <div class="slide">
-                    <img th:src="@{/images/애견팬션02.png}" alt="여행지 2">
-                </div>
-                <div class="slide">
-                    <img th:src="@{/images/애견팬션03.jpg}" alt="여행지 3">
-                </div>
-                <div class="slide">
-                    <img th:src="@{/images/애견팬션04.jpg}" alt="여행지 4">
-                </div>
-                <div class="slide">
-                    <img th:src="@{/images/애견팬션05.webp}" alt="여행지 5">
-                </div>
-            </div>
-            <button class="slider-btn prev-btn">❮</button>
-            <button class="slider-btn next-btn">❯</button>
-            <div class="slider-counter">
-                <span id="current-slide">1</span> / <span id="total-slides">5</span>
-            </div>
-            <div class="slider-nav">
-                <div class="slider-dot active"></div>
-                <div class="slider-dot"></div>
-                <div class="slider-dot"></div>
-                <div class="slider-dot"></div>
-                <div class="slider-dot"></div>
             </div>
         </div>
         

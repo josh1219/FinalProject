@@ -81,6 +81,11 @@ public class HomeController {
         return "home/home01";
     }
 
+    @GetMapping("/tourmap")
+    public String tourmap() {
+        return "tourmap";
+    }
+
     @GetMapping("/")
     public String root(Model model) {
         // 루트 경로 접근 시 home 페이지로 리다이렉트

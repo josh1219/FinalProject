@@ -467,21 +467,7 @@
                 <div class="slider-dot"></div>
             </div>
         </div>
-        <div class="boardTop5">
-            <h3>최신 게시글</h3>
-            <ul class="post-list">
-                <li th:each="post : ${latestPosts}" class="post-item">
-                    <a th:href="@{/board/detail/{id}(id=${post.bIdx})}" class="post-link">
-                        <span class="post-title" th:text="${post.title}">게시글 제목</span>
-                        <span class="post-date" th:text="${post.insertDate}">작성일</span>
-                    </a>
-                </li>
-                <!-- 게시글이 없을 경우 -->
-                <li th:if="${#lists.isEmpty(latestPosts)}" class="post-item">
-                    <span class="post-title">등록된 게시글이 없습니다.</span>
-                </li>
-            </ul>
-        </div>
+      
     </div>
 
     <!-- footer -->

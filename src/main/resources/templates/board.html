@@ -609,6 +609,80 @@
         0%, 100% { transform: translateY(0); }
         50% { transform: translateY(-10px); }
     }
+    
+    .load-more-container {
+        text-align: center;
+        margin: 30px 0;
+        position: relative;
+    }
+    
+    .load-more-btn {
+        background: linear-gradient(45deg, #ff69b4, #ff8da1);
+        color: white;
+        padding: 12px 35px;
+        border-radius: 25px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
+    }
+    
+    .load-more-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 105, 180, 0.4);
+    }
+    
+    .load-more-btn::after {
+        content: "";
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent
+        );
+        transform: rotate(45deg);
+        transition: 0.5s;
+    }
+    
+    .load-more-btn:hover::after {
+        left: 100%;
+    }
+
+    .load-more-btn .loading {
+        display: none;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    .load-more-btn .loading::after {
+        content: "🐾";
+        animation: loadingDots 1.5s infinite;
+    }
+
+    @keyframes loadingDots {
+        0%, 100% { content: "🐾"; }
+        25% { content: "🐾 🐾"; }
+        50% { content: "🐾 🐾 🐾"; }
+        75% { content: "🐾 🐾"; }
+    }
+
+    .load-more-btn.loading-state {
+        color: transparent;
+    }
+
+    .load-more-btn.loading-state .loading {
+        display: block;
+        color: white;
+    }
   </style>
 </head>
 
@@ -667,9 +741,10 @@
                       <div class="sub-message">첫 번째 게시글의 주인공이 되어보세요 🐾</div>
                   </div>
                   <!-- 게시글 목록 -->
-                  <th:block th:if="${not #lists.isEmpty(boardList)}" th:each="board : ${boardList}">
+                  <th:block th:if="${not #lists.isEmpty(boardList)}" th:each="board, iterStat : ${boardList}">
                       <div class="board-item" 
                            th:classappend="${board.bType == '공지사항'} ? 'notice-post' : (${board.member != null && board.member.role != null && board.member.role.name() == 'ADMIN'} ? 'admin-post')"
+                           th:style="${iterStat.index >= 10 ? 'display: none;' : ''}"
                            th:onclick="'location.href=\'/board/detail/' + ${board.bIdx} + '\''">
                           <div class="board-content">
                               <div class="board-info">
@@ -690,6 +765,13 @@
                           </div>
                       </div>
                   </th:block>
+              </div>
+              <!-- 더보기 버튼 -->
+              <div class="load-more-container" th:if="${#lists.size(boardList) > 10}">
+                  <button id="loadMoreBtn" class="load-more-btn">
+                      더보기
+                      <span class="loading"></span>
+                  </button>
               </div>
           </div>
       
@@ -851,6 +933,41 @@
 
     // 전광판이 끝에 도달하면 자동으로 재시작
     document.querySelector('.notice-ticker').addEventListener('animationend', restartTicker);
+    
+    // 게시글 더보기 기능
+    let currentlyShown = 10;
+    const postsPerPage = 10;
+    
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if(loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', function() {
+            // 로딩 상태 추가
+            this.classList.add('loading-state');
+            
+            setTimeout(() => {
+                const posts = document.querySelectorAll('.board-item');
+                const totalPosts = posts.length;
+                
+                // 다음 10개의 게시글 표시
+                for(let i = currentlyShown; i < currentlyShown + postsPerPage && i < totalPosts; i++) {
+                    posts[i].style.display = '';
+                }
+                
+                currentlyShown += postsPerPage;
+                
+                // 로딩 상태 제거
+                this.classList.remove('loading-state');
+                
+                // 모든 게시글을 다 보여줬다면 더보기 버튼 페이드아웃 후 제거
+                if(currentlyShown >= totalPosts) {
+                    this.style.opacity = '0';
+                    setTimeout(() => {
+                        this.style.display = 'none';
+                    }, 300);
+                }
+            }, 800); // 로딩 효과를 보여주기 위한 지연
+        });
+    }
   </script>
 </body>
 </html>

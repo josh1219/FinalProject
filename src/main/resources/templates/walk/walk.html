@@ -262,41 +262,53 @@
         <!-- /footer -->
 
         <script th:inline="javascript">
-            var map;
-            var currentLocationMarker;
-            var walkPath;
-            var walkCoordinates = [];
-            var totalDistance = 0;
-            var watchId = null;
+            var map, directionsService, directionsRenderer, currentLocationMarker, polyline = null, pathCoordinates = [], totalDistance = 0, lastValidLocation = null, currentLocation = null, MIN_DISTANCE = 2;
+            var wsIdx = null;
+            var watchId = null;  // GPS 워치 ID
+            var mIdx = [[${session.mIdx}]];
+            var csrfToken = [[${_csrf.token}]];
+            var csrfHeader = [[${_csrf.headerName}]];
 
-            // AJAX 설정
+            // AJAX 전역 설정
             $.ajaxSetup({
                 beforeSend: function(xhr) {
-                    xhr.setRequestHeader(header, token);
+                    if (csrfHeader && csrfToken) {
+                        xhr.setRequestHeader(csrfHeader, csrfToken);
+                    }
                 }
             });
 
             var isTracking = false;  // 산책 트래킹 상태
             var totalSeconds = 0;
             var timerInterval = null;
+            var lastPosition = null;  // 마지막 위치
+            var lastMoveTime = null;  // 마지막 움직임 시간
+            var MAX_SPEED = 8.33;  // 최대 허용 속도 (m/s) - 시속 30km
+            var STATIONARY_THRESHOLD = 15000;  // 정지 감지 시간 (10초)
+            var stationaryCheckInterval = null;  // 정지 상태 체크 인터벌
+            var warningTimeout;
 
             function initMap() {
-                // 서울 시청을 중심으로 초기화
-                var defaultLocation = { lat: 37.5665, lng: 126.9780 };
+                directionsService = new google.maps.DirectionsService();
+                directionsRenderer = new google.maps.DirectionsRenderer();
 
                 map = new google.maps.Map(document.getElementById('map'), {
-                    center: defaultLocation,
-                    zoom: 15,
-                    zoomControl: true,
-                    mapTypeControl: false,
-                    scaleControl: false,
-                    streetViewControl: false,
-                    rotateControl: false,
-                    fullscreenControl: false
+                    zoom: 17,
+                    center: { lat: 37.5665, lng: 126.9780 },  // 서울 중심부 좌표
+                    disableDefaultUI: true,
+                    styles: [
+                        {
+                            featureType: "poi",
+                            elementType: "labels",
+                            stylers: [{ visibility: "off" }]
+                        }
+                    ]
                 });
 
-                // 경로를 그릴 Polyline 초기화
-                walkPath = new google.maps.Polyline({
+                directionsRenderer.setMap(map);
+
+                // polyline 초기화
+                polyline = new google.maps.Polyline({
                     path: [],
                     geodesic: true,
                     strokeColor: '#FF0000',
@@ -305,143 +317,223 @@
                     map: map
                 });
 
-                // 현재 위치 마커 초기화
-                currentLocationMarker = new google.maps.Marker({
-                    position: defaultLocation,
-                    map: map,
-                    icon: {
-                        path: google.maps.SymbolPath.CIRCLE,
-                        scale: 10,
-                        fillColor: '#4285F4',
-                        fillOpacity: 1,
-                        strokeColor: '#FFFFFF',
-                        strokeWeight: 2
-                    }
+                // 클릭 이벤트 비활성화
+                map.addListener('click', function(e) {
+                    e.preventDefault();
                 });
 
-                // 위치 권한 확인
-                checkLocationPermission();
-            }
-
-            function checkLocationPermission() {
-                if (!navigator.geolocation) {
-                    alert('이 브라우저에서는 위치 서비스를 지원하지 않습니다.');
-                    return;
-                }
-
-                navigator.permissions.query({ name: 'geolocation' }).then(function(permissionStatus) {
-                    if (permissionStatus.state === 'granted') {
-                        // 이미 권한이 있는 경우
-                        getCurrentPosition();
-                    } else if (permissionStatus.state === 'prompt') {
-                        // 권한 요청이 필요한 경우
-                        requestLocationPermission();
-                    } else {
-                        // 권한이 거부된 경우
-                        showWarningMessage('위치 권한이 거부되었습니다. 설정에서 권한을 허용해주세요.');
-                    }
-                });
-            }
-
-            function getCurrentPosition() {
+                // 현재 위치로 지도 중심 변경 시도
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
-                        var pos = {
+                        const currentLocation = {
                             lat: position.coords.latitude,
                             lng: position.coords.longitude
                         };
-                        map.setCenter(pos);
-                        currentLocationMarker.setPosition(pos);
+                        map.setCenter(currentLocation);
                     },
                     function(error) {
-                        handleLocationError(error);
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 0
+                        console.error('Error getting current location:', error);
                     }
                 );
-            }
 
-            function startWalk() {
-                if (isTracking) {
-                    return;
+                // 현재 위치 마커 생성
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(function(position) {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude
+                        };
+
+                        currentLocationMarker = new google.maps.Marker({
+                            position: pos,
+                            map: map,
+                            title: '현재 위치'
+                        });
+
+                        map.setCenter(pos);
+                    }, function() {
+                        handleLocationError(true, map.getCenter());
+                    });
+                } else {
+                    handleLocationError(false, map.getCenter());
                 }
 
-                if (!navigator.geolocation) {
-                    alert('이 브라우저에서는 위치 서비스를 지원하지 않습니다.');
-                    return;
-                }
+                // GO 버튼 동적 생성
+                var html = [];
+                html.push('<div class="Go-button-site">');
+                html.push('GO!');
+                html.push('</div>');
+                $('#map').append(html.join(''));
 
-                navigator.permissions.query({ name: 'geolocation' }).then(function(permissionStatus) {
-                    if (permissionStatus.state === 'granted') {
-                        startTracking();
-                    } else {
+                // GO 버튼 클릭 이벤트
+                document.querySelector('.Go-button-site').addEventListener('click', function() {
+                    if (!isTracking) {
                         requestLocationPermission();
+                    } else {
+                        stopWalk();
                     }
                 });
             }
 
-            function startTracking() {
-                isTracking = true;
-                walkCoordinates = [];
-                totalDistance = 0;
-                document.getElementById('startButton').style.display = 'none';
-                document.getElementById('stopButton').style.display = 'block';
-                startTimer();
-
-                watchId = navigator.geolocation.watchPosition(
-                    handleLocationUpdate,
-                    handleLocationError,
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 0
-                    }
-                );
-            }
-
             function requestLocationPermission() {
-                navigator.geolocation.getCurrentPosition(
-                    function(position) {
-                        // 권한 허용됨
-                        startTracking();
-                    },
-                    function(error) {
-                        if (error.code === error.PERMISSION_DENIED) {
-                            showWarningMessage('위치 권한이 거부되었습니다. 설정에서 권한을 허용해주세요.');
+                if (!navigator.geolocation) {
+                    showWarningMessage('이 브라우저에서는 위치 서비스를 지원하지 않습니다.');
+                    return false;
+                }
+
+                return new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(
+                        function(position) {
+                            resolve(true);
+                        },
+                        function(error) {
+                            if (error.code === 1) {
+                                showWarningMessage('위치 권한이 거부되었습니다. 설정에서 권한을 허용해주세요.');
+                                if (window.Android && typeof window.Android.openAppSettings === 'function') {
+                                    window.Android.openAppSettings();
+                                }
+                            }
+                            resolve(false);
                         }
-                    },
-                    {
-                        enableHighAccuracy: true,
-                        timeout: 5000,
-                        maximumAge: 0
-                    }
-                );
+                    );
+                });
             }
 
-            function handleLocationError(error) {
-                var errorMessage = '';
-                switch(error.code) {
-                    case error.PERMISSION_DENIED:
-                        errorMessage = '위치 권한이 거부되었습니다. 설정에서 권한을 허용해주세요.';
-                        break;
-                    case error.POSITION_UNAVAILABLE:
-                        errorMessage = '위치 정보를 사용할 수 없습니다.';
-                        break;
-                    case error.TIMEOUT:
-                        errorMessage = '위치 정보 요청 시간이 초과되었습니다.';
-                        break;
-                    default:
-                        errorMessage = '알 수 없는 오류가 발생했습니다.';
-                        break;
+            async function startWalk() {
+                if (isTracking) {
+                    stopWalk();
+                    return;
                 }
-                showWarningMessage(errorMessage);
+
+                // 위치 권한 확인
+                const hasPermission = await requestLocationPermission();
+                if (!hasPermission) {
+                    return;
+                }
+
+                // 새로운 산책 시작 시 변수 초기화
+                isTracking = true;
+                totalDistance = 0;
+                totalSeconds = 0;
+                pathCoordinates = [];
+                lastValidLocation = null;
+                currentLocation = null;
+
+                // polyline 초기화
+                if (polyline) {
+                    polyline.setMap(null);
+                    polyline = new google.maps.Polyline({
+                        path: [],
+                        geodesic: true,
+                        strokeColor: '#FF0000',
+                        strokeOpacity: 1.0,
+                        strokeWeight: 2,
+                        map: map
+                    });
+                }
+
+                // 초기 UI 상태 설정
+                $('#distance').text('0m');
+                $('#timer').text('00:00:00');
+                $('.plusMile').text('( + 0 mile)');
+
+                // 워크 세션 시작 요청
+                $.ajax({
+                    url: '/api/walk/start',
+                    type: 'POST',
+                    data: { mIdx: mIdx },
+                    success: function(response) {
+                        wsIdx = response.wsIdx;
+                        console.log('Walk session started:', wsIdx);
+
+                        // GPS 트래킹 시작
+                        watchId = navigator.geolocation.watchPosition(
+                            handleLocationUpdate,
+                            handleLocationError,
+                            {
+                                enableHighAccuracy: true,
+                                maximumAge: 0,
+                                timeout: 5000
+                            }
+                        );
+
+                        // 타이머 시작
+                        startTimer();
+
+                        // UI 업데이트
+                        document.querySelector('.Go-button-site').textContent = 'STOP';
+                        document.querySelector('.Go-button-site').classList.add('stop');
+
+                        // 정지 상태 체크 인터벌 시작
+                        stationaryCheckInterval = setInterval(checkStationary, 1000);
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error starting walk:', error);
+                        alert('산책을 시작할 수 없습니다.');
+                        stopWalk();
+                    }
+                });
+            }
+
+            function stopWalk() {
+                if (!isTracking) return;
+
+                stopTimer();
+                if (watchId) {
+                    navigator.geolocation.clearWatch(watchId);
+                }
+
+                isTracking = false;
+                document.querySelector('.Go-button-site').textContent = 'GO!';
+                document.querySelector('.Go-button-site').classList.remove('stop');
+
+                if (totalDistance < 100) {
+                    pathCoordinates = [];
+                    if (polyline) {
+                        polyline.setMap(null);
+                    }
+                    $('#distance').text('0m');
+                    $('#timer').text('00:00:00');
+                    $('.plusMile').text('( + 0 mile)');
+                    showWarningMessage('최소 100m 이상 걸어야 포인트가 적립됩니다.');
+                    return;
+                }
+
+                // 산책 데이터 저장
+                const walkData = {
+                    distance: totalDistance,
+                    time: totalSeconds,
+                    coordinates: pathCoordinates.map(coord => ({
+                        latitude: coord.lat,
+                        longitude: coord.lng
+                    }))
+                };
+
+                fetch('/walk/save', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(walkData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        showWarningMessage('산책 데이터 저장에 실패했습니다.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showWarningMessage('산책 데이터 저장 중 오류가 발생했습니다.');
+                });
             }
 
             function handleLocationUpdate(position) {
-                var location = {
+                if (!isTracking) return;
+
+                const location = {
                     lat: position.coords.latitude,
                     lng: position.coords.longitude
                 };
@@ -535,7 +627,8 @@
                     Math.cos(rad(lat1)) * Math.cos(rad(lat2)) *
                     Math.sin(dLng / 2) * Math.sin(dLng / 2);
                 const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                const distance = R * c; // 두 점 간 거리
+                const distance = R * c;
+
                 return Math.round(distance); // 소수점 제거
             }
 

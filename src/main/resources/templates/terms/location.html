@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>PETOPIA - 위치정보이용약관</title>
+    <style>
+        .terms-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        h2 {
+            color: #444;
+            margin-top: 25px;
+        }
+        p {
+            margin: 15px 0;
+            color: #666;
+        }
+        .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 60px;
+        padding: 0 20px;
+        background: #ffffff;
+        border-bottom: 1px solid #eee;
+        z-index: 100;
+        }
+        .header img {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        }
+
+        .header-title {
+        font-size: 18px;
+        font-weight: bold;
+        }
+    </style>
+    <script>
+        function handleBackButton() {
+            window.history.back();
+        }
+    </script>
+</head>
+<body>
+    <div class="header">
+        <div class="back-button" onclick="handleBackButton()" title="뒤로가기">
+            <img src="/images/chevron-left.svg" alt="뒤로가기"/>
+        </div>
+      </div>
+    <div class="terms-container">
+        <h1>위치정보이용약관</h1>
+        
+        <h2>제1조 (목적)</h2>
+        <p>이 약관은 PETOPIA(이하 "회사")가 제공하는 위치정보사업 또는 위치기반서비스사업과 관련하여 회사와 개인위치정보주체와의 권리, 의무 및 책임사항, 기타 필요한 사항을 규정함을 목적으로 합니다.</p>
+        
+        <h2>제2조 (약관의 효력 및 변경)</h2>
+        <p>① 본 약관은 서비스를 신청한 고객 또는 개인위치정보주체가 본 약관에 동의하고 회사가 정한 소정의 절차에 따라 서비스의 이용자로 등록함으로써 효력이 발생합니다.</p>
+        <p>② 회사는 본 약관의 내용을 변경할 수 있으며, 변경된 약관은 회사 홈페이지를 통해 공지합니다.</p>
+        
+        <h2>제3조 (서비스 내용 및 요금)</h2>
+        <p>① 회사는 위치정보사업자로부터 위치정보를 전달받아 아래와 같은 위치기반서비스를 제공합니다.</p>
+        <p>1. 산책로 기록 서비스</p>
+        <p>2. 주변 동물병원 찾기 서비스</p>
+        <p>② 회사는 위치정보를 이용한 서비스를 무료로 제공합니다.</p>
+        
+        <h2>제4조 (개인위치정보주체의 권리)</h2>
+        <p>개인위치정보주체는 언제든지 개인위치정보의 수집•이용•제공에 대한 동의를 철회할 수 있습니다.</p>
+        
+        <h2>제5조 (법정대리인의 권리)</h2>
+        <p>회사는 14세 미만의 아동으로부터 개인위치정보를 수집•이용 또는 제공하고자 하는 경우에는 법정대리인의 동의를 받아야 합니다.</p>
+        
+        <h2>제6조 (위치정보 수집방법)</h2>
+        <p>회사는 GPS칩이 내장된 스마트폰 등을 통해 위치정보를 수집합니다.</p>
+    </div>
+</body>
+</html>

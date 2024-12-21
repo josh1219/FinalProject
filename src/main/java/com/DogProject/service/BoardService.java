@@ -6,6 +6,7 @@ import com.DogProject.entity.Member;
 import com.DogProject.repository.BoardRepository;
 import com.DogProject.service.FileService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -148,5 +150,15 @@ public class BoardService {
         }
 
         return board;
+    }
+
+    // 최신 게시글 5개 조회
+    @Transactional(readOnly = true)
+    public List<Board> getTop5RecentPosts() {
+        List<Board> allBoards = getBoardList();  // 전체 게시글 가져오기
+        return allBoards.stream()
+                .sorted((b1, b2) -> b2.getBIdx() - b1.getBIdx())  // bIdx 기준 내림차순 정렬
+                .limit(5)  // 상위 5개만 선택
+                .collect(Collectors.toList());
     }
 }

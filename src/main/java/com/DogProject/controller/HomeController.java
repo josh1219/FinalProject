@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequiredArgsConstructor
@@ -52,28 +53,25 @@ public class HomeController {
                 }
                 
                 if (member == null && email != null) {
-                    member = memberService.findBymEmail(email);
+                    member = memberService.findByEmail(email);
                 }
-            }
-            // 일반 로그인 사용자인 경우
-            else {
-                String username = auth.getName();
-                member = memberService.findBymEmail(username);
             }
             
             if (member != null) {
                 model.addAttribute("member", member);
-                model.addAttribute("isAdmin", Role.ADMIN.equals(member.getRole()));
-                model.addAttribute("isLoggedIn", true);
-                System.out.println("Home - 로그인 사용자 정보:");
-                System.out.println("Email: " + member.getMEmail());
-                System.out.println("Name: " + member.getName());
-                System.out.println("Provider: " + member.getProvider());
+                if (member.getRole() == Role.ADMIN) {
+                    model.addAttribute("isAdmin", true);
+                }
             }
-        } else {
-            model.addAttribute("isLoggedIn", false);
         }
-        
+
+        // 최근 게시글 5개 가져오기
+        List<Board> recentBoards = boardService.getBoardList().stream()
+                .filter(board -> "N".equals(board.getDeleteCheck()))
+                .sorted((b1, b2) -> b2.getBIdx() - b1.getBIdx())
+                .limit(5)
+                .collect(Collectors.toList());
+        model.addAttribute("recentBoards", recentBoards);
         
         return "home/home";
     }

@@ -97,6 +97,11 @@ public class MemberService implements UserDetailsService {
         return memberRepository.findBymEmail(mEmail).orElse(null);
     }
 
+    public Member findByEmail(String email) {
+        return memberRepository.findBymEmail(email)
+                .orElse(null);
+    }
+
     public Member findByProviderAndSocialId(String provider, String socialId) {
         return memberRepository.findByProviderAndSocialId(provider, socialId).orElse(null);
     }

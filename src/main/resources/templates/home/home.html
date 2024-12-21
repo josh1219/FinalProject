@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${isAdmin != null and isAdmin ? 'PETOPIA - 관리자 로그인' : 'PETOPIA'}">PETOPIA</title>
     <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/css/footer.css">
     <style>
         * {
@@ -237,7 +238,7 @@
         .slide {
             width: 20%;
             height: 100%;
-            padding: 20px;
+            padding: 10px 20px;
             box-sizing: border-box;
         }
 
@@ -306,11 +307,10 @@
         }
         
         .boardTop5 {
+            margin: 20px;
             padding: 20px;
-            margin-right: 20px;
-            margin-left: 20px;
-            background-color: white;
-            border-radius: 10px;
+            background-color: #fff;
+            border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
@@ -318,42 +318,52 @@
             margin-bottom: 15px;
             color: #333;
             font-size: 18px;
+            font-weight: bold;
         }
 
-        .post-list {
-            list-style: none;
-            padding: 0;
+        .boardTop5 table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
         }
 
-        .post-item {
-            padding: 10px 0;
+        .boardTop5 th,
+        .boardTop5 td {
+            padding: 12px;
+            text-align: left;
             border-bottom: 1px solid #eee;
         }
 
-        .post-item:last-child {
-            border-bottom: none;
+        .boardTop5 th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #495057;
         }
 
-        .post-link {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-decoration: none;
-            color: #333;
-        }
-
-        .post-title {
-            flex-grow: 1;
-            margin-right: 15px;
-            white-space: nowrap;
+        .boardTop5 td.title {
+            max-width: 300px;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .post-date {
-            color: #888;
-            font-size: 0.9em;
-            white-space: nowrap;
+        .boardTop5 td.title a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        .boardTop5 td.title a:hover {
+            color: #007bff;
+        }
+
+        .boardTop5 .no-posts {
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+
+        .boardTop5 tr:hover {
+            background-color: #f8f9fa;
         }
 
         .withDogWalkButton, .dogShopButton {
@@ -399,6 +409,179 @@
             transition: transform 0.3s ease;
             border-radius: 10px;
             overflow: hidden;
+        }
+        
+        .newestBoard {
+            margin: 20px 20px;
+            padding: 0px;
+            max-width: 1000px;
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .newestBoard h3 {
+            margin-bottom: 5px;
+            color: #2c3e50;
+            font-size: 1.5em;
+            font-weight: 600;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+
+        .newestBoard .board-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .newestBoard .board-item {
+            padding: 10px;
+            border-bottom: 1px solid #f0f2f5;
+            transition: background-color 0.2s ease;
+        }
+
+        .newestBoard .board-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .newestBoard .board-item:last-child {
+            border-bottom: none;
+        }
+
+        .newestBoard .title-section {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .newestBoard .board-title {
+            font-size: 16px;
+            color: #1a202c;
+            font-weight: 600;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .newestBoard .board-title:hover {
+            color: #3182ce;
+        }
+
+        .newestBoard .board-category {
+            font-size: 12px;
+            color: #4a5568;
+            background-color: #edf2f7;
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-left: 12px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .newestBoard .board-info {
+            font-size: 13px;
+            color: #718096;
+            display: flex;
+            align-items: center;
+        }
+
+        .newestBoard .board-info .writer {
+            color: #4a5568;
+            font-weight: 500;
+        }
+
+        .newestBoard .board-info .separator {
+            margin: 0 8px;
+            color: #cbd5e0;
+        }
+
+        .newestBoard .board-info .view-count {
+            display: flex;
+            align-items: center;
+            color: #718096;
+        }
+
+        .newestBoard .board-info .view-count i {
+            margin-right: 4px;
+            font-size: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .newestBoard {
+                margin: 5px 20px;
+                padding: 0px;
+            }
+
+            .newestBoard .board-title {
+                font-size: 15px;
+            }
+
+            .newestBoard .board-category {
+                font-size: 11px;
+                padding: 3px 8px;
+            }
+
+            .newestBoard .board-info {
+                font-size: 12px;
+            }
+        }
+        .company-info {
+            margin: 20px 20px;
+            padding: 5px;
+            background-color: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .company-info-table {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+        }
+
+        .company-info-table th {
+            color: #6b7280;
+            text-align: left;
+            padding-right: 20px;
+            vertical-align: top;
+            width: 120px;
+            font-weight: normal;
+        }
+
+        .company-info-table td {
+            color: #374151;
+        }
+
+        .company-info-table .terms {
+            font-size: 11px;
+            color: #6b7280;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .company-info-table .terms a {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s ease;
+        }
+
+        .company-info-table .terms a:hover {
+            color: #4a5568;
+        }
+
+        .company-info-table .terms a i {
+            margin-left: 4px;
+            font-size: 8px;
+        }
+
+        .company-info-table .contact-info {
+            margin-top: 5px;
+            color: #6b7280;
+            font-size: 0.95em;
         }
     </style>
 </head>
@@ -467,7 +650,74 @@
                 <div class="slider-dot"></div>
             </div>
         </div>
+        
+        <!-- 최근 게시글 섹션 -->
+        <div class="newestBoard">
+            <h3>최근 게시글</h3>
+            <div class="board-list">
+                <div class="board-item" th:each="board : ${recentBoards}">
+                    <div class="title-section">
+                        <a class="board-title" th:href="@{/board/detail/{bIdx}(bIdx=${board.getBIdx()})}" th:text="${board.getTitle()}">제목</a>
+                        <span class="board-category" th:text="${board.getBType()}">카테고리</span>
+                    </div>
+                    <div class="board-info">
+                        <span class="writer" th:text="${board.getMember().getName()}">작성자</span>
+                        <span class="separator">•</span>
+                        <span class="time" th:text="${board.getInsertDate()}">시간</span>
+                        <span class="separator">•</span>
+                        <span class="view-count">
+                            <i class="fas fa-eye"></i>
+                            <span th:text="${board.getReadRate()}">0</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
       
+    </div>
+
+    <!-- 회사 정보 -->
+    <div class="company-info">
+        <table class="company-info-table">
+            <tr>
+                <th>회사명</th>
+                <td>(주)펫토피아</td>
+            </tr>
+            <tr>
+                <th>주소</th>
+                <td>서울특별시 마포구 백범로 23</td>
+            </tr>
+            <tr>
+                <th>대표이사</th>
+                <td>도베르</td>
+            </tr>
+            <tr>
+                <th>사업자등록번호</th>
+                <td>123-45-6789</td>
+            </tr>
+            <tr>
+                <th>통신판매업신고</th>
+                <td>제2024-서울마포-0000호</td>
+            </tr>
+            <tr>
+                <th>이메일</th>
+                <td>cs@petopia.co.kr</td>
+            </tr>
+            <tr>
+                <th>전화번호</th>
+                <td>
+                    문의 • 1234-5678
+                </td>
+            </tr>
+            <tr>
+                <th>PETOPIA</th>
+                <td class="terms">
+                    <a th:href="@{/terms/terms}">이용약관 <i class="fas fa-chevron-right"></i></a>
+                    <a th:href="@{/terms/privacy}">개인정보처리방침 <i class="fas fa-chevron-right"></i></a>
+                    <a th:href="@{/terms/location}">위치정보이용약관 <i class="fas fa-chevron-right"></i></a>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <!-- footer -->

@@ -113,7 +113,7 @@ public class MemberController {
         return "member/login";
     }
 
-    @PostMapping("/logout")
+    @GetMapping("/logout")  
     public String logout(HttpServletRequest request, HttpServletResponse response) {
         // 현재 인증 정보 가져오기
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -139,6 +139,6 @@ public class MemberController {
             SecurityContextHolder.clearContext();
         }
         
-        return "redirect:/member/login";
+        return "redirect:/home";  
     }
 }

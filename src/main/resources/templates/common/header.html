@@ -1,12 +1,22 @@
 <!-- header -->
-    <header th:fragment="header" class="header">
-        <div class="logo-container">
+<header th:fragment="header" class="header">
+    <div class="logo-container">
+        <div th:if="${#httpServletRequest.requestURI.contains('board/detail')}" onclick="history.back()" class="back-button">
+            <img src="/images/chevron-left.svg" alt="뒤로가기">
+        </div>
+        <div th:unless="${#httpServletRequest.requestURI.contains('board/detail')}">
             <a th:href="@{/home}" class="logo">
                 <img th:src="@{/images/PETOPIA_LOGO.png}" alt="PETOPIA">
             </a>
             <span th:if="${isAdmin}" class="admin-badge">관리자 로그인</span>
         </div>
+    </div>
         <div class="header-right">
+            <div class="logout" th:if="${session.isLoggedIn}">
+                <button onclick="location.href='/member/logout'" class="logout-button">
+                    <img th:src="@{/images/logoutButton.svg}" alt="로그아웃">
+                </button>
+            </div>
             <div class="chat">
                 <button onclick="location.href='/chatList'" class="chat-button">
                     <img th:src="@{/images/chatbutton.svg}" alt="채팅">
@@ -20,5 +30,3 @@
         </div>
     </header>
     <!-- /header -->
-
-   

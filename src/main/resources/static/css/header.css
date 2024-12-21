@@ -20,13 +20,15 @@
 .header-right {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 10px;
 }
 
 .logo-container {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: flex-start;
+    position: relative;
 }
 
 .logo {
@@ -43,31 +45,41 @@
     text-decoration: none;
 }
 
-.chat-button {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-}
-
-.chat-button img {
-    width: 22px;
-    height: 22px;
-}
-
-.mypage button {
+.chat, .mypage, .logout {
+    width: 40px;
+    height: 40px;
     display: flex;
-    align-items: center;
     justify-content: center;
-    background: white;
+    align-items: center;
+}
+
+.chat-button, .mypage-button, .logout-button {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
     border: none;
-    padding: 5px;
     cursor: pointer;
+    padding: 0;
+}
+
+.chat-button img, .mypage-button img, .logout-button img {
+    width: 28px;
+    height: 28px;
+    display: block;
 }
 
 .mypage img {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     display: block;
-    margin: auto;
+}
+
+.logout-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
 }

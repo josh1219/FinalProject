@@ -244,7 +244,9 @@
                 <span>결제금액</span>
                 <span th:text="${#numbers.formatInteger(product.price * quantity + 3000, 0, 'COMMA') + '원'}">0원</span>
             </div>
-            <button class="purchase-btn" onclick="processPurchase()">결제하기</button>
+            <button type="button" class="purchase-btn" onclick="location.href='/shop/order/history'">
+                결제하기
+            </button>
         </div>
     </div>
 

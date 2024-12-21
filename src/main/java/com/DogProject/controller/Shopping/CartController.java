@@ -36,6 +36,11 @@ public class CartController {
 
     @GetMapping("")
     public String cartPage(Model model, Principal principal, HttpSession session) {
+        // 로그인 체크
+        if (principal == null) {
+            return "redirect:/member/login";
+        }
+        
         try {
             System.out.println("=== Session Debug Info ===");
             System.out.println("Session ID: " + session.getId());

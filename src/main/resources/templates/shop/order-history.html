@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주문목록 - PETOPIA</title>
+    <link rel="stylesheet" href="/css/alert.css">
+    <link rel="stylesheet" href="/css/shop.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f8f9fa;
+            padding-top: 60px;
+            padding-bottom: 200px;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+        .order-container {
+            max-width: 768px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        .order-header {
+            border-bottom: 1px solid #eee;
+        }
+        .order-header h2 {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 500;
+            color: #333;
+        }
+        .order-items {
+            margin-top: 16px;
+        }
+        .order-item {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .item-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .item-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-right: 16px;
+        }
+        .item-info {
+            flex: 1;
+        }
+        .item-name {
+            font-size: 16px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: #333;
+        }
+        .item-price {
+            font-size: 18px;
+            font-weight: 600;
+            color: #040516;
+        }
+        .delivery-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .delivery-info h3 {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0 0 16px 0;
+            color: #333;
+        }
+        .delivery-field {
+            margin-bottom: 16px;
+        }
+        .delivery-field label {
+            display: block;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .delivery-field .value {
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+        }
+        .price-info {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #666;
+            font-size: 14px;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+            font-weight: 600;
+            font-size: 18px;
+        }
+        .empty-orders {
+            text-align: center;
+            padding: 48px 0;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="shop/shop-header :: shop-header"></div>
+
+    <div class="order-container">
+        <div class="order-header">
+            <h2>주문목록</h2>
+        </div>
+
+        <div class="empty-orders" th:if="${#lists.isEmpty(orders)}">
+            <p>주문 내역이 없습니다.</p>
+        </div>
+
+        <div class="order-items" th:unless="${#lists.isEmpty(orders)}">
+            <div class="order-item" th:each="order : ${orders}">
+                <div class="item-header">
+                    <img th:src="${order.productImage}" alt="상품 이미지" class="item-image">
+                    <div class="item-info">
+                        <div class="item-name" th:text="${order.productName}">프리미엄 강아지 사료</div>
+                        <div class="item-price">
+                            <span th:text="${order.quantity + '개'}">2개</span>
+                            <span th:text="${#numbers.formatInteger(order.price, 0, 'COMMA') + '원'}">69,000원</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="delivery-info">
+                    <h3>배송 정보</h3>
+                    <div class="delivery-field">
+                        <label>받는 분</label>
+                        <div class="value" th:text="${order.recipientName}">홍길동</div>
+                    </div>
+                    <div class="delivery-field">
+                        <label>연락처</label>
+                        <div class="value" th:text="${order.recipientPhone}">010-1234-5678</div>
+                    </div>
+                    <div class="delivery-field">
+                        <label>배송지</label>
+                        <div class="value" th:text="${order.shippingAddress}">52550 경남 사천시 주공1길 7 321</div>
+                    </div>
+                </div>
+
+                <div class="price-info">
+                    <div class="price-row">
+                        <span>상품금액</span>
+                        <span th:text="${#numbers.formatInteger(order.price, 0, 'COMMA') + '원'}">69,000원</span>
+                    </div>
+                    <div class="price-row">
+                        <span>배송비</span>
+                        <span th:text="${#numbers.formatInteger(order.shippingFee, 0, 'COMMA') + '원'}">3,000원</span>
+                    </div>
+                    <div class="total-row">
+                        <span>결제금액</span>
+                        <span th:text="${#numbers.formatInteger(order.totalAmount, 0, 'COMMA') + '원'}">72,000원</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

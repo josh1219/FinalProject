@@ -19,15 +19,23 @@
 
     <style>
         /* Reset and Global Styles */
-        
+        a, button, input, select, h1, h2, h3, h4, h5, * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        border: none;
+        text-decoration: none;
+        background: none;
+        -webkit-font-smoothing: antialiased;
+    }
 
         body {
             font-family: Arial, sans-serif;
             padding-bottom: 60px;
             min-height: 100vh;
             position: relative;
-            margin: 0;
-            padding-top: 70px;
+            margin: 20px;
+            padding-top: 60px;
         }
 
         .back-button {
@@ -789,7 +797,7 @@
     <div th:replace="~{common/header :: header}"></div>
     <!-- /header -->
 
-    <div class="post-container">
+    <div class="main-content">
         <div class="post-header">
             <h1 class="post-title" th:text="${board.title}">게시글 제목</h1>
             <div class="post-info">

@@ -52,11 +52,12 @@ public class WalkController {
 
     @GetMapping("")
     public String walk(Model model, HttpSession session) {
-        Object mIdxObj = session.getAttribute("mIdx");
-        if (mIdxObj == null) {
+        // 로그인 체크
+        if (session.getAttribute("mIdx") == null) {
             return "redirect:/member/login";
         }
 
+        Object mIdxObj = session.getAttribute("mIdx");
         int mIdx = Integer.parseInt(mIdxObj.toString());
         Member member = memberService.findByMIdx(mIdx);
         if (member == null) {
@@ -78,12 +79,13 @@ public class WalkController {
             @RequestParam("latitudes[]") List<Double> latitudes,
             @RequestParam("longitudes[]") List<Double> longitudes,
             HttpSession session) {
+        // 로그인 체크
+        if (session.getAttribute("mIdx") == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
         try {
             Object mIdxObj = session.getAttribute("mIdx");
-            if (mIdxObj == null) {
-                return ResponseEntity.badRequest().body("로그인이 필요합니다.");
-            }
-
             int mIdx = Integer.parseInt(mIdxObj.toString());
             Member member = memberService.findByMIdx(mIdx);
             if (member == null) {
@@ -144,12 +146,13 @@ public class WalkController {
     @GetMapping("/list")
     @ResponseBody
     public ResponseEntity<?> getWalkList(HttpSession session) {
+        // 로그인 체크
+        if (session.getAttribute("mIdx") == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
         try {
             Object mIdxObj = session.getAttribute("mIdx");
-            if (mIdxObj == null) {
-                return ResponseEntity.badRequest().body("로그인이 필요합니다.");
-            }
-
             int mIdx = Integer.parseInt(mIdxObj.toString());
             List<WalkSession> walkSessions = walkSessionRepository.findByMember_mIdxOrderByWalkDateDesc(mIdx);
             
@@ -173,12 +176,13 @@ public class WalkController {
             @RequestParam("distance") double distance,
             @RequestParam(value = "wsIdx", required = false) Integer wsIdx,
             HttpSession session) {
+        // 로그인 체크
+        if (session.getAttribute("mIdx") == null) {
+            return ResponseEntity.status(401).body("로그인이 필요합니다.");
+        }
+
         try {
             Object mIdxObj = session.getAttribute("mIdx");
-            if (mIdxObj == null) {
-                return ResponseEntity.badRequest().body("로그인이 필요합니다.");
-            }
-
             int mIdx = Integer.parseInt(mIdxObj.toString());
             Member member = memberService.findByMIdx(mIdx);
             if (member == null) {

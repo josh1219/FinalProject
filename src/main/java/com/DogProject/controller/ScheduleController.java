@@ -11,6 +11,7 @@ import com.DogProject.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,18 +43,30 @@ public class ScheduleController {
     private MemberService memberService;
     
     @GetMapping("")
-    public String schedule() {
+    public String schedule(HttpServletRequest request, Model model) {
+        HttpSession session = request.getSession();
+        Object mIdx = session.getAttribute("mIdx");
+        
+        if (mIdx == null) {
+            return "redirect:/member/login";
+        }
+        
+        model.addAttribute("mIdx", mIdx);
         return "schedule/schedule";
     }
 
     @GetMapping("/events")
     @ResponseBody
     public ResponseEntity<Map<String, List<CalendarEventDTO>>> getEvents(HttpServletRequest request) {
+        HttpSession session = request.getSession();
+        if (session.getAttribute("mIdx") == null) {
+            return ResponseEntity.status(401).body(null);
+        }
+        
         List<CalendarEventDTO> events = new ArrayList<>();
         
         try {
             // 세션에서 사용자 정보 가져오기
-            HttpSession session = request.getSession();
             Object mIdxObj = session.getAttribute("mIdx");
             
             if (mIdxObj == null) {

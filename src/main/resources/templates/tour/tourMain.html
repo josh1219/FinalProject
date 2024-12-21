@@ -163,28 +163,45 @@
             background-color: #f5f5f5;
         }
 
+        .place-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+        }
+        .place-marker {
+            width: 35px;
+            height: 35px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        .place-details {
+            flex-grow: 1;
+            min-width: 0;
+        }
         .place-name {
             font-weight: bold;
-            font-size: 16px;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-
         .place-category {
             color: #666;
-            font-size: 14px;
-            margin-bottom: 5px;
+            font-size: 0.9em;
+            margin-bottom: 2px;
         }
-
         .place-address {
-            color: #333;
-            font-size: 14px;
-            margin-bottom: 5px;
+            color: #888;
+            font-size: 0.85em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-
         .place-distance {
-            color: #2196F3;
-            font-size: 14px;
-            font-weight: bold;
+            color: #007bff;
+            font-size: 0.85em;
+            margin-top: 2px;
         }
 
         .pagination {
@@ -315,7 +332,7 @@
             }
 
             .place-item {
-                padding: 5px;
+                padding: 0px;
                 font-size: 13px;
             }
 
@@ -453,7 +470,7 @@
             }
 
             .place-item {
-                padding: 6px;
+                padding: 0px;
                 font-size: 11px;
             }
 
@@ -490,7 +507,7 @@
             }
 
             .place-item {
-                padding: 12px;
+                padding: 0px;
             }
 
             .category-list {
@@ -539,7 +556,7 @@
             }
 
             .place-item {
-                font-size: 14px;
+                font-size: 0px;
             }
         }
 
@@ -882,7 +899,7 @@
             }
 
             .place-item {
-                padding: 10px;
+                padding: 0px;
                 font-size: 13px;
             }
 
@@ -994,7 +1011,7 @@
             }
 
             .place-item {
-                padding: 6px;
+                padding: 0px;
                 font-size: 11px;
             }
 
@@ -1079,7 +1096,7 @@
         <div class="category-list">
             <button class="category-button" data-category="동물병원" onclick="toggleCategory(this)">
                 <img src="/images/markers/hospital.png" alt="동물병원">
-                동물병원
+                병원
             </button>
             <button class="category-button" data-category="카페" onclick="toggleCategory(this)">
                 <img src="/images/markers/cafe.png" alt="카페">
@@ -1087,7 +1104,7 @@
             </button>
             <button class="category-button" data-category="여행지" onclick="toggleCategory(this)">
                 <img src="/images/markers/travel.png" alt="여행지">
-                여행지
+                여행
             </button>
             <button class="category-button" data-category="미용" onclick="toggleCategory(this)">
                 <img src="/images/markers/beauty.png" alt="미용">
@@ -1095,15 +1112,15 @@
             </button>
             <button class="category-button" data-category="반려동물용품" onclick="toggleCategory(this)">
                 <img src="/images/markers/pet-shop.png" alt="반려동물용품">
-                반려용품
+                용품
             </button>
             <button class="category-button" data-category="문화시설" onclick="toggleCategory(this)">
                 <img src="/images/markers/museum.png" alt="문화시설">
-                문화시설
+                문화
             </button>
             <button class="category-button" data-category="위탁관리" onclick="toggleCategory(this)">
                 <img src="/images/markers/pet-hotel.png" alt="위탁관리">
-                위탁관리
+                위탁
             </button>
             <button class="category-button" data-category="식당" onclick="toggleCategory(this)">
                 <img src="/images/markers/restaurant.png" alt="식당">
@@ -1111,7 +1128,7 @@
             </button>
             <button class="category-button" data-category="숙박시설" onclick="toggleCategory(this)">
                 <img src="/images/markers/pension.png" alt="숙박시설">
-                숙박시설
+                숙박
             </button>
         </div>
         <div id="placeDetailPanel">
@@ -1225,7 +1242,7 @@
                         featureType: "poi",
                         elementType: "labels",
                         stylers: [
-                            { visibility: "off" }
+                            { visibility: "on" }
                         ]
                     }
                 ]
@@ -1600,14 +1617,25 @@
                 placeItem.className = 'place-item';
                 placeItem.innerHTML = `
                     <div class="place-info">
-                        <div class="place-header">
-                            <span class="place-name">${place.name}</span>
-                            ${distanceText ? `<span class="distance">${distanceText}</span>` : ''}
+                        <img src="${markerIcons[place.category]}" alt="${place.category}" class="place-marker">
+                        <div class="place-details">
+                            <div class="place-name">${place.name}</div>
+                            <div class="place-category">${place.category}</div>
+                            <div class="place-address">${place.address}</div>
+                            ${distanceText ? `<div class="place-distance">${distanceText}</div>` : ''}
                         </div>
-                        <div class="place-category">${place.category}</div>
-                        <div class="place-address">${place.address}</div>
                     </div>
                 `;
+
+                // 마커 이미지 동적 효과
+                const markerImg = placeItem.querySelector('.place-marker');
+                markerImg.addEventListener('mouseenter', () => {
+                    markerImg.style.transform = 'scale(1.2)';
+                    markerImg.style.transition = 'transform 0.3s ease';
+                });
+                markerImg.addEventListener('mouseleave', () => {
+                    markerImg.style.transform = 'scale(1)';
+                });
 
                 // 장소 아이템 클릭 이벤트 추가
                 placeItem.addEventListener('click', () => {
@@ -1750,8 +1778,8 @@
             const touch = e.touches[0];
             const currentY = touch.clientY;
             const newHeight = touchStartHeight - (currentY - touchStartY);
-            
-            // 위로 스와이프할 때는 제한
+
+            // deltaY가 150px 이상이면 패널을 닫음
             if (newHeight < 0) {
                 if (container.scrollTop === 0) {
                     e.preventDefault();

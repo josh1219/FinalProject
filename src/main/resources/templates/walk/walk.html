@@ -35,7 +35,7 @@
 
         .container {
             max-width: 430px;
-            margin: 0 auto;
+            margin: 40px auto;
             padding: 20px;
             background: white;
             min-height: calc(100vh - 110px);
@@ -172,7 +172,7 @@
             align-items: center;
             justify-content: center;
             position: fixed;
-            bottom: 100px;
+            bottom: 75px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
@@ -262,15 +262,16 @@
         <!-- /footer -->
 
         <script th:inline="javascript">
-            // 앱 체크 함수
+            // 모바일 기기 체크 함수
             function isMobileDevice() {
-                return window.Android !== undefined; // 안드로이드 앱에서만 true 반환
+                return window.Android !== undefined || 
+                       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             }
 
-            // 페이지 로드 시 앱 체크
+            // 페이지 로드 시 모바일 체크
             window.onload = function() {
                 if (!isMobileDevice()) {
-                    alert('펫토피아 앱에서만 이용 가능한 기능입니다.');
+                    alert('펫토피아 어플에서만 가능한 기능입니다.');
                     window.location.href = '/';
                     return;
                 }

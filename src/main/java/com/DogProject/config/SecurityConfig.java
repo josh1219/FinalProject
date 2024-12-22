@@ -63,7 +63,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
             .csrf()
                 .ignoringAntMatchers("/member/checkEmail", "/api/**", "/dog/insert", "/dog/update/**", 
-                    "/uploads/**", "/schedule/save", "/schedule/update")
+                    "/uploads/**", "/schedule/save", "/schedule/update", "/chat/upload")
                 .and()
             .sessionManagement()
                 .sessionCreationPolicy(org.springframework.security.config.http.SessionCreationPolicy.IF_REQUIRED)

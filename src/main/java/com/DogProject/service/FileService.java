@@ -76,6 +76,25 @@ public class FileService {
     }
 
     @Transactional
+    public File saveFile(MultipartFile multipartFile, int fType, int tIdx) {
+        try {
+            log.info("파일 저장 시작: {}, type: {}, tIdx: {}", multipartFile.getOriginalFilename(), fType, tIdx);
+            
+            // File 엔티티 생성
+            File file = new File();
+            file.setFType(fType);
+            file.setTIdx(tIdx);
+            
+            // 실제 파일 저장
+            return saveFile(file, multipartFile);
+            
+        } catch (Exception e) {
+            log.error("파일 저장 중 오류 발생", e);
+            throw new RuntimeException("파일 저장 중 오류가 발생했습니다: " + e.getMessage(), e);
+        }
+    }
+
+    @Transactional
     public void deleteFile(File file) {
         if (file != null) {
             try {
@@ -107,6 +126,10 @@ public class FileService {
 
         // DB에서 파일 정보 삭제
         fileRepository.delete(file);
+    }
+
+    public String getFilePath(String fileSaveName) {
+        return "/uploads/" + fileSaveName;
     }
 
     @Transactional(readOnly = true)

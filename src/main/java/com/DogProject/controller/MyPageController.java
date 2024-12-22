@@ -8,6 +8,8 @@ import com.DogProject.service.DogService;
 import com.DogProject.service.WalkService;
 import com.DogProject.service.BoardService;
 import com.DogProject.entity.Member;
+import com.DogProject.entity.Board;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import javax.servlet.http.HttpSession;
 
@@ -32,5 +34,26 @@ public class MyPageController {
             model.addAttribute("member", member);
         }
         return "mypage/myPage";
+    }
+
+    // 내가 쓴 게시글 목록
+    @GetMapping("/myBoards")
+    public String myBoards(Model model, HttpSession session) {
+        Object emailObj = session.getAttribute("email");
+        if (emailObj == null) {
+            return "redirect:/login";
+        }
+        
+        String email = (String) emailObj;
+        Member member = memberService.getMemberByEmail(email);
+        if (member == null) {
+            return "redirect:/login";
+        }
+        
+        List<Board> myBoards = boardService.getMyBoards(member);
+        model.addAttribute("member", member);
+        model.addAttribute("myBoards", myBoards);
+        
+        return "mypage/myBoards";
     }
 }

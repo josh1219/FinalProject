@@ -1,6 +1,7 @@
 package com.DogProject.repository;
 
 import com.DogProject.entity.Board;
+import com.DogProject.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -27,4 +28,12 @@ public interface BoardRepository extends JpaRepository<Board, Integer> {
            "ELSE 3 END, " +
            "b.bIdx DESC")
     List<Board> findAllOrderByTypeAndIdDesc(@Param("deleteCheck") String deleteCheck);
+
+    // 사용자가 작성한 게시글 목록 조회
+    @Query("SELECT b FROM Board b WHERE b.member.mEmail = :email AND b.deleteCheck = :deleteCheck ORDER BY b.bIdx DESC")
+    List<Board> findByMemberEmailAndDeleteCheck(@Param("email") String email, @Param("deleteCheck") String deleteCheck);
+
+    // Member 객체로 게시글 목록 조회
+    @Query("SELECT b FROM Board b WHERE b.member = :member AND b.deleteCheck = :deleteCheck ORDER BY b.bIdx DESC")
+    List<Board> findByMemberAndDeleteCheck(@Param("member") Member member, @Param("deleteCheck") String deleteCheck);
 }

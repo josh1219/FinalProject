@@ -152,6 +152,22 @@ public class BoardService {
         return board;
     }
 
+    /**
+     * 사용자가 작성한 게시글 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public List<Board> getMyBoards(String email) {
+        return boardRepository.findByMemberEmailAndDeleteCheck(email, "N");
+    }
+
+    /**
+     * 사용자가 작성한 게시글 목록 조회
+     */
+    @Transactional(readOnly = true)
+    public List<Board> getMyBoards(Member member) {
+        return boardRepository.findByMemberAndDeleteCheck(member, "N");
+    }
+
     // 최신 게시글 5개 조회
     @Transactional(readOnly = true)
     public List<Board> getTop5RecentPosts() {

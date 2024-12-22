@@ -95,20 +95,38 @@
         }
 
         .side-panel-container {
-            position: fixed;
+            position: absolute;
             bottom: 0;
             left: 0;
-            right: 0;
-            background-color: white;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+            width: 100%;
+            background: white;
             z-index: 1000;
-            transition: transform 0.3s ease-in-out;
-            height: 300px;
-            transform: translateY(0);
+            transition: height 0.2s ease;
+            height: 40vh;
+            min-height: 100px;
+            max-height: 90vh;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            resize: vertical;
         }
 
-        .side-panel-container.collapsed {
-            transform: translateY(calc(100% - 52px));
+        .panel-handle {
+            width: 100%;
+            height: 20px;
+            background-color: #f8f9fa;
+            cursor: ns-resize;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+            touch-action: none;
+        }
+
+        .handle-bar {
+            width: 40px;
+            height: 4px;
+            background-color: #ddd;
+            border-radius: 2px;
         }
 
         .places-panel {
@@ -1731,102 +1749,43 @@
         const container = document.querySelector('.side-panel-container');
         let startY;
         let startHeight;
+        let isDragging = false;
 
-        panelHandle.addEventListener('mousedown', initDrag);
-        
         function initDrag(e) {
-            startY = e.clientY;
-            startHeight = parseInt(document.defaultView.getComputedStyle(container).height);
-            document.documentElement.addEventListener('mousemove', doDrag);
-            document.documentElement.addEventListener('mouseup', stopDrag);
+            startY = e.clientY || e.touches[0].clientY;
+            startHeight = parseInt(document.defaultView.getComputedStyle(container).height, 10);
+            isDragging = true;
+            
+            document.addEventListener('mousemove', doDrag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchmove', doDrag);
+            document.addEventListener('touchend', stopDrag);
         }
 
         function doDrag(e) {
-            const newHeight = startHeight - (e.clientY - startY);
-            if (newHeight > 100 && newHeight < window.innerHeight * 0.8) {
-                container.style.height = newHeight + 'px';
-            }
+            if (!isDragging) return;
+            
+            const y = e.clientY || e.touches[0].clientY;
+            const walk = startY - y;
+            let newHeight = startHeight + walk;
+            
+            // 최소, 최대 높이 제한
+            newHeight = Math.max(100, Math.min(window.innerHeight * 0.9, newHeight));
+            container.style.height = `${newHeight}px`;
+            
+            e.preventDefault();
         }
 
         function stopDrag() {
-            document.documentElement.removeEventListener('mousemove', doDrag);
-            document.documentElement.removeEventListener('mouseup', stopDrag);
-        }
-
-        // 터치 이벤트 처리
-        let touchStartY;
-        let touchStartHeight;
-        let initialTouchY;
-        let isDragging = false;
-
-        panelHandle.addEventListener('touchstart', initTouch, { passive: true });
-        
-        function initTouch(e) {
-            isDragging = true;
-            touchStartY = e.touches[0].clientY;
-            initialTouchY = touchStartY;
-            touchStartHeight = parseInt(document.defaultView.getComputedStyle(container).height);
-            
-            document.addEventListener('touchmove', doTouch, { passive: false });
-            document.addEventListener('touchend', stopTouch);
-        }
-
-        function doTouch(e) {
-            if (!isDragging) return;
-            
-            e.preventDefault();
-            const touch = e.touches[0];
-            const currentY = touch.clientY;
-            const newHeight = touchStartHeight - (currentY - touchStartY);
-
-            // deltaY가 150px 이상이면 패널을 닫음
-            if (newHeight < 0) {
-                if (container.scrollTop === 0) {
-                    e.preventDefault();
-                }
-            }
-            
-            // 아래로 스와이프할 때는 닫기 제스처 처리
-            if (Math.abs(currentY - initialTouchY) > 100) {
-                if (currentY - initialTouchY > 0) {
-                    // 아래로 스와이프
-                    container.classList.add('collapsed');
-                } else {
-                    // 위로 스와이프
-                    container.classList.remove('collapsed');
-                }
-                stopTouch();
-            }
-        }
-
-        function stopTouch() {
             isDragging = false;
-            document.removeEventListener('touchmove', doTouch);
-            document.removeEventListener('touchend', stopTouch);
+            document.removeEventListener('mousemove', doDrag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchmove', doDrag);
+            document.removeEventListener('touchend', stopDrag);
         }
 
-        // 더블탭으로 패널 접기/펼치기
-        let lastTap = 0;
-        panelHandle.addEventListener('touchend', function(e) {
-            const currentTime = new Date().getTime();
-            const tapLength = currentTime - lastTap;
-            
-            if (tapLength < 500 && tapLength > 0) {
-                togglePanel();
-                e.preventDefault();
-            }
-            lastTap = currentTime;
-        });
-
-        // 패널 핸들 클릭으로 토글
-        panelHandle.addEventListener('click', function() {
-            const container = document.querySelector('.side-panel-container');
-            if (container.style.transform === 'translateY(calc(100% - 52px))') {
-                container.style.transform = 'translateY(0)';
-            } else {
-                container.style.transform = 'translateY(calc(100% - 52px))';
-            }
-        });
+        panelHandle.addEventListener('mousedown', initDrag);
+        panelHandle.addEventListener('touchstart', initDrag);
 
         // 패널의 드래그 기능과 토글 기능을 구현했습니다. 사용자가 핸들을 드래그하여 패널의 높이를 조절할 수 있고, 클릭하여 패널을 접을 수 있습니다.
         function togglePlaceList() {

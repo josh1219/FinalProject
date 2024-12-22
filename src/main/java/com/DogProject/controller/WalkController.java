@@ -199,7 +199,13 @@ public class WalkController {
             path.setWalkSession(walkSession);
             path.setLatitude(latitude);
             path.setLongitude(longitude);
-            path.setSequence((int)pathRepository.countByWalkSession(walkSession).longValue());
+            
+            // 마지막 시퀀스 값을 가져와서 1을 더함
+            int lastSequence = pathRepository.findTopByWalkSessionOrderBySequenceDesc(walkSession)
+                    .map(Path::getSequence)
+                    .orElse(-1);
+            path.setSequence(lastSequence + 1);
+            
             path.setCreateTime(now);
             path.setUpdateTime(now);
             pathRepository.save(path);

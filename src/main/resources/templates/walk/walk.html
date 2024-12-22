@@ -262,16 +262,15 @@
         <!-- /footer -->
 
         <script th:inline="javascript">
-            // 모바일 기기 체크 함수
+            // 앱 체크 함수
             function isMobileDevice() {
-                return window.Android !== undefined || 
-                       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                return window.Android !== undefined; // 안드로이드 앱에서만 true 반환
             }
 
-            // 페이지 로드 시 모바일 체크
+            // 페이지 로드 시 앱 체크
             window.onload = function() {
                 if (!isMobileDevice()) {
-                    alert('페토피아 어플에서만 가능한 기능입니다.');
+                    alert('펫토피아 앱에서만 이용 가능한 기능입니다.');
                     window.location.href = '/';
                     return;
                 }
@@ -327,19 +326,14 @@
                     return;
                 }
 
-                // 위치 권한 체크
-                if (!checkLocationPermission()) {
-                    return;
+                // 네이티브 위치 권한 확인
+                if (window.Android) {
+                    if (!window.Android.hasLocationPermission()) {
+                        window.Android.requestLocationPermission();
+                        return;
+                    }
                 }
 
-                // 현재 위치가 없으면 시작하지 않음
-                if (!currentPosition) {
-                    showWarningMessage('현재 위치를 가져올 수 없습니다. 잠시 후 다시 시도해주세요.');
-                    return;
-                }
-
-                console.log('Starting walk...'); // 산책 시작 로그
-                
                 // 새로운 산책 시작 시 변수 초기화
                 isTracking = true;
                 totalDistance = 0;
@@ -382,15 +376,18 @@
 
                 // 2초마다 위치 데이터 전송
                 locationInterval = setInterval(() => {
-                    if (currentPosition) {
+                    if (currentLocation) {
                         $.ajax({
                             url: '/walk/record',
                             type: 'POST',
                             data: {
-                                latitude: currentPosition.lat,
-                                longitude: currentPosition.lng,
+                                latitude: currentLocation.lat,
+                                longitude: currentLocation.lng,
                                 distance: totalDistance,
                                 wsIdx: wsIdx
+                            },
+                            headers: {
+                                'X-CSRF-TOKEN': csrfToken
                             },
                             success: function(response) {
                                 if (response.wsIdx && !wsIdx) {
@@ -443,6 +440,9 @@
                     data: {
                         'totalDistance': totalDistance,
                         'wsIdx': wsIdx
+                    },
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
                     },
                     success: function(data) {
                         if (data.success) {
@@ -584,6 +584,9 @@
                             latitude: location.lat,
                             longitude: location.lng,
                             distance: totalDistance
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
                         },
                         success: function(response) {
                             console.log('Location recorded successfully');

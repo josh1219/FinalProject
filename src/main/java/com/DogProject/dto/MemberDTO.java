@@ -64,4 +64,18 @@ public class MemberDTO {
         
         return member;
     }
+
+    public static MemberDTO fromEntity(Member member) {
+        MemberDTO memberDTO = new MemberDTO();
+        memberDTO.setName(member.getName());
+        memberDTO.setMEmail(member.getMEmail());
+        memberDTO.setBirthday(member.getBirthday());
+        memberDTO.setPhone(member.getPhone());
+        memberDTO.setGender(member.getGender());
+        memberDTO.setAddress(member.getAddress());
+        memberDTO.setPicture(member.getPicture());
+        memberDTO.setProvider(member.getProvider());
+        memberDTO.setSocialId(member.getSocialId());
+        return memberDTO;
+    }
 }

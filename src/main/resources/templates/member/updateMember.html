@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PETOPIA - 회원정보 수정</title>
+  <meta name="_csrf" th:content="${_csrf.token}" />
+  <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/join.css">
+  <style>
+    * {
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .input-box {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+    .input-box:focus {
+      border-color: #4CAF50;
+      outline: none;
+    }
+    .error-message {
+      color: #e01013;
+      font-size: 14px;
+      margin-top: 4px;
+      display: none;
+    }
+    .form-title {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #333;
+    }
+    .submit-button {
+      width: 100%;
+      padding: 12px;
+      background-color: #000000;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      margin-top: 0px;
+    }
+    .submit-button:hover {
+      background-color: #45a049;
+    }
+    .profile-image {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin: 20px auto;
+      display: block;
+      border: 2px solid #e0e0e0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .gender-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .gender-button {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      background: white;
+      cursor: pointer;
+    }
+    .gender-button.active {
+      background-color: #4CAF50;
+      color: white;
+      border-color: #4CAF50;
+    }
+
+    .postcode-group {
+      display: flex;
+     gap: 8px;
+     align-items: stretch;
+    }
+
+    .address-search-btn {
+        height: 40px;
+        background-color: #000000;
+    }
+
+
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+    <div class="container">
+      <div class="header-container">
+        <div class="top-header">
+          <div class="logo">PETOPIA</div>
+          <div class="header-buttons">
+            <a href="javascript:history.back()" class="back-button">
+              <span>←</span>
+            </a>
+            <a href="/home">
+              <img src="/images/home0.svg" alt="홈으로" class="home-icon">
+            </a>
+          </div>
+        </div>
+        <h1 class="form-title">회원정보 수정</h1>
+      </div>
+
+      <form th:action="@{/member/update}" method="post" id="updateForm">
+        <!-- 소셜 로그인 정보 표시 -->
+        <div th:if="${memberDTO.provider != 'local'}" class="social-info">
+          <img th:if="${memberDTO.picture}" th:src="${memberDTO.picture}" class="profile-image" alt="프로필 이미지">
+          <p th:if="${memberDTO.provider}" class="provider-info" 
+             th:text="${memberDTO.provider == 'kakao' ? '카카오 계정 프로필' : 
+                      memberDTO.provider == 'naver' ? '네이버 계정 프로필' : '구글 계정 프로필'}">
+          </p>
+        </div>
+
+        <div class="input-container">
+          <label class="input-label">
+            이메일
+          </label>
+          <input type="email" name="mEmail" class="input-box" th:value="${memberDTO.mEmail}" readonly>
+        </div>
+
+        <div class="input-container">
+          <label class="input-label">
+            이름(닉네임)<span class="required">*</span>
+          </label>
+          <input type="text" name="name" th:value="${memberDTO.name}" class="input-box" 
+                 placeholder="예) 홍길동" required>
+          <div class="error-message" id="nameError"></div>
+        </div>
+
+        <div class="input-container">
+          <label class="input-label">
+            생년월일
+          </label>
+          <input type="text" name="birthday" class="input-box" th:value="${memberDTO.birthday} " readonly
+                 placeholder="예) 19990815" pattern="\d{8}" maxlength="8">
+          <div class="error-message" id="birthdayError"></div>
+        </div>
+
+        <div class="input-container">
+          <label class="input-label">
+            휴대폰 번호<span class="required">*</span>
+          </label>
+          <input type="tel" name="phone" class="input-box" th:value="${memberDTO.phone}"
+                 placeholder="예) 01012345678" required pattern="[0-9]{10,11}" maxlength="11">
+          <div class="error-message" id="phoneError"></div>
+        </div>
+
+        <div class="input-container">
+          <label class="input-label">
+            성별
+          </label>
+          <input type="text" name="gender" class="input-box" th:value="${memberDTO.gender}" readonly>
+          <div class="error-message" id="genderError"></div>
+        </div>
+
+        <div class="input-container">
+          <label class="input-label">
+            주소<span class="required">*</span>
+          </label>
+          <div class="address-group">
+            <div class="postcode-group">
+              <input type="text" id="sample6_postcode" placeholder="우편번호" class="input-box postcode" readonly>
+              <button type="button" onclick="sample6_execDaumPostcode()" class="address-search-btn">주소 검색</button>
+            </div>
+            <input type="text" id="sample6_address" placeholder="주소" class="input-box" readonly>
+            <input type="text" id="sample6_detailAddress" placeholder="상세주소" class="input-box">
+            <input type="hidden" name="address" id="fullAddress" th:value="${memberDTO.address}">
+            <div class="error-message" id="addressError"></div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit-button">정보 수정하기</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+  <script>
+    // 주소 검색 API
+    function sample6_execDaumPostcode() {
+      new daum.Postcode({
+        oncomplete: function(data) {
+          document.getElementById('sample6_postcode').value = data.zonecode;
+          document.getElementById('sample6_address').value = data.address;
+          document.getElementById('sample6_detailAddress').focus();
+          updateFullAddress();
+        }
+      }).open();
+    }
+
+    // 전체 주소 업데이트
+    function updateFullAddress() {
+      const postcode = document.getElementById('sample6_postcode').value;
+      const address = document.getElementById('sample6_address').value;
+      const detailAddress = document.getElementById('sample6_detailAddress').value;
+      
+      let fullAddress = '';
+      if (postcode) fullAddress += `[${postcode}] `;
+      if (address) fullAddress += address;
+      if (detailAddress) fullAddress += ` ${detailAddress}`;
+      
+      document.getElementById('fullAddress').value = fullAddress.trim();
+    }
+
+    // 페이지 로드 시 주소 분리
+    document.addEventListener('DOMContentLoaded', function() {
+      const fullAddress = document.getElementById('fullAddress').value;
+      if (fullAddress) {
+        const postcodeMatch = fullAddress.match(/\[(\d{5})\]/);
+        if (postcodeMatch) {
+          document.getElementById('sample6_postcode').value = postcodeMatch[1];
+          const remainingAddress = fullAddress.replace(/\[\d{5}\]\s*/, '').split(' ');
+          const detailAddressStart = remainingAddress.findIndex(part => part.includes('동') || part.includes('호'));
+          
+          if (detailAddressStart !== -1) {
+            document.getElementById('sample6_address').value = remainingAddress.slice(0, detailAddressStart).join(' ');
+            document.getElementById('sample6_detailAddress').value = remainingAddress.slice(detailAddressStart).join(' ');
+          } else {
+            document.getElementById('sample6_address').value = remainingAddress.join(' ');
+          }
+        }
+      }
+    });
+
+    // 상세주소 입력 시 전체 주소 업데이트
+    document.getElementById('sample6_detailAddress').addEventListener('input', updateFullAddress);
+
+    // 폼 제출 전 유효성 검사
+    document.getElementById('updateForm').addEventListener('submit', function(e) {
+      let isValid = true;
+      const name = document.querySelector('input[name="name"]').value;
+      const birthday = document.querySelector('input[name="birthday"]').value;
+      const phone = document.querySelector('input[name="phone"]').value;
+      const gender = document.getElementById('genderInput').value;
+      const address = document.getElementById('fullAddress').value;
+
+      // 이름 검사
+      if (name.trim().length < 2) {
+        document.getElementById('nameError').textContent = '이름은 2자 이상이어야 합니다.';
+        document.getElementById('nameError').style.display = 'block';
+        isValid = false;
+      }
+
+      // 생년월일 검사
+      if (!/^\d{8}$/.test(birthday)) {
+        document.getElementById('birthdayError').textContent = '생년월일은 8자리 숫자여야 합니다.';
+        document.getElementById('birthdayError').style.display = 'block';
+        isValid = false;
+      }
+
+      // 전화번호 검사
+      if (!/^01[0-9]{8,9}$/.test(phone)) {
+        document.getElementById('phoneError').textContent = '올바른 휴대폰 번호를 입력해주세요.';
+        document.getElementById('phoneError').style.display = 'block';
+        isValid = false;
+      }
+
+      // 성별 검사
+      if (!gender) {
+        document.getElementById('genderError').textContent = '성별을 선택해주세요.';
+        document.getElementById('genderError').style.display = 'block';
+        isValid = false;
+      }
+
+      // 주소 검사
+      if (!address) {
+        document.getElementById('addressError').textContent = '주소를 입력해주세요.';
+        document.getElementById('addressError').style.display = 'block';
+        isValid = false;
+      }
+
+      if (!isValid) {
+        e.preventDefault();
+      }
+    });
+  </script>
+</body>
+</html>

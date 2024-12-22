@@ -27,6 +27,7 @@ import java.time.LocalDateTime;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import javax.servlet.http.Cookie;
 
@@ -140,5 +141,52 @@ public class MemberController {
         }
         
         return "redirect:/home";  
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/update")
+    public String updateForm(Model model, HttpSession session) {
+        String userEmail = (String) session.getAttribute("email");
+        if (userEmail != null) {
+            Member member = memberService.findBymEmail(userEmail);
+            if (member != null) {
+                MemberDTO memberDTO = MemberDTO.fromEntity(member);
+                model.addAttribute("memberDTO", memberDTO);
+                return "member/updateMember";
+            }
+        }
+        return "redirect:/member/login";
+    }
+
+    @PostMapping("/update")
+    public String updateProcess(@Valid MemberDTO memberDTO, BindingResult bindingResult, 
+                              Model model, HttpSession session) {
+        if (bindingResult.hasErrors()) {
+            return "member/updateMember";
+        }
+
+        try {
+            String userEmail = (String) session.getAttribute("email");
+            if (userEmail != null) {
+                Member currentMember = memberService.findBymEmail(userEmail);
+                if (currentMember != null) {
+                    // 기존 정보 유지
+                    memberDTO.setMEmail(currentMember.getMEmail());
+                    memberDTO.setProvider(currentMember.getProvider());
+                    memberDTO.setSocialId(currentMember.getSocialId());
+                    memberDTO.setPicture(currentMember.getPicture());
+                    memberDTO.setBirthday(currentMember.getBirthday());
+                    memberDTO.setGender(currentMember.getGender());
+                    
+                    Member updatedMember = memberDTO.toEntity();
+                    memberService.updateMember(updatedMember);
+                    return "redirect:/mypage";
+                }
+            }
+            return "redirect:/member/login";
+        } catch (IllegalStateException e) {
+            model.addAttribute("errorMessage", e.getMessage());
+            return "member/updateMember";
+        }
     }
 }

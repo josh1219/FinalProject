@@ -78,11 +78,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .frameOptions().sameOrigin()
                 .and()
             .authorizeRequests()
-                .antMatchers("/", "/css/**", "/images/**", "/js/**", "/video/**","/member/**", "/error", 
+                .antMatchers("/", "/css/**", "/images/**", "/js/**", "/video/**", "/error", 
                         "/home", "/board", "/board/detail", "/dog/**", "/shop/**", "/shop/detail/**", "/chat/**", "/walk/**", "/api/**",
-                        "/uploads/**", "/schedule/**", "/ws/**", "/ws/chat/**", "/topic/**").permitAll()
+                        "/uploads/**", "/schedule/**", "/ws/**", "/ws/chat/**", "/topic/**", "/member/login", "/member/join", "/member/checkEmail").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/member/checkEmail").permitAll()
+                .antMatchers("/member/**").authenticated()
                 .antMatchers("/board/create").authenticated()
                 .antMatchers("/shop/cart/**", "/shop/orders/**", "/shop/returns/**", "/shop/mypage/**", "/shop/purchase/**").authenticated()
                 .anyRequest().authenticated()

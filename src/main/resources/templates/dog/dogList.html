@@ -138,7 +138,7 @@
 
         .nav-button {
             display: inline-block;
-            padding: 1rem 1rem;
+            padding: 0.5rem 0.4rem;
             background-color: #000;
             color: white;
             text-decoration: none;
@@ -164,7 +164,7 @@
 
         <div class="navigation-buttons">
             <a href="/dog/insert" class="nav-button">새 반려견 등록</a>
-            <a href="/dog/deleted/list" class="nav-button">삭제된 반려견 목록</a>
+            <a href="/dog/deleted/list" class="nav-button">삭제된 반려견</a>
         </div>
 
         <div th:if="${#lists.isEmpty(dogs)}" class="no-dogs">

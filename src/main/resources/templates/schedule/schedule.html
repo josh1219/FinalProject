@@ -548,26 +548,24 @@
         }
 
         .event-item {
-            padding: 10px;
-            border-bottom: 1px solid #eee;
+            padding: 8px;
             cursor: pointer;
+            border-radius: 4px;
+            margin-bottom: 4px;
         }
-
+        
         .event-item:hover {
             background-color: #f5f5f5;
         }
-
+        
         .event-time {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 5px;
-        }
-
-        .event-title {
+            color: #1a73e8;
             font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .event-title {
             color: #333;
-            display: block;
-            margin-top: 5px;
         }
 
         .event-count {
@@ -991,12 +989,11 @@
 
             events.forEach(event => {
                 const li = document.createElement('li');
-                const startTime = new Date(event.start);
-                const endTime = new Date(event.end);
+                const time = new Date(event.start);
                 li.innerHTML = `
                     <div class="event-item">
-                        <div>시작시간 : ${String(startTime.getHours()).padStart(2, '0')}:${String(startTime.getMinutes()).padStart(2, '0')}</div>
-                        <div>종료시간 : ${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}</div>
+                        <span class="event-time">${String(time.getHours()).padStart(2, '0')}:${String(time.getMinutes()).padStart(2, '0')}</span>
+                        <span class="event-title">${event.title}</span>
                     </div>
                 `;
                 // 직접 클릭 이벤트 핸들러를 추가
@@ -1071,13 +1068,7 @@
                 initWalkMap(walkId);
             } else {
                 // 일반 일정 상세 정보 표시
-                const startTime = new Date(event.start);
-                const endTime = new Date(event.end);
-                detailContent.innerHTML = `
-                    <div>시작시간 : ${String(startTime.getHours()).padStart(2, '0')}:${String(startTime.getMinutes()).padStart(2, '0')}</div>
-                    <div>종료시간 : ${String(endTime.getHours()).padStart(2, '0')}:${String(endTime.getMinutes()).padStart(2, '0')}</div>
-                    ${event.body ? `<div>내용: ${event.body}</div>` : ''}
-                `;
+                detailContent.textContent = event.body || '';
                 mapContainer.style.display = 'none';
                 editBtn.style.display = 'block';
                 editBtn.dataset.eventId = event.id;

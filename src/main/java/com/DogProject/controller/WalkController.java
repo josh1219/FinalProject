@@ -76,8 +76,7 @@ public class WalkController {
     @Transactional
     public ResponseEntity<?> saveWalkData(
             @RequestParam("totalDistance") double totalDistance,
-            @RequestParam("latitudes[]") List<Double> latitudes,
-            @RequestParam("longitudes[]") List<Double> longitudes,
+            @RequestParam("wsIdx") int wsIdx,
             HttpSession session) {
         // 로그인 체크
         if (session.getAttribute("mIdx") == null) {
@@ -92,36 +91,15 @@ public class WalkController {
                 return ResponseEntity.badRequest().body("회원 정보를 찾을 수 없습니다.");
             }
 
-            // 유효성 검사
-            if (totalDistance < 0 || latitudes.size() != longitudes.size() || latitudes.isEmpty()) {
-                return ResponseEntity.badRequest().body("잘못된 산책 데이터입니다.");
-            }
+            // 기존 WalkSession 조회
+            WalkSession walkSession = walkSessionRepository.findById(wsIdx)
+                    .orElseThrow(() -> new RuntimeException("산책 세션을 찾을 수 없습니다."));
 
-            // WalkSession 생성 및 저장
-            WalkSession walkSession = new WalkSession();
-            walkSession.setMember(member);
-            walkSession.setTotalDistance(totalDistance);
-            walkSession = walkSessionRepository.save(walkSession);
-
-            // Path 데이터 일괄 저장
-            LocalDateTime now = LocalDateTime.now();
-            for (int i = 0; i < latitudes.size(); i++) {
-                Path path = new Path();
-                path.setMember(member);
-                path.setWalkSession(walkSession);
-                path.setLatitude(latitudes.get(i));
-                path.setLongitude(longitudes.get(i));
-                path.setSequence(i);
-                path.setCreateTime(now);
-                path.setUpdateTime(now);
-                pathRepository.save(path);
-            }
-
-            // 첫 번째 Path의 create_time을 walk_date로, 마지막 Path의 create_time을 walk_end_date로 설정
-            List<Path> paths = pathRepository.findPathsByWalkSessionOrderBySequence(walkSession.getWsIdx());
+            // 마지막 Path의 create_time을 walk_end_date로 설정
+            List<Path> paths = pathRepository.findPathsByWalkSessionOrderBySequence(wsIdx);
             if (!paths.isEmpty()) {
-                walkSession.setWalkDate(paths.get(0).getCreateTime());
                 walkSession.setWalkEndDate(paths.get(paths.size() - 1).getCreateTime());
+                walkSession.setTotalDistance(totalDistance);
                 walkSession = walkSessionRepository.save(walkSession);
             }
 
@@ -135,7 +113,6 @@ public class WalkController {
             response.put("message", "산책 데이터가 저장되었습니다.");
             response.put("earnedPoints", earnedPoints);
             response.put("currentPoint", member.getPoint());
-            response.put("wsIdx", walkSession.getWsIdx());
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

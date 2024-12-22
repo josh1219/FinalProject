@@ -22,8 +22,11 @@
                     <img th:src="@{/images/chatbutton.svg}" alt="채팅">
                 </button>
             </div>
-            <div class="mypage"><!-- 마이페이지 완성 후, 세션값 있으면 mypage로 이동, 세션값 없으면 login로 이동 하게해야함.-->
-                <button onclick="location.href='/member/login'" class="mypage-button">  
+            <div class="mypage">
+                <button th:if="${session.mIdx != null}" onclick="location.href='/mypage'" class="mypage-button">
+                    <img th:src="@{/images/mypage.svg}" alt="마이페이지">
+                </button>
+                <button th:unless="${session.mIdx != null}" onclick="location.href='/member/login'" class="mypage-button">
                     <img th:src="@{/images/mypage.svg}" alt="마이페이지">
                 </button>
             </div>

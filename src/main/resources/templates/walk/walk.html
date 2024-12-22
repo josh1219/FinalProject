@@ -298,27 +298,37 @@
             var wsIdx = null; // 현재 산책 세션의 ID를 저장할 변수
             var locationInterval = null; // 위치 전송 인터벌 ID를 저장할 변수
 
+            // 위치 권한 체크 함수
+            function checkLocationPermission() {
+                if (!window.Android) {
+                    showWarningMessage('안드로이드 앱에서만 사용 가능합니다.');
+                    return false;
+                }
+
+                // 권한이 없으면 요청
+                if (!window.Android.hasLocationPermission()) {
+                    showWarningMessage('위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.');
+                    window.Android.requestLocationPermission();
+                    return false;
+                }
+
+                // GPS 상태 체크
+                if (window.Android.isGPSEnabled && !window.Android.isGPSEnabled()) {
+                    showWarningMessage('GPS를 켜주세요.');
+                    return false;
+                }
+
+                return true;
+            }
+
             function startWalk() {
                 if (isTracking) {
                     stopWalk();
                     return;
                 }
 
-                // 네이티브 위치 권한 확인
-                if (window.Android) {
-                    if (!window.Android.hasLocationPermission()) {
-                        showWarningMessage('위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.');
-                        window.Android.requestLocationPermission();
-                        return;
-                    }
-
-                    // GPS가 켜져있는지 확인 (Android에 해당 메서드가 있다고 가정)
-                    if (window.Android.isGPSEnabled && !window.Android.isGPSEnabled()) {
-                        showWarningMessage('GPS를 켜주세요.');
-                        return;
-                    }
-                } else {
-                    showWarningMessage('위치 권한이 필요합니다.');
+                // 위치 권한 체크
+                if (!checkLocationPermission()) {
                     return;
                 }
 

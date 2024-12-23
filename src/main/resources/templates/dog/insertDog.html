@@ -306,9 +306,9 @@
                             <button type="button" class="img-button" onclick="openCamera()">
                                 <img src="/images/camera-1.svg" alt="카메라">
                             </button>
-                            <label for="file-input" class="img-button">
+                            <button type="button" class="img-button" onclick="openGallery()">
                                 <img src="/images/photo-1.svg" alt="사진">
-                            </label>
+                            </button>
                             <button type="button" class="img-button" onclick="removeImage()">
                                 <img src="/images/trash.svg" alt="제거">
                             </button>
@@ -375,9 +375,23 @@
     <!-- /footer -->
 
     <script>
+        let lastClickedButton = null;
+
         function openCamera() {
+            lastClickedButton = 'camera';
             const input = document.getElementById('file-input');
             input.setAttribute('capture', 'camera');
+            input.removeAttribute('accept');
+            input.setAttribute('accept', 'image/*;capture=camera');
+            input.click();
+        }
+
+        function openGallery() {
+            lastClickedButton = 'gallery';
+            const input = document.getElementById('file-input');
+            input.removeAttribute('capture');
+            input.removeAttribute('accept');
+            input.setAttribute('accept', 'image/*');
             input.click();
         }
 

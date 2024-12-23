@@ -80,6 +80,14 @@ public class CartService {
         }
     }
 
+    // 장바구니 조회 (Member 버전)
+    public List<CartItem> getCartItems(Member member) {
+        if (member == null) {
+            throw new IllegalStateException("회원을 찾을 수 없습니다.");
+        }
+        return cartItemRepository.findByMember(member);
+    }
+
     // 장바구니에 상품 추가
     @Transactional
     public void addToCart(int productId, int quantity, Authentication auth) {
@@ -135,6 +143,15 @@ public class CartService {
     @Transactional
     public void clearCart(Authentication auth) {
         Member member = getMemberFromAuth(auth);
+        cartItemRepository.deleteByMember(member);
+    }
+
+    // 장바구니 비우기 (Member 버전)
+    @Transactional
+    public void clearCart(Member member) {
+        if (member == null) {
+            throw new IllegalStateException("회원을 찾을 수 없습니다.");
+        }
         cartItemRepository.deleteByMember(member);
     }
 

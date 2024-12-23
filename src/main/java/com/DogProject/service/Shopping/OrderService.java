@@ -1,9 +1,9 @@
 package com.DogProject.service.Shopping;
 
 import com.DogProject.entity.Member;
-import com.DogProject.entity.Shopping.CartItem;
 import com.DogProject.entity.Shopping.Order;
 import com.DogProject.entity.Shopping.OrderItem;
+import com.DogProject.entity.Shopping.CartItem;
 import com.DogProject.entity.Shopping.Product;
 import com.DogProject.repository.Shopping.CartItemRepository;
 import com.DogProject.repository.Shopping.OrderRepository;
@@ -13,12 +13,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -60,7 +63,12 @@ public class OrderService {
             @Transactional
     public Order createOrder(Member member, int productId, int quantity,
                            String recipientName, String recipientPhone,
-                           String address, String shippingRequest) {
+                           String address, String shippingRequest, int usedPoint) {
+        // 포인트 사용 가능 여부 확인
+        if (usedPoint > member.getPoint()) {
+            throw new IllegalStateException("사용 가능한 포인트를 초과했습니다.");
+        }
+
         // 상품 조회
         Product product = productService.getProduct(productId);
         if (product == null) {
@@ -72,15 +80,22 @@ public class OrderService {
             throw new IllegalStateException("상품의 재고가 부족합니다.");
         }
 
+        // 포인트 차감
+        if (usedPoint > 0) {
+            member.setPoint(member.getPoint() - usedPoint);
+            memberService.updateMemberPoint(member);
+        }
+
         // 주문 생성
         Order order = Order.builder()
                 .member(member)
                 .orderDate(LocalDateTime.now())
-                .status("ORDERED")
+                .status("배송준비중")
                 .recipientName(recipientName)
                 .recipientPhone(recipientPhone)
                 .recipientAddress(address)
                 .shippingRequest(shippingRequest)
+                .usedPoint(usedPoint)
                 .build();
 
         // 주문 상품 생성
@@ -94,7 +109,7 @@ public class OrderService {
         List<OrderItem> orderItems = new ArrayList<>();
         orderItems.add(orderItem);
         order.setOrderItems(orderItems);
-        order.setTotalAmount(product.getPrice() * quantity);
+        order.setTotalAmount(product.getPrice() * quantity - usedPoint);
 
         // 재고 감소
         product.setStock(product.getStock() - quantity);
@@ -105,22 +120,36 @@ public class OrderService {
     }
 
     @Transactional
-    public Order createOrderFromCart(Member member, String recipientName, String recipientPhone, String recipientAddress, String shippingRequest) {
-        // 1. 장바구니 아이템 조회
-        List<CartItem> cartItems = cartService.getCartItems(SecurityContextHolder.getContext().getAuthentication());
+    public Order createOrderFromCart(Member member, String recipientName,
+                                   String recipientPhone, String address,
+                                   String shippingRequest, int usedPoint) {
+        // 포인트 사용 가능 여부 확인
+        if (usedPoint > member.getPoint()) {
+            throw new IllegalStateException("사용 가능한 포인트를 초과했습니다.");
+        }
+
+        // 장바구니 아이템 조회
+        List<CartItem> cartItems = cartService.getCartItems(member);
         if (cartItems.isEmpty()) {
             throw new IllegalStateException("장바구니가 비어있습니다.");
+        }
+
+        // 포인트 차감
+        if (usedPoint > 0) {
+            member.setPoint(member.getPoint() - usedPoint);
+            memberService.updateMemberPoint(member);
         }
 
         // 2. 주문 생성
         Order order = Order.builder()
                 .member(member)
                 .orderDate(LocalDateTime.now())
-                .status("ORDERED")
+                .status("배송준비중")
                 .recipientName(recipientName)
                 .recipientPhone(recipientPhone)
-                .recipientAddress(recipientAddress)
+                .recipientAddress(address)
                 .shippingRequest(shippingRequest)
+                .usedPoint(usedPoint)
                 .build();
 
         // 3. 주문 아이템 생성 및 연결
@@ -128,27 +157,109 @@ public class OrderService {
         int totalAmount = 0;
 
         for (CartItem cartItem : cartItems) {
+            Product product = cartItem.getProduct();
+            
+            // 재고 확인
+            if (product.getStock() < cartItem.getQuantity()) {
+                throw new IllegalStateException(
+                    String.format("상품 '%s'의 재고가 부족합니다.", product.getName())
+                );
+            }
+
             OrderItem orderItem = OrderItem.builder()
                     .order(order)
-                    .product(cartItem.getProduct())
+                    .product(product)
                     .quantity(cartItem.getQuantity())
-                    .price(cartItem.getProduct().getPrice() * cartItem.getQuantity())
+                    .price(product.getPrice() * cartItem.getQuantity())
                     .build();
+            
             orderItems.add(orderItem);
-            totalAmount += orderItem.getPrice();
+            totalAmount += product.getPrice() * cartItem.getQuantity();
+
+            // 재고 감소
+            product.setStock(product.getStock() - cartItem.getQuantity());
+            productService.saveProduct(product);
         }
 
         order.setOrderItems(orderItems);
-        order.setTotalAmount(totalAmount);
+        order.setTotalAmount(totalAmount - usedPoint);
 
-        // 4. 주문 저장
-        Order savedOrder = orderRepository.save(order);
+        // 장바구니 비우기
+        cartService.clearCart(member);
 
-        // 5. 장바구니 비우기
-        cartService.clearCart(SecurityContextHolder.getContext().getAuthentication());
-
-        return savedOrder;
+        // 주문 저장
+        return orderRepository.save(order);
     }
 
-    
+    // 회원의 총 사용 포인트 조회
+    public int getTotalUsedPoints(int mIdx) {
+        // 회원의 모든 주문을 조회
+        List<Order> orders = orderRepository.findByMember_mIdx(mIdx);
+        System.out.println("주문 개수: " + orders.size()); // 디버깅용 로그
+        
+        int totalPoints = 0;
+        for (Order order : orders) {
+            totalPoints += order.getUsedPoint();
+            System.out.println("주문번호: " + order.getOIdx() + ", 사용포인트: " + order.getUsedPoint()); // 디버깅용 로그
+        }
+        System.out.println("총 사용 포인트: " + totalPoints); // 디버깅용 로그
+        return totalPoints;
+    }
+
+    // 회원의 총 주문 정보를 조회합니다.
+    public Map<String, Object> getTotalOrderInfo(int mIdx) {
+        Map<String, Object> result = new HashMap<>();
+        
+        // 회원의 모든 주문을 조회
+        List<Order> orders = orderRepository.findByMember_mIdx(mIdx);
+        System.out.println("총 주문 개수: " + orders.size()); // 디버깅용 로그
+        
+        int totalAmount = 0;
+        for (Order order : orders) {
+            totalAmount += (order.getTotalAmount() + order.getUsedPoint());
+            System.out.println("주문번호: " + order.getOIdx() + 
+                             ", 결제금액: " + order.getTotalAmount() + 
+                             ", 사용포인트: " + order.getUsedPoint()); // 디버깅용 로그
+        }
+        System.out.println("총 주문금액: " + totalAmount); // 디버깅용 로그
+                
+        result.put("totalAmount", totalAmount);
+        result.put("orderCount", orders.size());
+        
+        return result;
+    }
+
+    // 주문 생성 시 상태를 "배송준비중"으로 설정
+    public Order saveOrder(Order order) {
+        if (order.getOrderDate() == null) {
+            order.setOrderDate(LocalDateTime.now());
+        }
+        if (order.getStatus() == null) {
+            order.setStatus("배송준비중");
+        }
+        return orderRepository.save(order);
+    }
+
+    // 매일 자정에 실행되는 배송 상태 업데이트 스케줄러
+    @Scheduled(cron = "0 0 0 * * *")
+    @Transactional
+    public void updateOrderStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        List<Order> orders = orderRepository.findAll();
+        
+        for (Order order : orders) {
+            LocalDateTime orderDate = order.getOrderDate();
+            
+            // 주문 후 1일 경과: 배송중
+            if (orderDate.plusDays(1).isBefore(now) && "배송준비중".equals(order.getStatus())) {
+                order.setStatus("배송중");
+                orderRepository.save(order);
+            }
+            // 주문 후 3일 경과: 배송완료
+            else if (orderDate.plusDays(3).isBefore(now) && "배송중".equals(order.getStatus())) {
+                order.setStatus("배송완료");
+                orderRepository.save(order);
+            }
+        }
+    }
 }

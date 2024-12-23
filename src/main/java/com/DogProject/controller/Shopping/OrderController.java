@@ -60,10 +60,6 @@ public class OrderController {
             return "redirect:/member/login";
         }
 
-        // 주문 상세 정보 조회 로직 구현 예정
-        // Order order = orderService.getOrderById(orderId);
-        // model.addAttribute("order", order);
-
         return "shop/order-detail"; // 주문 상세 페이지 뷰 (아직 미구현)
     }
 
@@ -107,12 +103,17 @@ public class OrderController {
 
             // 장바구니에서 주문하는 경우
             if (purchaseData.get("fromCart") != null && (boolean) purchaseData.get("fromCart")) {
+                // 포인트 사용 금액 가져오기
+                int usedPoint = purchaseData.get("usedPoint") != null ? 
+                    ((Number) purchaseData.get("usedPoint")).intValue() : 0;
+
                 Order savedOrder = orderService.createOrderFromCart(
                     member,
                     (String) purchaseData.get("recipientName"),
                     (String) purchaseData.get("recipientPhone"),
                     (String) purchaseData.get("recipientAddress"),
-                    (String) purchaseData.get("shippingRequest")
+                    (String) purchaseData.get("shippingRequest"),
+                    usedPoint
                 );
                 
                 return Map.of(
@@ -123,6 +124,10 @@ public class OrderController {
             }
             // 단일 상품 주문하는 경우
             else if (purchaseData.get("productId") != null && purchaseData.get("quantity") != null) {
+                // 포인트 사용 금액 가져오기
+                int usedPoint = purchaseData.get("usedPoint") != null ? 
+                    ((Number) purchaseData.get("usedPoint")).intValue() : 0;
+
                 Order savedOrder = orderService.createOrder(
                     member,
                     ((Number) purchaseData.get("productId")).intValue(),
@@ -130,7 +135,8 @@ public class OrderController {
                     (String) purchaseData.get("recipientName"),
                     (String) purchaseData.get("recipientPhone"),
                     (String) purchaseData.get("recipientAddress"),
-                    (String) purchaseData.get("shippingRequest")
+                    (String) purchaseData.get("shippingRequest"),
+                    usedPoint
                 );
                 
                 return Map.of(

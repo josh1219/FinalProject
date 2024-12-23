@@ -51,12 +51,19 @@
             margin-bottom: 16px;
         }
         .order-status {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 16px;
-            font-size: 14px;
-            font-weight: 500;
-            margin-left: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-text {
+            color: #333;
+            font-weight: bold;
+        }
+        .delivery-status {
+            color: #666;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background-color: #f0f0f0;
         }
         .status-ordered { background: #e3f2fd; color: #1976d2; }
         .status-shipping { background: #e8f5e9; color: #2e7d32; }
@@ -96,32 +103,76 @@
             color: #666;
             margin-top: 4px;
         }
-        .delivery-info {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
+        .point-info {
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #e9ecef;
         }
-        .delivery-info h3 {
-            font-size: 18px;
+        .point-amount {
+            color: #4B50E6;
             font-weight: 500;
-            margin: 0 0 16px 0;
-            color: #333;
         }
-        .delivery-field {
-            margin-bottom: 16px;
-        }
-        .delivery-field label {
-            display: block;
+        .price-info, .shipping-info {
+            margin: 5px 0;
             font-size: 14px;
             color: #666;
-            margin-bottom: 8px;
+        }
+        .shipping-info {
+            color: #888;
+        }
+        .amount {
+            font-weight: 500;
+            color: #333;
+        }
+        .delivery-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #eee;
+        }
+        .delivery-info h3 {
+            margin: 0;
+            padding: 0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 16px;
+            color: #333;
+        }
+        .delivery-info h3:after {
+            content: '▼';
+            font-size: 12px;
+            color: #666;
+            transition: transform 0.3s ease;
+        }
+        .delivery-info.collapsed h3:after {
+            transform: rotate(-90deg);
+        }
+        .delivery-info .delivery-content {
+            margin-top: 15px;
+            display: none;
+        }
+        .delivery-info.collapsed .delivery-content {
+            display: none;
+        }
+        .delivery-field {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: flex-start;
+        }
+        .delivery-field label {
+            min-width: 100px;
+            color: #666;
+            font-size: 14px;
         }
         .delivery-field .value {
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            font-size: 14px;
+            flex: 1;
             color: #333;
+            font-size: 14px;
         }
         .total-price {
             text-align: right;
@@ -173,51 +224,69 @@
             <div class="order-item" th:each="order : ${orders}">
                 <div class="order-date">
                     주문일자: <span th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}"></span>
-                    <span th:class="'order-status ' + 'status-' + ${#strings.toLowerCase(order.status)}"
-                          th:text="${order.status == 'ORDERED' ? '주문완료' : 
-                                   order.status == 'SHIPPING' ? '배송중' :
-                                   order.status == 'COMPLETED' ? '배송완료' :
-                                   order.status == 'RETURNED' ? '반품완료' :
-                                   order.status == 'RETURN_REQUESTED' ? '반품신청' : order.status}">
-                    </span>
+                    <div class="order-status">
+                        <span class="status-text">주문완료</span>
+                        <span class="delivery-status" th:text="${order.status == '배송준비중' ? '배송준비중' : 
+                                       order.status == '배송중' ? '배송중' :
+                                       order.status == '배송완료' ? '배송완료' : order.status}">
+                        </span>
+                    </div>
                 </div>
 
                 <div th:each="item : ${order.orderItems}" class="item-header">
                     <img th:src="${item.product.imageUrl}" class="item-image" alt="상품 이미지">
                     <div class="item-info">
-                        <div class="item-name" th:text="${item.product.name}"></div>
-                        <div class="item-quantity" th:text="'수량: ' + ${item.quantity} + '개'"></div>
-                        <div class="item-price" th:text="${#numbers.formatInteger(item.price, 0, 'COMMA') + '원'}"></div>
+                        <div class="item-name" th:text="${item.product.name}">상품명</div>
+                        <div class="item-price" th:text="${#numbers.formatInteger(item.price, 0, 'COMMA') + '원'}">가격</div>
+                        <div class="item-quantity" th:text="'수량: ' + ${item.quantity} + '개'">수량</div>
                     </div>
+                </div>
+
+                <!-- 상품 금액 정보 -->
+                <div class="price-info">
+                    <span>상품 금액: </span>
+                    <span class="amount" th:text="${#numbers.formatInteger(order.totalAmount + order.usedPoint, 0, 'COMMA')}"></span>원
+                </div>
+
+                <!-- 포인트 사용 정보 -->
+                <div class="point-info" th:if="${order.usedPoint > 0}">
+                    <span> 포인트 사용: </span>
+                    <span class="point-amount" th:text="${'-' + #numbers.formatInteger(order.usedPoint, 0, 'COMMA') + 'P'}"></span>
+                </div>
+
+                <!-- 최종 결제 금액 -->
+                <div class="total-price">
+                    <span>총 결제금액: </span>
+                    <span class="amount" th:text="${#numbers.formatInteger(order.totalAmount, 0, 'COMMA')}"></span>원
                 </div>
 
                 <div class="delivery-info">
-                    <h3>배송 정보</h3>
-                    <div class="delivery-field">
-                        <label>받는 사람</label>
-                        <div class="value" th:text="${order.recipientName}"></div>
-                    </div>
-                    <div class="delivery-field">
-                        <label>연락처</label>
-                        <div class="value" th:text="${order.recipientPhone}"></div>
-                    </div>
-                    <div class="delivery-field">
-                        <label>배송지</label>
-                        <div class="value" th:text="${order.recipientAddress}"></div>
-                    </div>
-                    <div class="delivery-field">
-                        <label>배송 요청사항</label>
-                        <div class="value" th:text="${order.shippingRequest}"></div>
+                    <h3 onclick="toggleDeliveryInfo(this)">배송 정보</h3>
+                    <div class="delivery-content">
+                        <div class="delivery-field">
+                            <label>받는 사람</label>
+                            <div class="value" th:text="${order.recipientName}"></div>
+                        </div>
+                        <div class="delivery-field">
+                            <label>연락처</label>
+                            <div class="value" th:text="${order.recipientPhone}"></div>
+                        </div>
+                        <div class="delivery-field">
+                            <label>배송지</label>
+                            <div class="value" th:text="${order.recipientAddress}"></div>
+                        </div>
+                        <div class="delivery-field">
+                            <label>배송 요청사항</label>
+                            <div class="value" th:text="${order.shippingRequest}"></div>
+                        </div>
                     </div>
                 </div>
-
-                <div class="total-price" th:text="'총 결제금액: ' + ${#numbers.formatInteger(order.totalAmount, 0, 'COMMA') + '원'}"></div>
 
                 <div class="action-buttons" th:if="${order.status != 'RETURNED' and order.status != 'RETURN_REQUESTED'}">
                     <button class="action-btn return-btn" 
                             th:onclick="'requestReturn(' + ${order.oIdx} + ')'"
                             th:if="${order.status == 'COMPLETED'}">반품 신청</button>
-                    <button class="action-btn review-btn">리뷰 작성</button>
+                    <!--<button class="action-btn review-btn">리뷰 작성</button> -->
                 </div>
             </div>
         </div>
@@ -261,6 +330,28 @@
                 });
             }
         }
+    </script>
+    <script>
+        function toggleDeliveryInfo(element) {
+            const deliveryInfo = element.parentElement;
+            deliveryInfo.classList.toggle('collapsed');
+            const content = deliveryInfo.querySelector('.delivery-content');
+            if (deliveryInfo.classList.contains('collapsed')) {
+                content.style.display = 'none';
+            } else {
+                content.style.display = 'block';
+            }
+        }
+
+        // 페이지 로드 시 모든 배송정보를 닫힌 상태로 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            const deliveryInfos = document.querySelectorAll('.delivery-info');
+            deliveryInfos.forEach(info => {
+                info.classList.add('collapsed');
+                const content = info.querySelector('.delivery-content');
+                content.style.display = 'none';
+            });
+        });
     </script>
     <script src="/js/alert.js"></script>
 </body>

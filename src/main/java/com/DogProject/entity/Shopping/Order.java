@@ -34,6 +34,10 @@ public class Order {
     private LocalDateTime orderDate;
 
     @Column(nullable = false)
+    @Comment("사용한 포인트")
+    private int usedPoint;
+
+    @Column(nullable = false)
     @Comment("주문 상태")
     private String status;
 

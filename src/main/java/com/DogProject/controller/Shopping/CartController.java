@@ -52,8 +52,10 @@ public class CartController {
                     .mapToInt(item -> item.getProduct().getPrice() * item.getQuantity())
                     .sum();
                 model.addAttribute("totalPrice", totalPrice);
+                model.addAttribute("totalAmount", totalPrice);
             } else {
                 model.addAttribute("totalPrice", 0);
+                model.addAttribute("totalAmount", 0);
                 model.addAttribute("emptyCart", true);
             }
             
@@ -135,6 +137,12 @@ public class CartController {
                         } else {
                             System.out.println("Phone is null");
                         }
+
+                        // 포인트 정보 추가
+                        int memberPoint = memberWithAddress.getPoint();
+                        model.addAttribute("memberPoint", memberPoint);
+                        System.out.println("Added point to model: " + memberPoint);
+
                     } catch (Exception e) {
                         System.out.println("Error finding member by m_idx: " + e.getMessage());
                         e.printStackTrace();

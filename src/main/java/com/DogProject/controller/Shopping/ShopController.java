@@ -176,6 +176,8 @@ public class ShopController {
                         }
                         
                         model.addAttribute("memberName", memberWithAddress.getName());
+                        // 포인트 정보 추가
+                        model.addAttribute("memberPoint", memberWithAddress.getPoint());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -199,8 +201,22 @@ public class ShopController {
 
         // 현재 로그인한 회원 정보 가져오기
         Member member = getCurrentMember(authentication);
-        if (member == null) {
-            return "redirect:/shop";
+        if (member != null) {
+            if (member.getAddress() != null) {
+                model.addAttribute("memberAddress", member.getAddress());
+            }
+            if (member.getPhone() != null) {
+                String phone = member.getPhone();
+                if (phone.length() == 11 && !phone.contains("-")) {
+                    phone = phone.substring(0, 3) + "-" 
+                         + phone.substring(3, 7) + "-"
+                         + phone.substring(7);
+                }
+                model.addAttribute("memberPhone", phone);
+            }
+            model.addAttribute("memberName", member.getName());
+            // 포인트 정보 추가
+            model.addAttribute("memberPoint", member.getPoint());
         }
 
         // 장바구니 정보 조회
@@ -214,23 +230,6 @@ public class ShopController {
                 .mapToInt(item -> item.getProduct().getPrice() * item.getQuantity())
                 .sum();
 
-        // 회원 정보 추가
-        if (member.getAddress() != null) {
-            model.addAttribute("memberAddress", member.getAddress());
-        }
-        
-        if (member.getPhone() != null) {
-            String phone = member.getPhone();
-            // 전화번호에 하이픈 추가
-            if (phone.length() == 11 && !phone.contains("-")) {
-                phone = phone.substring(0, 3) + "-" 
-                     + phone.substring(3, 7) + "-"
-                     + phone.substring(7);
-            }
-            model.addAttribute("memberPhone", phone);
-        }
-        
-        model.addAttribute("memberName", member.getName());
         model.addAttribute("cartItems", cartItems);
         model.addAttribute("totalAmount", totalAmount);
         model.addAttribute("fromCart", true);

@@ -15,4 +15,5 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findByMember_mIdxAndOrderDateAfterOrderByOrderDateDesc(int mIdx, LocalDateTime startDate);
     List<Order> findByMember_mIdxAndOrderDateAfterAndStatusOrderByOrderDateDesc(int mIdx, LocalDateTime startDate, String status);
     List<Order> findByMember_mIdxAndOrderDateAfterAndStatusInOrderByOrderDateDesc(int mIdx, LocalDateTime startDate, List<String> statuses);
+    List<Order> findByMember_mIdx(int mIdx);
 }

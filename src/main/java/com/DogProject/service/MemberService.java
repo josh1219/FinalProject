@@ -266,4 +266,18 @@ public class MemberService implements UserDetailsService {
         return memberRepository.save(existingMember);
     }
 
+    /**
+     * 포인트 업데이트를 위한 새로운 메서드
+     *
+     * @param member
+     * @return
+     */
+    @Transactional
+    public Member updateMemberPoint(Member member) {
+        Member existingMember = memberRepository.findById(member.getMIdx())
+            .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+        existingMember.setPoint(member.getPoint());
+        return memberRepository.save(existingMember);
+    }
+
 }

@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/css/shop.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <style>
         body {
             margin: 0;
@@ -163,6 +164,144 @@
             font-weight: 700;
             cursor: pointer;
         }
+        .shipping-field {
+            margin-bottom: 16px;
+        }
+        .shipping-field label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        .shipping-field input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        .address-search-btn {
+            display: inline-block;
+            padding: 8px 16px;
+            margin-top: 8px;
+            background: #040516;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .address-search-btn:hover {
+            background: #4B50E6;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            color: #666;
+        }
+        
+        #address-search-container {
+            width: 100%;
+            height: 400px;
+        }
+        .address-wrapper {
+            margin-bottom: 8px;
+        }
+        .detail-address {
+            margin-top: 8px;
+        }
+        .point-field {
+            margin: 20px 0;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        .point-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #333;
+        }
+        .point-input-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .point-input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .use-point-btn {
+            padding: 8px 16px;
+            background: #040516;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .use-point-btn:hover {
+            background: #4B50E6;
+        }
+        .use-max-point {
+            padding: 4px 8px;
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .use-max-point:hover {
+            background: #f1f1f1;
+        }
     </style>
 </head>
 <body>
@@ -189,6 +328,22 @@
             </div>
         </div>
 
+        <div class="point-field">
+            <div class="point-info">
+                <span>사용 가능한 포인트</span>
+                <span th:text="${#numbers.formatInteger(memberPoint, 0, 'COMMA') + 'P'}">0P</span>
+            </div>
+            <div class="point-input-wrapper">
+                <input type="number" id="usePoint" class="point-input" 
+                       placeholder="사용할 포인트를 입력하세요" min="0" 
+                       th:max="${memberPoint}" 
+                       th:data-max-point="${memberPoint}"
+                       th:data-product-price="${product.price * quantity}">
+                <button type="button" class="use-max-point" onclick="useMaxPoint()">전액사용</button>
+                <button type="button" class="use-point-btn" onclick="applyPoint()">포인트 적용</button>
+            </div>
+        </div>
+
         <div class="shipping-info">
             <h3>배송 정보</h3>
             <div class="shipping-field">
@@ -207,11 +362,19 @@
             </div>
             <div class="shipping-field">
                 <label>배송지 (필수)</label>
-                <input type="text" id="recipientAddress" 
-                       th:value="${memberAddress}" 
-                       th:data-address="${memberAddress}"
-                       th:placeholder="${memberAddress != null ? memberAddress : '주소를 입력해주세요'}" 
-                       readonly>
+                <div class="address-wrapper">
+                    <input type="text" id="recipientAddress" 
+                           th:value="${memberAddress}" 
+                           th:data-address="${memberAddress}"
+                           th:placeholder="${memberAddress != null ? memberAddress : '주소를 입력해주세요'}" 
+                           readonly>
+                    <button type="button" class="address-search-btn" onclick="searchAddress()">
+                        <i class="fas fa-search"></i> 주소 검색
+                    </button>
+                </div>
+                <input type="text" id="recipientAddressDetail" 
+                       placeholder="상세주소를 입력해주세요"
+                       class="detail-address">
                 <span th:if="${memberAddress == null}" style="color: #666; font-size: 12px;">* 회원 정보에 저장된 주소가 없습니다.</span>
             </div>
             <div class="shipping-field">
@@ -236,13 +399,14 @@
                 <span>상품금액</span>
                 <span th:text="${#numbers.formatInteger(product.price * quantity, 0, 'COMMA') + '원'}">0원</span>
             </div>
+
             <div class="price-row">
-                <span>배송비</span>
-                <span>3,000원</span>
+                <span>포인트 사용</span>
+                <span id="usedPoint">0원</span>
             </div>
             <div class="total-row">
                 <span>결제금액</span>
-                <span th:text="${#numbers.formatInteger(product.price * quantity + 3000, 0, 'COMMA') + '원'}">0원</span>
+                <span id="totalPrice" th:text="${#numbers.formatInteger(product.price * quantity, 0, 'COMMA') + '원'}">0원</span>
             </div>
             <button type="button" class="purchase-btn" onclick="processPurchase()">
                 결제하기
@@ -250,10 +414,72 @@
         </div>
     </div>
 
+    <!-- 주소 검색 모달 -->
+    <div id="addressModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">주소 검색</h3>
+                <button class="close-button" onclick="closeAddressModal()">&times;</button>
+            </div>
+            <div id="address-search-container"></div>
+        </div>
+    </div>
+
     <script th:inline="javascript">
         // CSRF 토큰 설정
         const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
         const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+        let appliedPoint = 0;
+
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        function useMaxPoint() {
+            const pointInput = document.getElementById('usePoint');
+            const maxPoint = parseInt(pointInput.getAttribute('data-max-point'));
+            const productPrice = parseInt(pointInput.getAttribute('data-product-price'));
+            
+            // 상품 가격을 초과하지 않는 선에서 최대 포인트 사용
+            pointInput.value = Math.min(maxPoint, productPrice);
+            applyPoint(); // 최대 포인트 적용 후 바로 적용
+        }
+
+        function applyPoint() {
+            const pointInput = document.getElementById('usePoint');
+            const maxPoint = parseInt(pointInput.getAttribute('data-max-point'));
+            const productPrice = parseInt(pointInput.getAttribute('data-product-price'));
+            const pointToUse = parseInt(pointInput.value) || 0;
+
+            if (pointToUse < 0) {
+                showAlert('포인트는 0보다 작을 수 없습니다.');
+                pointInput.value = 0;
+                return;
+            }
+
+            if (pointToUse > maxPoint) {
+                showAlert('보유한 포인트를 초과하여 사용할 수 없습니다.');
+                pointInput.value = maxPoint;
+                return;
+            }
+
+            if (pointToUse > productPrice) {
+                showAlert('상품 가격을 초과하여 포인트를 사용할 수 없습니다.');
+                pointInput.value = productPrice;
+                return;
+            }
+
+            appliedPoint = pointToUse;
+            updateTotalPrice();
+        }
+
+        function updateTotalPrice() {
+            const basePrice = /*[[${product.price * quantity}]]*/ 0;
+            const finalPrice = basePrice - appliedPoint;
+            document.getElementById('totalPrice').textContent = formatPrice(finalPrice) + '원';
+            document.getElementById('usedPoint').textContent = formatPrice(appliedPoint) + '원';
+        }
 
         // 배송정보 유효성 검사
         document.getElementById('recipientName').addEventListener('input', function(e) {
@@ -300,27 +526,63 @@
             }
         });
 
+        function searchAddress() {
+            const modal = document.getElementById('addressModal');
+            modal.style.display = 'block';
+            
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    let address = data.address;
+                    let extraAddress = '';
+
+                    if (data.buildingName !== '') {
+                        extraAddress = (data.bname !== '' ? `${data.bname}, ` : '') + 
+                                     (data.buildingName !== '' ? data.buildingName : '');
+                    }
+                    if (extraAddress !== '') {
+                        address += ` (${extraAddress})`;
+                    }
+
+                    document.getElementById('recipientAddress').value = address;
+                    document.getElementById('recipientAddressDetail').focus();
+                    closeAddressModal();
+                },
+                width: '100%',
+                height: '100%'
+            }).embed(document.getElementById('address-search-container'));
+        }
+
+        function closeAddressModal() {
+            const modal = document.getElementById('addressModal');
+            modal.style.display = 'none';
+        }
+
+        // 모달 외부 클릭 시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('addressModal');
+            if (event.target == modal) {
+                closeAddressModal();
+            }
+        }
+
         function processPurchase() {
             const recipientName = document.getElementById('recipientName').value;
             const recipientPhone = document.getElementById('recipientPhone').value;
-            const recipientAddress = document.getElementById('recipientAddress').value;
+            const address = document.getElementById('recipientAddress').value;
+            const addressDetail = document.getElementById('recipientAddressDetail').value;
+            const fullAddress = addressDetail ? `${address} ${addressDetail}` : address;
             const shippingRequestSelect = document.getElementById('shippingRequest');
             const customShippingRequest = document.getElementById('customShippingRequest');
             
-            // 배송 요청사항 처리 수정
-            let shippingRequest;
-            if (shippingRequestSelect.value === "direct") {
+            let shippingRequest = '';
+            if (shippingRequestSelect.value === 'direct') {
                 shippingRequest = customShippingRequest.value;
-                if (!shippingRequest.trim()) {
-                    alert('배송 요청사항을 입력해주세요.');
-                    return;
-                }
             } else {
                 shippingRequest = shippingRequestSelect.value;
             }
 
             // 유효성 검사
-            if (!recipientName || !recipientPhone || !recipientAddress) {
+            if (!recipientName || !recipientPhone || !address) {
                 alert('모든 필수 배송정보를 입력해주세요.');
                 return;
             }
@@ -345,8 +607,9 @@
                 quantity: /*[[${quantity}]]*/ 1,
                 recipientName: recipientName,
                 recipientPhone: recipientPhone,
-                recipientAddress: recipientAddress,  
-                shippingRequest: shippingRequest
+                recipientAddress: fullAddress,  
+                shippingRequest: shippingRequest,
+                usedPoint: appliedPoint
             };
 
             fetch('/shop/order/api/purchase', {

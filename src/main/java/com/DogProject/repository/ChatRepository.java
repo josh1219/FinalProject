@@ -3,6 +3,7 @@ package com.DogProject.repository;
 import com.DogProject.entity.Chat;
 import com.DogProject.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -21,4 +22,8 @@ public interface ChatRepository extends JpaRepository<Chat, Integer> {
             + "AND (t1.sender_midx = :userId OR t1.receiver_midx = :userId) "
             + "ORDER BY t1.send_time DESC", nativeQuery = true)
     List<Chat> findLatestChatsByUserId(@Param("userId") int userId);
+
+    @Modifying
+    @Query("DELETE FROM Chat c WHERE (CONCAT(c.sender.mIdx, '_', c.receiver.mIdx) = :roomId) OR (CONCAT(c.receiver.mIdx, '_', c.sender.mIdx) = :roomId)")
+    void deleteByRoomId(@Param("roomId") String roomId);
 }

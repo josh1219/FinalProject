@@ -201,6 +201,21 @@ public class ChatController {
         }
     }
 
+    @PostMapping("/chat/deleteRooms")
+    @ResponseBody
+    public Map<String, Object> deleteRooms(@RequestBody Map<String, List<String>> request) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            List<String> roomIds = request.get("roomIds");
+            chatService.deleteRooms(roomIds);
+            response.put("success", true);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("error", e.getMessage());
+        }
+        return response;
+    }
+
     private String getFileIcon(String extension) {
         switch (extension) {
             case "pdf":

@@ -7,6 +7,8 @@
     <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1.5.2/dist/sockjs.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
     <style>
         /* Reset and Global Styles */
         * {
@@ -16,60 +18,106 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #f5f5f5;
-            height: 100vh;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
+            background: white;
         }
 
         .chat-container {
-            max-width: 414px;
-            width: 100%;
-            height: 100vh;
-            margin: 0 auto;
-            background: white;
+            flex: 1;
             display: flex;
             flex-direction: column;
+            max-width: 414px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 60px 0 120px 0;  
+            position: relative;
+            background: white;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .chat-header {
-            padding: 15px;
-            background-color: white;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .back-button {
-            cursor: pointer;
-            padding: 5px;
-        }
-
-        .back-button img {
-            width: 24px;
-            height: 24px;
-        }
-
-        .chat-title {
-            font-size: 20px;
-            font-weight: bold;
-            flex-grow: 1;
         }
 
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
-            background-color: #f8f9fa;
+            height: calc(100vh - 240px);
+        }
+
+        .chat-input-wrapper {
+            position: fixed;
+            bottom: 60px;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #eee;
+            z-index: 1000;
+        }
+
+        .file-preview {
+            position: fixed;
+            bottom: 120px;  
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 414px;
+            background: white;
+            padding: 10px;
+            border-top: 1px solid #eee;
+            display: none;  
+            z-index: 999;
+        }
+
+        .preview-container {
+            position: relative;
+            width: 100%;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .preview-container img#image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            margin: 10px auto;
+        }
+
+        .remove-preview {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .remove-preview img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .file-info {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .chat-input-container {
+            max-width: 414px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
         }
 
         .message {
@@ -99,15 +147,6 @@
             opacity: 0.7;
         }
 
-        .chat-input-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;  
-            padding: 10px;
-            background: #fff;
-            border-top: 1px solid #e1e4e8;
-        }
-
         .file-upload-container {
             margin-right: 10px;
         }
@@ -133,7 +172,7 @@
             height: 24px;
         }
 
-        .chat-image {
+        .chat-media {
             max-width: 200px;
             border-radius: 8px;
             margin: 5px 0;
@@ -164,40 +203,6 @@
         .chat-input:focus {
             outline: none;
             border-color: #88B8F6;
-        }
-
-        /* Footer */
-        .footer {
-            position: sticky;
-            bottom: 0;
-            width: 100%;
-            height: 85px;
-            background: white;
-            border-top: 1px solid rgba(0, 0, 0, 0.1);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding: 10px 0;
-        }
-
-        .footer-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            cursor: pointer;
-            text-decoration: none;
-            color: inherit;
-        }
-
-        .footer-item img {
-            width: 30px;
-            height: 30px;
-        }
-
-        .footer-item-text {
-            font-size: 11px;
-            color: #000;
         }
 
         .date-divider {
@@ -299,18 +304,18 @@
             margin-right: 4px;
         }
 
-        .chat-image-container {
+        .chat-media-container {
             margin: 5px 0;
         }
         
-        .chat-image {
+        .chat-media {
             display: block;
             max-width: 200px;
             border-radius: 8px;
             transition: transform 0.2s;
         }
         
-        .chat-image:hover {
+        .chat-media:hover {
             transform: scale(1.02);
         }
         
@@ -365,7 +370,7 @@
             white-space: pre-wrap;
         }
 
-        .chat-image {
+        .chat-media {
             max-width: 200px;
             border-radius: 8px;
             margin-bottom: 4px;
@@ -373,14 +378,10 @@
     </style>
 </head>
 <body>
+    <!-- header -->
+    <div th:replace="~{common/header :: header}"></div>
+    <!-- /header -->
     <div class="chat-container">
-        <div class="chat-header">
-            <div class="back-button" onclick="history.back()">
-                <img src="/images/arrow-left0.svg" alt="뒤로가기">
-            </div>
-            <div class="chat-title">채팅</div>
-        </div>
-
         <div class="chat-messages" id="chat-messages">
             <th:block th:each="chat,status : ${chatHistory}">
                 <!-- 첫 메시지이거나 날짜가 바뀌는 경우 새로운 날짜 표시 -->
@@ -398,41 +399,45 @@
                 
                 <div th:class="${chat.sender.MIdx == currentMember.mIdx ? 'message sent' : 'message received'}">
                     <div th:if="${#strings.startsWith(chat.content, '/uploads/')}">
-                        <!-- 파일이나 이미지인 경우 -->
-                        <th:block th:if="${#strings.contains(chat.content, '|')}">
-                            <!-- 일반 파일 -->
-                            <div class="chat-file-container">
-                                <a th:href="${#strings.substringBefore(chat.content, '|')}" target="_blank" class="chat-file-link">
-                                    <i th:class="${#strings.substringAfterLast(chat.content, '|')}"></i>
-                                    <span th:text="${#strings.substringBetween(chat.content, '|')}"></span>
-                                </a>
-                            </div>
-                        </th:block>
-                        <th:block th:unless="${#strings.contains(chat.content, '|')}">
-                            <!-- 이미지 -->
-                            <div class="chat-image-container">
-                                <img th:src="${chat.content}" alt="Shared image" class="chat-image"
-                                    style="max-width:200px; border-radius:8px; cursor:pointer"
-                                    onclick="window.open(this.src, '_blank')"/>
-                            </div>
-                        </th:block>
+                        <div class="chat-media-container" th:with="mediaPath=${#strings.contains(chat.content, '|TEXT|') ? 
+                                                                             #strings.substringBefore(chat.content, '|TEXT|') : 
+                                                                             chat.content}">
+                            <video th:if="${#strings.contains(mediaPath, '.mp4')}"
+                                  th:src="${#strings.replace(mediaPath, ' ', '%20')}" 
+                                  controls 
+                                  style="max-width:200px; border-radius:8px;">
+                            </video>
+                            <img th:unless="${#strings.contains(mediaPath, '.mp4')}"
+                                 th:src="${mediaPath}" 
+                                 alt="Shared media" 
+                                 class="chat-media"
+                                 style="max-width:200px; border-radius:8px; cursor:pointer"
+                                 onclick="window.open(this.src, '_blank')"/>
+                        </div>
+                        <div th:if="${#strings.contains(chat.content, '|TEXT|')}" 
+                             class="message-content" 
+                             th:text="${#strings.substringAfter(chat.content, '|TEXT|')}">
+                        </div>
                     </div>
-                    <div th:unless="${#strings.startsWith(chat.content, '/uploads/')}" class="message-content" th:text="${chat.content}"></div>
+                    <div th:unless="${#strings.startsWith(chat.content, '/uploads/')}" 
+                         class="message-content" 
+                         th:text="${chat.content}">
+                    </div>
                     <div class="message-time" th:text="${#strings.substring(chat.sendTime, 11, 16)}"></div>
                 </div>
             </th:block>
         </div>
-
-        <div class="file-preview" id="file-preview">
-            <div class="preview-container">
-                <button class="remove-preview" id="remove-preview" onclick="removeFilePreview()">
-                    <img src="/images/deleteIcon.png" alt="삭제">
-                </button>
-                <img id="image-preview" style="display: none;">
-                <div class="file-info" id="file-info" style="display: none;"></div>
-            </div>
+    </div>
+    <div class="file-preview" id="file-preview">
+        <div class="preview-container">
+            <button class="remove-preview" id="remove-preview" onclick="removeFilePreview()">
+                <img src="/images/deleteIcon.png" alt="삭제">
+            </button>
+            <img id="image-preview" style="display: none;">
+            <div class="file-info" id="file-info" style="display: none;"></div>
         </div>
-
+    </div>
+    <div class="chat-input-wrapper">
         <div class="chat-input-container">
             <div class="file-upload-container">
                 <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)">
@@ -445,36 +450,17 @@
                 <img src="/images/send0.svg" alt="전송">
             </button>
         </div>
-
-        <div class="footer">
-            <a href="/calendar" class="footer-item">
-                <img src="/images/calendar0.svg" alt="Calendar">
-                <div class="footer-item-text">캘린더</div>
-            </a>
-            <a href="/walk" class="footer-item">
-                <img src="/images/location0.svg" alt="Walk">
-                <div class="footer-item-text">산책</div>
-            </a>
-            <a href="/home" class="footer-item">
-                <img src="/images/home0.svg" alt="Home">
-                <div class="footer-item-text">홈</div>
-            </a>
-            <a href="/board" class="footer-item">
-                <img src="/images/_3-user0.svg" alt="Community">
-                <div class="footer-item-text">커뮤니티</div>
-            </a>
-            <a href="/menu" class="footer-item">
-                <img src="/images/category0.svg" alt="Menu">
-                <div class="footer-item-text">메뉴</div>
-            </a>
-        </div>
     </div>
+    <!-- footer -->
+    <div th:replace="~{common/footer :: footer}"></div>
+    <!-- /footer -->
 
     <script th:inline="javascript">
         const currentMember = /*[[${currentMember}]]*/ {};
         const roomId = /*[[${roomId}]]*/ '';
         let stompClient = null;
         let selectedFile = null;  // 전역 변수로 선언
+        let lastShownDate = '';  // 마지막으로 표시된 날짜를 저장
 
         document.addEventListener('DOMContentLoaded', function() {
             connect();
@@ -495,69 +481,90 @@
             messageContainer.scrollTop = messageContainer.scrollHeight;
         });
 
+        function getWeekday(dateStr) {
+            const date = new Date(dateStr);
+            const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+            return weekdays[date.getDay()];
+        }
+
         function showDateDivider(dateStr) {
-            const messagesDiv = document.getElementById('chat-messages');
+            // 이미 같은 날짜가 표시되어 있다면 추가하지 않음
+            if (dateStr === lastShownDate) {
+                return;
+            }
+            
+            const messagesDiv = document.querySelector('.chat-messages');
             const dateDivider = document.createElement('div');
             dateDivider.className = 'date-divider';
-            dateDivider.setAttribute('data-date', dateStr);
             
             const dateSpan = document.createElement('span');
-            const weekday = getWeekday(dateStr);
-            const [year, month, day] = dateStr.split('-');
+            
+            // 날짜 포맷팅
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const weekday = getWeekday(now);
+            
             dateSpan.textContent = `${year}년 ${month}월 ${day}일 ${weekday}요일`;
             
             dateDivider.appendChild(dateSpan);
             messagesDiv.appendChild(dateDivider);
+            
+            // 마지막 표시 날짜 업데이트
+            lastShownDate = dateStr;
         }
 
         function appendMessage(message) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${message.senderId == currentMember.mIdx ? 'sent' : 'received'}`;
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const weekday = getWeekday(now);
+            const today = `${year}년 ${month}월 ${day}일 ${weekday}요일`;
             
-            const contentDiv = document.createElement('div');
-            contentDiv.className = 'message-content';
+            const lastDateDivider = document.querySelector('.date-divider:last-child');
             
-            // 메시지 내용 파싱
-            const parts = message.content.split('|TEXT|');
-            const fileContent = parts[0];
-            const textContent = parts[1] || '';
-            
-            // 파일 내용 처리
-            if (fileContent.startsWith('/uploads/')) {
-                if (fileContent.includes('|')) {
-                    // 일반 파일인 경우
-                    const [filePath, fileName, fileIcon] = fileContent.split('|');
-                    contentDiv.innerHTML = `
-                        <div class="file-message">
-                            <a href="${filePath}" target="_blank">
-                                <i class="${fileIcon}"></i>
-                                <span>${fileName}</span>
-                            </a>
-                        </div>
-                    `;
+            if (!lastDateDivider || lastDateDivider.textContent.trim() !== today) {
+                showDateDivider(today);
+            }
+
+            let messageHTML = '';
+            if (message.content.startsWith('/uploads/')) {
+                const hasText = message.content.includes('|TEXT|');
+                const mediaPath = hasText ? message.content.split('|TEXT|')[0] : message.content;
+                const messageText = hasText ? message.content.split('|TEXT|')[1] : '';
+                
+                let mediaElement;
+                if (mediaPath.includes('.mp4')) {
+                    const encodedPath = encodeVideoUrl(mediaPath);
+                    mediaElement = `<video src="${encodedPath}" controls style="max-width:200px; border-radius:8px;"></video>`;
                 } else {
-                    // 이미지인 경우
-                    contentDiv.innerHTML = `<img src="${fileContent}" class="chat-image" alt="Uploaded Image">`;
+                    mediaElement = `<img src="${mediaPath}" alt="Shared media" class="chat-media" 
+                                       style="max-width:200px; border-radius:8px; cursor:pointer" 
+                                       onclick="window.open(this.src, '_blank')">`;
                 }
                 
-                // 텍스트가 있는 경우 추가
-                if (textContent) {
-                    contentDiv.innerHTML += `<div class="text-message">${textContent}</div>`;
-                }
+                messageHTML = `
+                    <div class="message ${message.senderId == currentMember.mIdx ? 'sent' : 'received'}">
+                        <div>
+                            <div class="chat-media-container">
+                                ${mediaElement}
+                            </div>
+                            ${hasText ? `<div class="message-content">${messageText}</div>` : ''}
+                        </div>
+                        <div class="message-time">${message.sendTime ? message.sendTime.substring(11, 16) : new Date().toTimeString().substring(0, 5)}</div>
+                    </div>`;
             } else {
-                // 일반 텍스트 메시지
-                contentDiv.textContent = message.content;
+                messageHTML = `
+                    <div class="message ${message.senderId == currentMember.mIdx ? 'sent' : 'received'}">
+                        <div class="message-content">${message.content}</div>
+                        <div class="message-time">${message.sendTime ? message.sendTime.substring(11, 16) : new Date().toTimeString().substring(0, 5)}</div>
+                    </div>`;
             }
             
-            messageDiv.appendChild(contentDiv);
-            
-            const timeDiv = document.createElement('div');
-            timeDiv.className = 'message-time';
-            timeDiv.textContent = message.time;
-            messageDiv.appendChild(timeDiv);
-            
             const chatMessages = document.querySelector('.chat-messages');
-            chatMessages.appendChild(messageDiv);
+            chatMessages.insertAdjacentHTML('beforeend', messageHTML);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
@@ -677,25 +684,46 @@
             document.getElementById('file-input').value = '';
         }
 
+        function encodeVideoUrl(url) {
+            if (!url) return url;
+            try {
+                // 전체 URL을 디코딩 후 다시 강력하게 인코딩
+                const decodedUrl = decodeURIComponent(url);
+                return encodeURIComponent(decodedUrl)
+                    .replace(/%2F/g, '/') // 슬래시는 다시 원래대로
+                    .replace(/%3A/g, ':') // 콜론도 다시 원래대로
+                    .replace(/[']/g, '%27')
+                    .replace(/["]/g, '%22')
+                    .replace(/\(/g, '%28')
+                    .replace(/\)/g, '%29')
+                    .replace(/\\/g, '%5C')
+                    .replace(/%20/g, '%20'); // 공백 처리 확실히
+            } catch (e) {
+                console.error('URL 인코딩 중 오류:', e);
+                return url;
+            }
+        }
+
         function connect() {
             console.log("연결 시도");
             const socket = new SockJS('/ws');
             stompClient = Stomp.over(socket);
             stompClient.connect({}, function(frame) {
                 console.log('Connected: ' + frame);
-                stompClient.subscribe('/topic/messages/' + roomId, function(message) {
-                    appendMessage(JSON.parse(message.body));
+                
+                // 채팅방 입장 시 마지막 날짜 초기화
+                const dateDividers = document.querySelectorAll('.date-divider');
+                if (dateDividers.length > 0) {
+                    lastShownDate = dateDividers[dateDividers.length - 1].querySelector('span').textContent.trim();
+                }
+
+                stompClient.subscribe('/topic/messages/' + roomId, function(messageOutput) {
+                    appendMessage(JSON.parse(messageOutput.body));
                 });
             }, function(error) {
                 console.error('연결 실패:', error);
                 setTimeout(connect, 5000); // 5초 후 재연결 시도
             });
-        }
-        
-        function getWeekday(dateStr) {
-            const date = new Date(dateStr);
-            const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-            return weekdays[date.getDay()];
         }
     </script>
 </body>

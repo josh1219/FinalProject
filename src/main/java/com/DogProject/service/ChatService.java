@@ -5,7 +5,10 @@ import com.DogProject.entity.Member;
 import com.DogProject.repository.ChatRepository;
 import com.DogProject.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,6 +19,7 @@ import java.util.List;
 public class ChatService {
     private final ChatRepository chatRepository;
     private final MemberRepository memberRepository;
+    private static final Logger log = LoggerFactory.getLogger(ChatService.class);
 
     // 채팅 메시지 저장
     public Chat saveChat(String content, int senderId, int receiverId) {
@@ -56,5 +60,21 @@ public class ChatService {
         }
         
         return chatRooms;
+    }
+
+    @Transactional
+    public void deleteRooms(List<String> roomIds) {
+        if (roomIds != null && !roomIds.isEmpty()) {
+            for (String roomId : roomIds) {
+                try {
+                    String[] userIds = roomId.split("_");
+                    if (userIds.length == 2) {
+                        chatRepository.deleteByRoomId(roomId);
+                    }
+                } catch (Exception e) {
+                    log.error("Error deleting chat room {}: {}", roomId, e.getMessage());
+                }
+            }
+        }
     }
 }

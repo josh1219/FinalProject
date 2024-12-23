@@ -226,7 +226,7 @@
                     </th:block>
                 </div>
             </div>
-            <input type="hidden" id="sessionMemberMIdx" th:value="${sessionMember.MIdx}">
+            <input type="hidden" id="sessionMemberMIdx" th:value="${session.sessionMember != null ? session.sessionMember.MIdx : ''}">
             <input type="hidden" id="boardMemberMIdx" th:value="${board.member.MIdx}">
             <button class="chat-button01" onclick="startChat()">💌 1:1 채팅하기</button>
         </div>

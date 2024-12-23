@@ -519,41 +519,37 @@
 
                 let startY = 0;
                 let pullDistance = 0;
-                const THRESHOLD = 80;
+                let isRefreshing = false;
+                const THRESHOLD = 60;
+                const MAX_PULL = 80;
+
                 const chatList = document.querySelector('.chat-list');
                 const refreshIndicator = document.querySelector('.refresh-indicator');
                 const refreshSpinner = document.querySelector('.refresh-spinner');
                 const refreshText = document.querySelector('.refresh-text');
-                let isRefreshing = false;
 
                 chatList.addEventListener('touchstart', (e) => {
-                    if (chatList.scrollTop === 0 && !isRefreshing) {
-                        startY = e.touches[0].clientY;
-                        refreshIndicator.style.display = 'block';
-                        refreshIndicator.style.opacity = '0';
-                    }
+                    if (isRefreshing || chatList.scrollTop > 0) return;
+                    
+                    startY = e.touches[0].clientY;
+                    refreshIndicator.style.display = 'block';
+                    chatList.style.transition = '';
                 });
 
                 chatList.addEventListener('touchmove', (e) => {
-                    if (startY === 0 || isRefreshing) return;
-                    
+                    if (!startY || isRefreshing || chatList.scrollTop > 0) return;
+
                     const currentY = e.touches[0].clientY;
                     pullDistance = currentY - startY;
 
-                    if (chatList.scrollTop === 0 && pullDistance > 0) {
+                    if (pullDistance > 0) {
                         e.preventDefault();
-                        const translateY = Math.min(pullDistance/2, THRESHOLD);
-                        chatList.style.transform = `translateY(${translateY}px)`;
-                        
-                        // 인디케이터 표시
-                        refreshIndicator.style.opacity = (translateY / THRESHOLD).toString();
-                        
-                        // 스피너 회전 각도 계산
-                        const rotation = (translateY / THRESHOLD) * 360;
-                        refreshSpinner.style.transform = `rotate(${rotation}deg)`;
-                        
+                        chatList.style.transform = `translateY(${Math.min(pullDistance * 0.3, MAX_PULL)}px)`;
+                        refreshSpinner.style.transform = `rotate(${pullDistance * 2}deg)`;
+                        refreshIndicator.style.opacity = Math.min(pullDistance / THRESHOLD, 1);
+
                         // 텍스트 업데이트
-                        if (translateY >= THRESHOLD) {
+                        if (pullDistance >= THRESHOLD) {
                             refreshText.textContent = '놓아서 새로고침';
                         } else {
                             refreshText.textContent = '당겨서 새로고침';
@@ -580,7 +576,6 @@
                         chatList.style.transform = 'translateY(40px)';
 
                         setTimeout(() => {
-                            // 현재 페이지 URL 사용
                             fetch(window.location.href, {
                                 method: 'GET',
                                 headers: {
@@ -598,7 +593,7 @@
                                 console.error('새로고침 중 오류 발생:', error);
                             })
                             .finally(() => {
-                                window.location.reload(); // 오류가 발생하더라도 페이지 새로고침
+                                window.location.reload();
                             });
                         }, 500);
                     } else {

@@ -22,7 +22,6 @@ import java.util.List;
 public class Product {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Comment("상품 고유 ID(PK)")
     @Column(name = "pidx")
     private Long pidx;          

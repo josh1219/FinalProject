@@ -11,6 +11,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/join.css">
+  <link rel="stylesheet" href="/css/header.css">
+  <link rel="stylesheet" href="/css/footer.css">
   <style>
     * {
       font-family: 'Noto Sans KR', sans-serif;
@@ -94,25 +96,20 @@
         height: 40px;
         background-color: #000000;
     }
+    .header-container {
+        margin-bottom: 30px;
+        margin-top: 55px;
+    }
+
 
 
   </style>
 </head>
 <body>
+  <div th:replace="~{common/header :: header}"></div>
   <div class="page-wrapper">
     <div class="container">
       <div class="header-container">
-        <div class="top-header">
-          <div class="logo">PETOPIA</div>
-          <div class="header-buttons">
-            <a href="javascript:history.back()" class="back-button">
-              <span>←</span>
-            </a>
-            <a href="/home">
-              <img src="/images/home0.svg" alt="홈으로" class="home-icon">
-            </a>
-          </div>
-        </div>
         <h1 class="form-title">회원정보 수정</h1>
       </div>
 
@@ -183,11 +180,11 @@
             <div class="error-message" id="addressError"></div>
           </div>
         </div>
-
         <button type="submit" class="submit-button">정보 수정하기</button>
       </form>
     </div>
   </div>
+  <div th:replace="~{common/footer :: footer}"></div>
 
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script>

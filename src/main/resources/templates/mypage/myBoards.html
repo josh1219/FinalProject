@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PETOPIA - 내가 쓴 게시글</title>
+    <link rel="stylesheet" href="/css/join.css">
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -14,8 +15,11 @@
         <button id="top-btn" onclick="scrollToTop()">↑</button>
         
         <!-- 페이지 헤더 -->
+        <div th:replace="~{common/header :: header}"></div>
+        <!-- /헤더 -->
+    <div class="container">
         <div class="page-header">
-            <h2>내가 쓴 게시글</h2>
+            <h2>내 게시물</h2>
             <div class="header-actions">
                 <a href="/board" class="write-btn">
                     <i class="fas fa-pen"></i>
@@ -23,6 +27,7 @@
                 </a>
             </div>
         </div>
+    
 
         <!-- 게시글 목록 -->
         <div class="posts-container">
@@ -52,7 +57,7 @@
                     </div>
                 </div>
             </div>
-
+        </div>
             <!-- 빈 상태 -->
             <div th:if="${#lists.isEmpty(myBoards)}" class="empty-state">
                 <img src="/images/empty-posts.png" alt="빈 게시판">
@@ -72,11 +77,20 @@
     <style>
         /* 메인 컨텐츠 스타일 */
         .main-content {
-            padding: 20px;
+            padding: 0px;
             max-width: 1200px;
             margin: 0 auto;
             position: relative;
             min-height: calc(100vh - 160px); /* header와 footer 높이를 고려한 최소 높이 */
+        }
+
+        /* 커뮤니티 버튼 링크 스타일 */
+        .header-actions a {
+            text-decoration: none;
+        }
+
+        .fa-pen:before {
+            content: "✏️";
         }
 
         /* 페이지 헤더 스타일 */
@@ -84,7 +98,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-top: 15px;
+            margin-bottom: 15px;
             padding: 0 20px;
         }
 
@@ -205,7 +220,7 @@
             align-items: center;
             gap: 8px;
             padding: 8px 16px;
-            background-color: #000000;
+            background-color: #FF9EBB;
             color: #fff;
             border-radius: 8px;
             font-size: 14px;
@@ -248,13 +263,13 @@
         /* 반응형 스타일 */
         @media (max-width: 768px) {
             .page-header {
-                flex-direction: column;
+                flex-direction: row;
                 align-items: flex-start;
                 gap: 12px;
             }
 
             .post-content {
-                padding: 16px;
+                padding: 15px;
             }
 
             .post-title h3 {
@@ -269,6 +284,10 @@
             #top-btn {
                 bottom: 20px;
                 right: 20px;
+            }
+            .container {
+                padding: 13px 20px;
+                margin-top: 55px;
             }
         }
     </style>

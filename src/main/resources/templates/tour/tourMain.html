@@ -1565,6 +1565,17 @@
                         category: category,
                         position: { lat: latitude, lng: longitude },
                         phone: place.전화번호,
+                        time : place.운영시간,
+                        homepage : place.홈페이지,
+                        parking : place.주차가능여부,
+                        pay : place.입장이용료가격정보,
+                        dogcan : place.반려동물동반가능정보,
+                        dogonly : place.반려동물전용정보,
+                        dogsize : place.입장가능동물크기,
+                        dogstop : place.반려동물제한사항,
+                        dogin : place.장소실내여부,
+                        dogout : place.장소실외여부,
+                        dogpay : place.애견동반추가요금,
                         distance: distance,
                         matchesSearch: 
                             place.시설명.toLowerCase().includes(keyword) ||
@@ -1806,13 +1817,18 @@
             // 기본 정보 섹션 업데이트
             detailPanel.querySelector('.detail-address').textContent = "주소 : " + place.address || '주소 정보 없음';
             detailPanel.querySelector('.detail-time').textContent = "운영시간 : " + place.time || '운영시간 정보 없음';
-            detailPanel.querySelector('.detail-phone').textContent = "전화번호 : " + place.phone || '전화번호 정보 없음';
-            
-            const homepageElement = detailPanel.querySelector('.detail-homepage');
-            if (place.homepage) {
-                homepageElement.innerHTML = `<a href="${place.homepage}" target="_blank" class="homepage-link">홈페이지</a>`;
+            const phoneElement = detailPanel.querySelector('.detail-phone');
+            if (place.phone !== '') {
+                phoneElement.innerHTML = `<a href="tel:${place.phone}" class="phone-link">${place.phone}</a>`;
             } else {
-                homepageElement.textContent = '홈페이지 정보 없음';
+                phoneElement.textContent = '전화번호 정보 없음';
+            }
+
+            const homepageElement = detailPanel.querySelector('.detail-homepage');
+            if (place.homepage!== '정보없음') {
+                homepageElement.innerHTML = `<a href="${place.homepage}" target="_blank" class="homepage-link">홈페이지</a>`;
+            } else if (place.homepage === '정보없음') {
+                homepageElement.textContent = '정보 없음';
             }
             
             detailPanel.querySelector('.detail-parking').textContent = 

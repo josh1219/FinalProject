@@ -11,7 +11,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -26,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Slf4j
@@ -53,7 +53,7 @@ public class ProductService {
         }
     }
 
-    private String generateFileName(String originalUrl, Long productId) {
+    private String generateFileName(String originalUrl, int productId) {
         try {
             // URL의 마지막 부분에서 파일명 추출
             String originalFileName = originalUrl.substring(originalUrl.lastIndexOf('/') + 1);
@@ -69,7 +69,7 @@ public class ProductService {
         }
     }
 
-    private String downloadAndSaveImage(String imageUrl, Long productId) {
+    private String downloadAndSaveImage(String imageUrl, int productId) {
         try {
             log.info("Downloading image from URL: {}", imageUrl);
             
@@ -103,7 +103,7 @@ public class ProductService {
         }
     }
 
-    private String downloadAndSaveDetailImage(String imageUrl, Long productId, int index) {
+    private String downloadAndSaveDetailImage(String imageUrl, int productId, int index) {
         try {
             String actualImageUrl = extractImageUrl(imageUrl);
             log.info("Downloading detail image from URL: {}", actualImageUrl);
@@ -136,7 +136,7 @@ public class ProductService {
         }
     }
 
-    private String generateDetailFileName(String originalUrl, Long productId, int index) {
+    private String generateDetailFileName(String originalUrl, int productId, int index) {
         try {
             String extension = originalUrl.substring(originalUrl.lastIndexOf("."));
             if (!extension.matches("\\.(jpg|jpeg|png|gif)")) {
@@ -164,14 +164,13 @@ public class ProductService {
 
                 for (Map<String, Object> productData : productsData) {
                     String originalImageUrl = (String) productData.get("image_url");
-                    Long productId = Long.valueOf(productData.get("P_IDX").toString());
+                    int productId = Integer.parseInt(productData.get("P_IDX").toString());
                     log.info("Processing product with image URL: {}", originalImageUrl);
                     String savedImageUrl = downloadAndSaveImage(originalImageUrl, productId);
                     log.info("Image saved with path: {}", savedImageUrl);
 
                     // 상품 기본 정보 저장
                     Product product = Product.builder()
-                        .pidx(productId)
                         .name((String) productData.get("p_name"))
                         .price(Integer.parseInt(productData.get("p_price").toString()))
                         .stock(Integer.parseInt(productData.get("p_stock").toString()))
@@ -238,8 +237,19 @@ public class ProductService {
         }
     }
 
-    public Product getProductById(Long productId) {
-        return productRepository.findById(productId).orElse(null);
+    @Transactional(readOnly = true)
+    public Product getProduct(int productId) {
+        return productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+    }
+
+    @Transactional
+    public Product saveProduct(Product product) {
+        return productRepository.save(product);
+    }
+
+    public Optional<Product> getProductById(int productId) {
+        return productRepository.findById(productId);
     }
 
     @Transactional
@@ -267,7 +277,7 @@ public class ProductService {
                     Files.deleteIfExists(secondLastFilePath);
                     
                     log.info("Deleted detail images for product {}: {} and {}", 
-                            product.getPidx(), lastFileName, secondLastFileName);
+                            product.getPIdx(), lastFileName, secondLastFileName);
                     
                     // DB에서도 마지막 2개 이미지 URL 제거
                     detailImageUrls.remove(detailImageUrls.size() - 1);
@@ -276,7 +286,7 @@ public class ProductService {
                     productRepository.save(product);
                 } catch (IOException e) {
                     log.error("Error deleting detail images for product {}: {}", 
-                            product.getPidx(), e.getMessage());
+                            product.getPIdx(), e.getMessage());
                 }
             }
         }

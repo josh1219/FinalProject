@@ -4,7 +4,6 @@ import lombok.*;
 import org.hibernate.annotations.Comment;
 
 import javax.persistence.*;
-
 @Entity
 @Table(name = "order_items")
 @Getter
@@ -15,15 +14,16 @@ public class OrderItem {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "oi_idx")
     @Comment("주문 상품 고유 ID")
-    private Long id;
+    private Long oiIdx;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "o_idx")
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
+    @JoinColumn(name = "p_idx")
     private Product product;
 
     @Column(nullable = false)

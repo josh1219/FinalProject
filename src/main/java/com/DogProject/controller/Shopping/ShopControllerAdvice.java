@@ -6,11 +6,9 @@ import com.DogProject.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import java.security.Principal;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.ui.Model;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
 @ControllerAdvice(basePackages = "com.DogProject.controller.Shopping")
@@ -68,8 +66,15 @@ public class ShopControllerAdvice {
     }
 
     @ModelAttribute("cartCount")
-    public int getCartCount(Principal principal) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return cartService.getCartItems(authentication).size();
+    public int getCartCount() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !auth.getPrincipal().equals("anonymousUser")) {
+            try {
+                return cartService.getCartItems(auth).size();
+            } catch (Exception e) {
+                return 0;
+            }
+        }
+        return 0;
     }
 }

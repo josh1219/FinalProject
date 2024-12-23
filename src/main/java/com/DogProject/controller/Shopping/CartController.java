@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
@@ -16,7 +15,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.security.Principal;
 import java.util.List;
 import java.util.Map;
 import java.util.Collections;
@@ -35,18 +33,18 @@ public class CartController {
     }
 
     @GetMapping("")
-    public String cartPage(Model model, Principal principal, HttpSession session) {
+    public String cartPage(Model model, Authentication auth, HttpSession session) {
         // 로그인 체크
-        if (principal == null) {
+        if (auth == null) {
             return "redirect:/member/login";
         }
         
         try {
             System.out.println("=== Session Debug Info ===");
             System.out.println("Session ID: " + session.getId());
-            System.out.println("Principal: " + (principal != null ? principal.getName() : "null"));
+            System.out.println("Authentication: " + (auth != null ? auth.getName() : "null"));
             
-            List<CartItem> cartItems = cartService.getCartItems(principal);
+            List<CartItem> cartItems = cartService.getCartItems(auth);
             model.addAttribute("cartItems", cartItems);
             
             if (cartItems != null && !cartItems.isEmpty()) {
@@ -60,20 +58,19 @@ public class CartController {
             }
             
             // 회원 주소 정보 가져오기
-            if (principal != null) {
+            if (auth != null) {
                 System.out.println("=== Member Debug Info ===");
                 // OAuth2 인증 정보에서 이메일 가져오기
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
                 String userEmail = null;
                 Member member = null;
                 
-                if (authentication != null && authentication.getPrincipal() instanceof OAuth2User) {
-                    OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+                if (auth.getPrincipal() instanceof OAuth2User) {
+                    OAuth2User oauth2User = (OAuth2User) auth.getPrincipal();
                     
                     // OAuth2 제공자 확인
                     String provider = "";
-                    if (authentication instanceof OAuth2AuthenticationToken) {
-                        provider = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
+                    if (auth instanceof OAuth2AuthenticationToken) {
+                        provider = ((OAuth2AuthenticationToken) auth).getAuthorizedClientRegistrationId();
                     }
                     
                     System.out.println("OAuth2 Provider: " + provider);
@@ -100,7 +97,7 @@ public class CartController {
                     }
                     System.out.println("OAuth2 email: " + userEmail);
                 } else {
-                    userEmail = principal.getName();
+                    userEmail = auth.getName();
                     System.out.println("Regular email: " + userEmail);
                 }
                 
@@ -146,7 +143,7 @@ public class CartController {
                     System.out.println("Member not found for email: " + userEmail);
                 }
             } else {
-                System.out.println("Principal is null - user not logged in");
+                System.out.println("Authentication is null - user not logged in");
             }
             
             return "shop/cart";
@@ -159,9 +156,9 @@ public class CartController {
 
     @PostMapping("/add")
     @ResponseBody
-    public ResponseEntity<String> addToCart(@RequestParam Long productId, @RequestParam int quantity, Principal principal) {
+    public ResponseEntity<String> addToCart(@RequestParam int productId, @RequestParam int quantity, Authentication auth) {
         try {
-            cartService.addToCart(productId, quantity, principal);
+            cartService.addToCart(productId, quantity, auth);
             return ResponseEntity.ok("success");
         } catch (Exception e) {
             e.printStackTrace();
@@ -171,9 +168,9 @@ public class CartController {
 
     @DeleteMapping("/remove")
     @ResponseBody
-    public ResponseEntity<String> removeFromCart(@RequestParam Long productId, Principal principal) {
+    public ResponseEntity<String> removeFromCart(@RequestParam int productId, Authentication auth) {
         try {
-            cartService.removeFromCartByProductId(productId, principal);
+            cartService.removeFromCart(productId, auth);
             return ResponseEntity.ok("success");
         } catch (Exception e) {
             e.printStackTrace();
@@ -183,9 +180,9 @@ public class CartController {
 
     @PostMapping("/update")
     @ResponseBody
-    public ResponseEntity<String> updateQuantity(@RequestParam Long productId, @RequestParam int change, Principal principal) {
+    public ResponseEntity<String> updateQuantity(@RequestParam int productId, @RequestParam int change, Authentication auth) {
         try {
-            cartService.updateCartItemQuantity(productId, change, principal);
+            cartService.updateCartItemQuantity(productId, change, auth);
             return ResponseEntity.ok("success");
         } catch (Exception e) {
             e.printStackTrace();
@@ -195,8 +192,8 @@ public class CartController {
 
     @GetMapping("/check")
     @ResponseBody
-    public ResponseEntity<Map<String, Boolean>> checkCartStatus(@RequestParam Long productId, Principal principal) {
-        boolean inCart = cartService.isProductInCart(productId, principal);
+    public ResponseEntity<Map<String, Boolean>> checkCartStatus(@RequestParam int productId, Authentication auth) {
+        boolean inCart = cartService.isProductInCart(productId, auth);
         return ResponseEntity.ok(Collections.singletonMap("inCart", inCart));
     }
 }

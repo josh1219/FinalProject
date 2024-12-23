@@ -239,21 +239,21 @@
         </div>
 
         <div th:unless="${cartItems.empty}" class="cart-items">
-            <div th:each="item : ${cartItems}" class="cart-item" th:data-price="${item.product.price}" th:data-product-id="${item.product.pidx}">
+            <div th:each="item : ${cartItems}" class="cart-item" th:data-price="${item.product.price}" th:data-product-id="${item.product.pIdx}">
                 <div class="item-header">
                     <img th:src="${item.product.imageUrl}" class="item-image" alt="상품 이미지">
                     <div class="item-info">
                         <div class="item-name" th:text="${item.product.name}">상품명</div>
                         <div class="item-price" th:text="${#numbers.formatInteger(item.product.price, 0, 'COMMA') + '원'}">가격</div>
                     </div>
-                    <button class="remove-btn" th:onclick="'removeItem(' + ${item.product.pidx} + ')'">
+                    <button class="remove-btn" th:onclick="'removeItem(' + ${item.product.pIdx} + ')'">
                         삭제
                     </button>
                 </div>
                 <div class="quantity-controls">
-                    <button class="quantity-btn" th:onclick="'updateQuantity(' + ${item.product.pidx} + ', -1, this)'" type="button">-</button>
+                    <button class="quantity-btn" th:onclick="'updateQuantity(' + ${item.product.pIdx} + ', -1, this)'" type="button">-</button>
                     <input type="number" class="quantity-input" th:value="${item.quantity}" readonly>
-                    <button class="quantity-btn" th:onclick="'updateQuantity(' + ${item.product.pidx} + ', 1, this)'" type="button">+</button>
+                    <button class="quantity-btn" th:onclick="'updateQuantity(' + ${item.product.pIdx} + ', 1, this)'" type="button">+</button>
                 </div>
             </div>
             
@@ -261,7 +261,7 @@
             <div class="shipping-info">
                 <h3>배송정보</h3>
                 <div class="shipping-field">
-                    <label>이름 (필수)</label>
+                    <label>수령인 (필수)</label>
                     <input type="text" id="recipientName" placeholder="받으실 분의 이름을 입력해주세요" maxlength="5">
                     <span class="error-message" id="nameError" style="display: none; color: red; font-size: 12px;"></span>
                 </div>
@@ -314,7 +314,7 @@
                 <span>총 결제금액</span>
                 <span th:text="${#numbers.formatInteger(totalPrice, 0, 'COMMA') + '원'}">0원</span>
             </div>
-            <button class="checkout-btn" onclick="location.href='/shop/order/history'">결제하기</button>
+            <button class="checkout-btn" onclick="processOrder()">결제하기</button>
         </div>
     </div>
 
@@ -481,6 +481,66 @@
                 errorElement.style.display = 'none';
             }
         });
+
+        function processOrder() {
+            // 배송 정보 가져오기
+            const recipientName = document.getElementById('recipientName').value;
+            const recipientPhone = document.getElementById('recipientPhone').value;
+            const recipientAddress = document.getElementById('recipientAddress').value;
+            const shippingRequestSelect = document.getElementById('shippingRequest').value;
+            const customShippingRequest = document.getElementById('customShippingRequest').value;
+
+            // 배송 요청사항 처리
+            let shippingRequest;
+            if (shippingRequestSelect === "direct") {
+                shippingRequest = customShippingRequest;
+                if (!shippingRequest.trim()) {
+                    alert('배송 요청사항을 입력해주세요.');
+                    return;
+                }
+            } else {
+                shippingRequest = shippingRequestSelect;
+            }
+
+
+            // 유효성 검사
+            if (!recipientName || !recipientPhone || !recipientAddress) {
+                alert('배송 정보를 모두 입력해주세요.');
+                return;
+            }
+
+            // 주문 데이터 생성
+            const orderData = {
+                fromCart: true,
+                recipientName: recipientName,
+                recipientPhone: recipientPhone,
+                recipientAddress: recipientAddress,
+                shippingRequest: shippingRequest
+            };
+
+            // 서버에 주문 요청
+            fetch('/shop/order/api/purchase', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [header]: token
+                },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => response.json())
+            .then(result => {
+                if (result.success) {
+                    alert('주문이 완료되었습니다.');
+                    window.location.href = '/shop/order/history';
+                } else {
+                    alert(result.message || '주문 처리 중 오류가 발생했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('주문 처리 중 오류가 발생했습니다.');
+            });
+        }
     </script>
     <script src="/js/alert.js"></script>
 </body>

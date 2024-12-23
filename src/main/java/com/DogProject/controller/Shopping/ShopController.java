@@ -2,8 +2,12 @@ package com.DogProject.controller.Shopping;
 
 import com.DogProject.entity.Member;
 import com.DogProject.entity.Shopping.Product;
+import com.DogProject.entity.Shopping.CartItem;
+import com.DogProject.repository.Shopping.CartItemRepository;
 import com.DogProject.service.MemberService;
 import com.DogProject.service.Shopping.ProductService;
+import com.DogProject.service.Shopping.CartService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,6 +20,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.util.List;
 import java.util.Map;
@@ -28,7 +33,12 @@ public class ShopController {
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private CartService cartService;
+
     private final ProductService productService;
+
+    private final CartItemRepository cartItemRepository;
 
     @GetMapping("")
     public String shopMain(Model model, HttpServletRequest request, Principal principal,
@@ -81,15 +91,16 @@ public class ShopController {
     }
 
     @GetMapping("/detail/{id}")
-    public String shopDetail(@PathVariable Long id, Model model, HttpServletRequest request, Principal principal) {
+    public String shopDetail(@PathVariable int id, Model model, HttpServletRequest request, Principal principal) {
         addUserInfoToModel(model, request, principal);
-        Product product = productService.getProductById(id);
+        Product product = productService.getProductById(id)
+                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
         model.addAttribute("product", product);
         return "shop/shop-detail";
     }
 
     @GetMapping("/purchase/{productId}")
-    public String purchasePage(@PathVariable Long productId, 
+    public String purchasePage(@PathVariable int productId, 
                              @RequestParam(required = false) Integer quantity,
                              Model model,
                              Authentication authentication) {
@@ -99,10 +110,8 @@ public class ShopController {
         }
 
         // 상품 정보 조회
-        Product product = productService.getProductById(productId);
-        if (product == null) {
-            return "redirect:/shop";
-        }
+        Product product = productService.getProductById(productId)
+                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
 
         // 구매 수량이 지정되지 않은 경우 기본값 1로 설정
         if (quantity == null || quantity < 1) {
@@ -181,6 +190,54 @@ public class ShopController {
         return "shop/purchase";
     }
 
+    @GetMapping("/cart/purchase")
+    public String cartPurchasePage(Model model, Authentication authentication, HttpSession session) {
+        // 로그인 체크
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/member/login";
+        }
+
+        // 현재 로그인한 회원 정보 가져오기
+        Member member = getCurrentMember(authentication);
+        if (member == null) {
+            return "redirect:/shop";
+        }
+
+        // 장바구니 정보 조회
+        List<CartItem> cartItems = cartItemRepository.findByMember(member);
+        if (cartItems.isEmpty()) {
+            return "redirect:/shop/cart?error=empty";
+        }
+
+        // 총 금액 계산
+        int totalAmount = cartItems.stream()
+                .mapToInt(item -> item.getProduct().getPrice() * item.getQuantity())
+                .sum();
+
+        // 회원 정보 추가
+        if (member.getAddress() != null) {
+            model.addAttribute("memberAddress", member.getAddress());
+        }
+        
+        if (member.getPhone() != null) {
+            String phone = member.getPhone();
+            // 전화번호에 하이픈 추가
+            if (phone.length() == 11 && !phone.contains("-")) {
+                phone = phone.substring(0, 3) + "-" 
+                     + phone.substring(3, 7) + "-"
+                     + phone.substring(7);
+            }
+            model.addAttribute("memberPhone", phone);
+        }
+        
+        model.addAttribute("memberName", member.getName());
+        model.addAttribute("cartItems", cartItems);
+        model.addAttribute("totalAmount", totalAmount);
+        model.addAttribute("fromCart", true);
+
+        return "shop/purchase";
+    }
+
     @PostMapping("/removeLastTwoDetailImages")
     @ResponseBody
     public ResponseEntity<String> removeLastTwoDetailImages() {
@@ -218,6 +275,48 @@ public class ShopController {
                     break;
                 }
             }
+        }
+    }
+
+    private Member getCurrentMember(Authentication authentication) {
+        String userEmail = null;
+        
+        if (authentication.getPrincipal() instanceof OAuth2User) {
+            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
+            
+            // OAuth2 제공자 확인
+            String provider = "";
+            if (authentication instanceof OAuth2AuthenticationToken) {
+                provider = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
+            }
+            
+            // 제공자별로 이메일 속성 이름이 다름
+            if ("google".equals(provider)) {
+                userEmail = oauth2User.getAttribute("email");
+            } else if ("naver".equals(provider)) {
+                Map<String, Object> response = oauth2User.getAttribute("response");
+                if (response != null) {
+                    userEmail = (String) response.get("email");
+                }
+            } else if ("kakao".equals(provider)) {
+                // 카카오의 경우 ID를 통해 회원 조회
+                Object kakaoId = oauth2User.getAttribute("id");
+                String socialId = kakaoId != null ? String.valueOf(kakaoId) : null;
+                if (socialId != null) {
+                    Member kakaoMember = memberService.findByProviderAndSocialId("kakao", socialId);
+                    if (kakaoMember != null) {
+                        userEmail = kakaoMember.getMEmail();
+                    }
+                }
+            }
+        } else {
+            userEmail = authentication.getName();
+        }
+
+        if (userEmail != null) {
+            return memberService.getMemberByEmail(userEmail);
+        } else {
+            return null;
         }
     }
 }

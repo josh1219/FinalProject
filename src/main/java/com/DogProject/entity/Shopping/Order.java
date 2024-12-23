@@ -10,8 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "orders", indexes = @Index(name = "idx_order_id", columnList = "id"))
+@Table(name = "orders")
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,11 +20,12 @@ public class Order {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "o_idx")
     @Comment("주문 고유 ID")
-    private Long id;
+    private Long oIdx;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(name = "m_idx")
     @Comment("주문자")
     private Member member;
 
@@ -35,12 +37,28 @@ public class Order {
     @Comment("주문 상태")
     private String status;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @Column(nullable = false)
     @Comment("총 주문 금액")
     private int totalAmount;
+
+    @Column(nullable = false)
+    @Comment("수령인 이름")
+    private String recipientName;
+
+    @Column(nullable = false)
+    @Comment("수령인 전화번호")
+    private String recipientPhone;
+
+    @Column(nullable = false)
+    @Comment("배송지 주소")
+    private String recipientAddress;
+
+    @Column
+    @Comment("배송 요청사항")
+    private String shippingRequest;
 
     @PrePersist
     public void prePersist() {

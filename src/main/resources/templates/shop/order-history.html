@@ -24,6 +24,8 @@
         }
         .order-header {
             border-bottom: 1px solid #eee;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
         }
         .order-header h2 {
             margin: 0;
@@ -31,20 +33,59 @@
             font-weight: 500;
             color: #333;
         }
+        .period-filter {
+            margin-top: 16px;
+            display: flex;
+            gap: 8px;
+        }
+        .period-btn {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+        }
+        .period-btn.active {
+            background: #040516;
+            color: white;
+            border-color: #040516;
+        }
         .order-items {
             margin-top: 16px;
         }
         .order-item {
             background: white;
             border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
+            padding: 24px;
+            margin-bottom: 16px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
+        .order-date {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 16px;
+        }
+        .order-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+        .status-ordered { background: #e3f2fd; color: #1976d2; }
+        .status-shipping { background: #e8f5e9; color: #2e7d32; }
+        .status-completed { background: #f5f5f5; color: #616161; }
+        .status-returned { background: #fbe9e7; color: #d84315; }
         .item-header {
             display: flex;
             align-items: center;
             margin-bottom: 12px;
+            padding: 16px;
+            border: 1px solid #eee;
+            border-radius: 8px;
         }
         .item-image {
             width: 80px;
@@ -66,6 +107,11 @@
             font-size: 18px;
             font-weight: 600;
             color: #040516;
+        }
+        .item-quantity {
+            font-size: 14px;
+            color: #666;
+            margin-top: 4px;
         }
         .delivery-info {
             margin-top: 20px;
@@ -94,28 +140,38 @@
             font-size: 14px;
             color: #333;
         }
-        .price-info {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-        }
-        .price-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            color: #666;
-            font-size: 14px;
-        }
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #eee;
+        .total-price {
+            text-align: right;
+            font-size: 20px;
             font-weight: 600;
-            font-size: 18px;
+            color: #040516;
+            margin-top: 16px;
         }
-        .empty-orders {
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+        }
+        .return-btn {
+            background: white;
+            border: 1px solid #040516;
+            color: #040516;
+        }
+        .review-btn {
+            background: #040516;
+            color: white;
+        }
+        .no-orders {
             text-align: center;
             padding: 48px 0;
             color: #666;
@@ -128,57 +184,100 @@
     <div class="order-container">
         <div class="order-header">
             <h2>주문목록</h2>
+            <div class="period-filter">
+                <button class="period-btn" data-period="1w">1주일</button>
+                <button class="period-btn" data-period="1m">1개월</button>
+                <button class="period-btn active" data-period="3m">3개월</button>
+                <button class="period-btn" data-period="6m">6개월</button>
+            </div>
         </div>
 
-        <div class="empty-orders" th:if="${#lists.isEmpty(orders)}">
-            <p>주문 내역이 없습니다.</p>
-        </div>
-
-        <div class="order-items" th:unless="${#lists.isEmpty(orders)}">
+        <div class="order-items" th:if="${not #lists.isEmpty(orders)}">
             <div class="order-item" th:each="order : ${orders}">
-                <div class="item-header">
-                    <img th:src="${order.productImage}" alt="상품 이미지" class="item-image">
+                <div class="order-date">
+                    주문일자: <span th:text="${#temporals.format(order.orderDate, 'yyyy-MM-dd HH:mm')}"></span>
+                    <span th:class="'order-status ' + 'status-' + ${#strings.toLowerCase(order.status)}"
+                          th:text="${order.status == 'ORDERED' ? '주문완료' : 
+                                   order.status == 'SHIPPING' ? '배송중' :
+                                   order.status == 'COMPLETED' ? '배송완료' :
+                                   order.status == 'RETURNED' ? '반품완료' :
+                                   order.status == 'RETURN_REQUESTED' ? '반품신청' : order.status}">
+                    </span>
+                </div>
+
+                <div th:each="item : ${order.orderItems}" class="item-header">
+                    <img th:src="${item.product.imageUrl}" class="item-image" alt="상품 이미지">
                     <div class="item-info">
-                        <div class="item-name" th:text="${order.productName}">프리미엄 강아지 사료</div>
-                        <div class="item-price">
-                            <span th:text="${order.quantity + '개'}">2개</span>
-                            <span th:text="${#numbers.formatInteger(order.price, 0, 'COMMA') + '원'}">69,000원</span>
-                        </div>
+                        <div class="item-name" th:text="${item.product.name}"></div>
+                        <div class="item-quantity" th:text="'수량: ' + ${item.quantity} + '개'"></div>
+                        <div class="item-price" th:text="${#numbers.formatInteger(item.price, 0, 'COMMA') + '원'}"></div>
                     </div>
                 </div>
 
                 <div class="delivery-info">
                     <h3>배송 정보</h3>
                     <div class="delivery-field">
-                        <label>받는 분</label>
-                        <div class="value" th:text="${order.recipientName}">홍길동</div>
+                        <label>받는 사람</label>
+                        <div class="value" th:text="${order.recipientName}"></div>
                     </div>
                     <div class="delivery-field">
                         <label>연락처</label>
-                        <div class="value" th:text="${order.recipientPhone}">010-1234-5678</div>
+                        <div class="value" th:text="${order.recipientPhone}"></div>
                     </div>
                     <div class="delivery-field">
                         <label>배송지</label>
-                        <div class="value" th:text="${order.shippingAddress}">52550 경남 사천시 주공1길 7 321</div>
+                        <div class="value" th:text="${order.recipientAddress}"></div>
+                    </div>
+                    <div class="delivery-field">
+                        <label>배송 요청사항</label>
+                        <div class="value" th:text="${order.shippingRequest}"></div>
                     </div>
                 </div>
 
-                <div class="price-info">
-                    <div class="price-row">
-                        <span>상품금액</span>
-                        <span th:text="${#numbers.formatInteger(order.price, 0, 'COMMA') + '원'}">69,000원</span>
-                    </div>
-                    <div class="price-row">
-                        <span>배송비</span>
-                        <span th:text="${#numbers.formatInteger(order.shippingFee, 0, 'COMMA') + '원'}">3,000원</span>
-                    </div>
-                    <div class="total-row">
-                        <span>결제금액</span>
-                        <span th:text="${#numbers.formatInteger(order.totalAmount, 0, 'COMMA') + '원'}">72,000원</span>
-                    </div>
+                <div class="total-price" th:text="'총 결제금액: ' + ${#numbers.formatInteger(order.totalAmount, 0, 'COMMA') + '원'}"></div>
+
+                <div class="action-buttons" th:if="${order.status != 'RETURNED' and order.status != 'RETURN_REQUESTED'}">
+                    <button class="action-btn return-btn" 
+                            th:onclick="'requestReturn(' + ${order.oIdx} + ')'"
+                            th:if="${order.status == 'COMPLETED'}">반품 신청</button>
+                    <button class="action-btn review-btn">리뷰 작성</button>
                 </div>
             </div>
         </div>
+
+        <div class="no-orders" th:if="${#lists.isEmpty(orders)}">
+            <p>주문 내역이 없습니다.</p>
+        </div>
     </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // 기간 필터 버튼 클릭 이벤트
+        $('.period-btn').click(function() {
+            $('.period-btn').removeClass('active');
+            $(this).addClass('active');
+            
+            const period = $(this).data('period');
+            window.location.href = '/shop/orders?period=' + period;
+        });
+
+        // 반품 신청
+        function requestReturn(orderId) {
+            if (confirm('해당 주문을 반품 신청하시겠습니까?')) {
+                $.ajax({
+                    url: '/api/orders/' + orderId + '/return',
+                    type: 'POST',
+                    success: function(response) {
+                        alert('반품 신청이 완료되었습니다.');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert('반품 신청 중 오류가 발생했습니다.');
+                    }
+                });
+            }
+        }
+    </script>
+    <script src="/js/alert.js"></script>
 </body>
 </html>

@@ -192,7 +192,7 @@
         <div class="shipping-info">
             <h3>배송 정보</h3>
             <div class="shipping-field">
-                <label>이름 (필수)</label>
+                <label>수령인 (필수)</label>
                 <input type="text" id="recipientName" placeholder="받으실 분의 이름을 입력해주세요" maxlength="5">
                     <span class="error-message" id="nameError" style="display: none; color: red; font-size: 12px;"></span>
             </div>
@@ -244,7 +244,7 @@
                 <span>결제금액</span>
                 <span th:text="${#numbers.formatInteger(product.price * quantity + 3000, 0, 'COMMA') + '원'}">0원</span>
             </div>
-            <button type="button" class="purchase-btn" onclick="location.href='/shop/order/history'">
+            <button type="button" class="purchase-btn" onclick="processPurchase()">
                 결제하기
             </button>
         </div>
@@ -303,13 +303,24 @@
         function processPurchase() {
             const recipientName = document.getElementById('recipientName').value;
             const recipientPhone = document.getElementById('recipientPhone').value;
-            const address = document.getElementById('recipientAddress').value;
+            const recipientAddress = document.getElementById('recipientAddress').value;
             const shippingRequestSelect = document.getElementById('shippingRequest');
             const customShippingRequest = document.getElementById('customShippingRequest');
-            const shippingRequest = shippingRequestSelect.value === "direct" ? customShippingRequest.value : shippingRequestSelect.value;
+            
+            // 배송 요청사항 처리 수정
+            let shippingRequest;
+            if (shippingRequestSelect.value === "direct") {
+                shippingRequest = customShippingRequest.value;
+                if (!shippingRequest.trim()) {
+                    alert('배송 요청사항을 입력해주세요.');
+                    return;
+                }
+            } else {
+                shippingRequest = shippingRequestSelect.value;
+            }
 
             // 유효성 검사
-            if (!recipientName || !recipientPhone || !address) {
+            if (!recipientName || !recipientPhone || !recipientAddress) {
                 alert('모든 필수 배송정보를 입력해주세요.');
                 return;
             }
@@ -329,15 +340,16 @@
 
             // 결제 처리 요청
             const purchaseData = {
-                productId: /*[[${product.id}]]*/ null,
+                fromCart: /*[[${fromCart}]]*/ false,
+                productId: /*[[${product.pIdx}]]*/ null,
                 quantity: /*[[${quantity}]]*/ 1,
                 recipientName: recipientName,
                 recipientPhone: recipientPhone,
-                address: address,
+                recipientAddress: recipientAddress,  
                 shippingRequest: shippingRequest
             };
 
-            fetch('/api/purchase', {
+            fetch('/shop/order/api/purchase', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -349,7 +361,7 @@
             .then(data => {
                 if (data.success) {
                     alert('결제가 완료되었습니다.');
-                    window.location.href = '/shop';
+                    window.location.href = '/shop/order/history';  // 주문 내역 페이지로 이동
                 } else {
                     alert(data.message || '결제 처리 중 오류가 발생했습니다.');
                 }
@@ -360,5 +372,6 @@
             });
         }
     </script>
+    <script src="/js/alert.js"></script>
 </body>
 </html>

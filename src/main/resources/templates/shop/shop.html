@@ -189,7 +189,7 @@
         <!-- 상품 목록 -->
         <div class="product-grid">
             <div th:each="product : ${products}" class="product-item">
-                <a th:href="@{'/shop/detail/' + ${product.pidx}}">
+                <a th:href="@{'/shop/detail/' + ${product.pIdx}}">
                     <div class="product-image">
                         <img th:src="${product.imageUrl}" alt="상품 이미지">
                     </div>

@@ -1,65 +1,97 @@
 package com.DogProject.service.Shopping;
 
+import com.DogProject.entity.Member;
 import com.DogProject.entity.Shopping.CartItem;
 import com.DogProject.entity.Shopping.Product;
 import com.DogProject.repository.Shopping.CartItemRepository;
 import com.DogProject.repository.Shopping.ProductRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.DogProject.service.MemberService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import javax.servlet.http.HttpSession;
+
+import java.util.Collections;
 import java.util.List;
-import java.security.Principal;
+import java.util.Map;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class CartService {
 
     private final CartItemRepository cartItemRepository;
     private final ProductRepository productRepository;
-    private final HttpSession httpSession;
+    private final MemberService memberService;
 
-    @Autowired
-    public CartService(CartItemRepository cartItemRepository, ProductRepository productRepository, HttpSession httpSession) {
-        this.cartItemRepository = cartItemRepository;
-        this.productRepository = productRepository;
-        this.httpSession = httpSession;
-    }
-
-    private String getCurrentUserIdentifier(Principal principal) {
-        if (principal != null) {
-            return "USER:" + principal.getName();
+    private Member getMemberFromAuth(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated() || auth.getPrincipal().equals("anonymousUser")) {
+            throw new IllegalStateException("로그인이 필요합니다.");
         }
-        return "SESSION:" + httpSession.getId();
-    }
 
-    public List<CartItem> getCartItems(Principal principal) {
-        String identifier = getCurrentUserIdentifier(principal);
-        if (identifier.startsWith("USER:")) {
-            return cartItemRepository.findByUserId(identifier);
+        Member member = null;
+        if (auth.getPrincipal() instanceof OAuth2User) {
+            OAuth2User oauth2User = (OAuth2User) auth.getPrincipal();
+            String provider = "";
+            if (auth instanceof OAuth2AuthenticationToken) {
+                provider = ((OAuth2AuthenticationToken) auth).getAuthorizedClientRegistrationId();
+            }
+
+            if ("google".equals(provider)) {
+                String email = oauth2User.getAttribute("email");
+                if (email != null) {
+                    member = memberService.getMemberByEmail(email);
+                }
+            } else if ("naver".equals(provider)) {
+                Map<String, Object> response = oauth2User.getAttribute("response");
+                if (response != null) {
+                    String email = (String) response.get("email");
+                    if (email != null) {
+                        member = memberService.getMemberByEmail(email);
+                    }
+                }
+            } else if ("kakao".equals(provider)) {
+                Object kakaoId = oauth2User.getAttribute("id");
+                if (kakaoId != null) {
+                    String socialId = String.valueOf(kakaoId);
+                    member = memberService.findByProviderAndSocialId("kakao", socialId);
+                }
+            }
+        } else {
+            member = memberService.getMemberByEmail(auth.getName());
         }
-        return cartItemRepository.findBySessionId(identifier);
+
+        if (member == null) {
+            throw new IllegalStateException("회원을 찾을 수 없습니다.");
+        }
+
+        return member;
     }
 
+    // 장바구니 조회
+    public List<CartItem> getCartItems(Authentication auth) {
+        try {
+            Member member = getMemberFromAuth(auth);
+            return cartItemRepository.findByMember(member);
+        } catch (IllegalStateException e) {
+            return Collections.emptyList();
+        }
+    }
+
+    // 장바구니에 상품 추가
     @Transactional
-    public void addToCart(Long productId, int quantity, Principal principal) {
+    public void addToCart(int productId, int quantity, Authentication auth) {
+        Member member = getMemberFromAuth(auth);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
 
-        String identifier = getCurrentUserIdentifier(principal);
-        CartItem cartItem;
-        
-        if (identifier.startsWith("USER:")) {
-            cartItem = cartItemRepository.findByProductAndUserId(product, identifier)
-                    .orElse(new CartItem());
-            cartItem.setUserId(identifier);
-        } else {
-            cartItem = cartItemRepository.findByProductAndSessionId(product, identifier)
-                    .orElse(new CartItem());
-            cartItem.setSessionId(identifier);
-        }
+        CartItem cartItem = cartItemRepository.findByMemberAndProduct(member, product)
+                .orElse(new CartItem());
 
-        if (cartItem.getId() == null) {
+        if (cartItem.getCIdx() == 0) {
+            cartItem.setMember(member);
             cartItem.setProduct(product);
             cartItem.setQuantity(quantity);
         } else {
@@ -69,52 +101,52 @@ public class CartService {
         cartItemRepository.save(cartItem);
     }
 
+    // 장바구니 상품 수량 업데이트
     @Transactional
-    public void updateCartItemQuantity(Long productId, int change, Principal principal) {
+    public void updateCartItemQuantity(int productId, int change, Authentication auth) {
+        Member member = getMemberFromAuth(auth);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
 
-        String identifier = getCurrentUserIdentifier(principal);
-        CartItem cartItem;
-        
-        if (identifier.startsWith("USER:")) {
-            cartItem = cartItemRepository.findByProductAndUserId(product, identifier)
-                    .orElseThrow(() -> new IllegalArgumentException("장바구니 항목을 찾을 수 없습니다."));
-        } else {
-            cartItem = cartItemRepository.findByProductAndSessionId(product, identifier)
-                    .orElseThrow(() -> new IllegalArgumentException("장바구니 항목을 찾을 수 없습니다."));
-        }
+        CartItem cartItem = cartItemRepository.findByMemberAndProduct(member, product)
+                .orElseThrow(() -> new IllegalArgumentException("장바구니에 해당 상품이 없습니다."));
 
         int newQuantity = cartItem.getQuantity() + change;
-        if (newQuantity < 1) {
-            cartItemRepository.delete(cartItem);
+        if (newQuantity <= 0) {
+            cartItemRepository.deleteByMemberAndProduct(member, product);
         } else {
             cartItem.setQuantity(newQuantity);
             cartItemRepository.save(cartItem);
         }
     }
 
+    // 장바구니에서 상품 제거
     @Transactional
-    public void removeFromCartByProductId(Long productId, Principal principal) {
+    public void removeFromCart(int productId, Authentication auth) {
+        Member member = getMemberFromAuth(auth);
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
 
-        String identifier = getCurrentUserIdentifier(principal);
-        if (identifier.startsWith("USER:")) {
-            cartItemRepository.deleteByProductAndUserId(product, identifier);
-        } else {
-            cartItemRepository.deleteByProductAndSessionId(product, identifier);
-        }
+        cartItemRepository.deleteByMemberAndProduct(member, product);
     }
 
-    public boolean isProductInCart(Long productId, Principal principal) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+    // 장바구니 비우기
+    @Transactional
+    public void clearCart(Authentication auth) {
+        Member member = getMemberFromAuth(auth);
+        cartItemRepository.deleteByMember(member);
+    }
 
-        String identifier = getCurrentUserIdentifier(principal);
-        if (identifier.startsWith("USER:")) {
-            return cartItemRepository.findByProductAndUserId(product, identifier).isPresent();
+    // 상품이 장바구니에 있는지 확인
+    public boolean isProductInCart(int productId, Authentication auth) {
+        try {
+            Member member = getMemberFromAuth(auth);
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
+
+            return cartItemRepository.findByMemberAndProduct(member, product).isPresent();
+        } catch (IllegalStateException e) {
+            return false;
         }
-        return cartItemRepository.findByProductAndSessionId(product, identifier).isPresent();
     }
 }

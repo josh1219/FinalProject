@@ -5,10 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
 import java.security.Principal;
-import java.util.ArrayList;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/shop")
@@ -22,7 +24,7 @@ public class ShopMyPageController {
         return "shop/mypage";
     }
 
-    @GetMapping("/orders")
+    @GetMapping("/order-history")
     public String orderList(Model model, Principal principal,
                          @RequestParam(required = false) String period,
                          @RequestParam(required = false) String status) {
@@ -30,8 +32,14 @@ public class ShopMyPageController {
             // 로그인하지 않은 경우 로그인 페이지로 리다이렉트
             return "redirect:/member/login";
         }
-        model.addAttribute("orders", orderService.getOrderHistory(principal.getName(), period, status));
-        return "shop/order";
+        model.addAttribute("order-history", orderService.getOrderHistory(principal.getName(), period, status));
+        return "shop/order-history";
+    }
+
+    @PostMapping("/order-history")
+    public String createOrder(@RequestParam Map<String, Object> orderData, Model model) {
+        model.addAttribute("orderItems", orderData);
+        return "shop/order-history";
     }
 
     @GetMapping("/returns")

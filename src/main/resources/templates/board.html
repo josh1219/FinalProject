@@ -3,275 +3,426 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="_csrf" th:content="${_csrf.token}"/>
+  <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
   <!-- <title th:text="${isAdmin ? 'PETOPIA - 관리자 로그인' : 'PETOPIA'}">자유게시판</title> -->
   <title th:text="${session.member != null && session.member.role.name() == 'ADMIN'} ? 'PETOPIA - 관리자 로그인' : 'PETOPIA 자유게시판'">PETOPIA 자유게시판</title>
   <link rel="stylesheet" href="/css/header.css">
   <link rel="stylesheet" href="/css/footer.css">
   <link rel="stylesheet" href="/css/board.css">
+  <style>
+    /* 새로고침 인디케이터 스타일 */
+    .refresh-indicator {
+      position: fixed;
+      top: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      width: 100%;
+      padding: 15px;
+      background-color: rgba(255, 255, 255, 0.95);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      display: none;
+    }
+
+    .refresh-spinner {
+      width: 30px;
+      height: 30px;
+      margin: 0 auto;
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #2C74D2;
+      border-radius: 50%;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .refresh-text {
+      margin-top: 8px;
+      color: #2C74D2;
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .spinning {
+      animation: spin 1s linear infinite;
+    }
+
+    .posts-container {
+      transition: transform 0.3s ease-out;
+      padding-top: 10px;
+    }
+  </style>
 </head>
 <body>
 
-    <!-- header -->
-    <div th:replace="~{common/header :: header}"></div>
-    <!-- /header -->
-    <div class="main-content">
-        
-        <button id="top-btn" onclick="scrollToTop()">↑</button>
-        
-        <div class="boardMenu-container">
-            <div class="boardMenu">
-                <div onclick="filterPosts('전체')" class="active">
-                    <img src="/images/home-4-home-house-roof-shelter1.svg" alt="전체">
-                    <div class="div3">전체</div>
-                </div>
-                <div onclick="filterPosts('공지사항')">
-                    <img src="/images/volume.svg" alt="공지">
-                    <div class="div5">공지</div>
-                </div>
-                <div onclick="filterPosts('질문')">
-                    <img src="/images/union0.svg" alt="질문">
-                    <div class="div6">질문</div>
-                </div>
-                <div onclick="filterPosts('자유')">
-                    <img src="/images/chat-bubble-square-write-messages-message-bubble-chat-square-write-review-pen-pencil-compose1.svg" alt="자유">
-                    <div class="div7">자유</div>
-                </div>
-                <div onclick="filterPosts('나눔')">
-                    <img src="/images/coin-share-payment-cash-money-finance-receive-give-coin-hand1.svg" alt="나눔">
-                    <div class="div8">나눔</div>
-                </div>
-                <div onclick="filterPosts('이벤트')">
-                    <img src="/images/gift-reward-box-social-present-gift-media-rating-bow1.svg" alt="이벤트">
-                    <div class="div10">이벤트</div>
-                </div>
-            </div>
-        </div>
-      
-          <div class="posts-container">
-              <!-- 전광판 공지사항 -->
-              <div class="notice-ticker-container">
-                  <div class="notice-ticker">
-                      타인을 향한 욕설, 비방글은 삭제 조치될 수 있습니다. 상호 배려하는 마음으로 건전한 커뮤니티를 만들어주세요! 🐾
-                  </div>
-              </div>
-
-              <div id="boardList">
-                  <!-- 게시글이 없을 때 표시할 메시지 -->
-                  <div th:if="${#lists.isEmpty(boardList)}" class="no-posts">
-                      <img src="/images/empty-box.svg" alt="빈 박스">
-                      <div class="message">아직 등록된 게시글이 없어요!</div>
-                      <div class="sub-message">첫 번째 게시글의 주인공이 되어보세요 🐾</div>
-                  </div>
-                  <!-- 게시글 목록 -->
-                  <th:block th:if="${not #lists.isEmpty(boardList)}" th:each="board, iterStat : ${boardList}">
-                      <div class="board-item" 
-                           th:classappend="${board.bType == '공지사항'} ? 'notice-post' : (${board.member != null && board.member.role != null && board.member.role.name() == 'ADMIN'} ? 'admin-post')"
-                           th:style="${iterStat.index >= 10 ? 'display: none;' : ''}"
-                           th:onclick="'location.href=\'/board/detail/' + ${board.bIdx} + '\''">
-                          <div class="board-content">
-                              <div class="board-info">
-                                  <span class="board-category" th:text="${board.bType}">카테고리</span>
-                              </div>
-                              <h3 class="board-title" th:classappend="${#strings.length(board.title) > 20} ? 'long-title'" 
-                                  th:text="${#strings.length(board.title) > 20} ? ${#strings.substring(board.title,0,20) + '...'} : ${board.title}">제목</h3>
-                              <div class="board-meta">
-                                  <span th:text="${board.member.name}">작성자</span>
-                                  <span th:text="${board.insertDate}">작성일</span>
-                                  <span class="has-image" th:if="${attachmentCounts.get(board.bIdx) > 0}">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                          <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
-                                      </svg>
-                                      <span th:text="${attachmentCounts.get(board.bIdx)}">0</span>
-                                  </span>
-                              </div>
-                          </div>
-                      </div>
-                  </th:block>
-              </div>
-              <!-- 더보기 버튼 -->
-              <div class="load-more-container" th:if="${#lists.size(boardList) > 10}">
-                  <button id="loadMoreBtn" class="load-more-btn">
-                      더보기
-                      <span class="loading"></span>
-                  </button>
-              </div>
-          </div>
-      
-        <!-- 글쓰기 버튼 -->
-        <div class="write-button" 
-            th:if="${session.sessionMember != null}"
-            onclick="handleWriteButtonClick()"
-            title="글쓰기">
-            <img src="/images/write-button.svg" alt="글쓰기">
-        </div>
-        <div class="write-button" 
-            th:unless="${session.sessionMember != null}"
-            onclick="alert('로그인이 필요한 서비스입니다.'); location.href='/member/login';"
-            title="글쓰기">
-            <img src="/images/write-button.svg" alt="글쓰기">
-        </div>
+  <!-- header -->
+  <div th:replace="~{common/header :: header}"></div>
+  <!-- /header -->
+  <div class="main-content">
+    <!-- 새로고침 인디케이터 추가 -->
+    <div class="refresh-indicator">
+      <div class="refresh-spinner"></div>
+      <div class="refresh-text">당겨서 새로고침</div>
     </div>
+    <button id="top-btn" onclick="scrollToTop()">↑</button>
+    
+    <div class="boardMenu-container">
+      <div class="boardMenu">
+        <div onclick="filterPosts('전체')" class="active">
+          <img src="/images/home-4-home-house-roof-shelter1.svg" alt="전체">
+          <div class="div3">전체</div>
+        </div>
+        <div onclick="filterPosts('공지사항')">
+          <img src="/images/volume.svg" alt="공지">
+          <div class="div5">공지</div>
+        </div>
+        <div onclick="filterPosts('질문')">
+          <img src="/images/union0.svg" alt="질문">
+          <div class="div6">질문</div>
+        </div>
+        <div onclick="filterPosts('자유')">
+          <img src="/images/chat-bubble-square-write-messages-message-bubble-chat-square-write-review-pen-pencil-compose1.svg" alt="자유">
+          <div class="div7">자유</div>
+        </div>
+        <div onclick="filterPosts('나눔')">
+          <img src="/images/coin-share-payment-cash-money-finance-receive-give-coin-hand1.svg" alt="나눔">
+          <div class="div8">나눔</div>
+        </div>
+        <div onclick="filterPosts('이벤트')">
+          <img src="/images/gift-reward-box-social-present-gift-media-rating-bow1.svg" alt="이벤트">
+          <div class="div10">이벤트</div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="posts-container">
+      <!-- 전광판 공지사항 -->
+      <div class="notice-ticker-container">
+        <div class="notice-ticker">
+          타인을 향한 욕설, 비방글은 삭제 조치될 수 있습니다. 상호 배려하는 마음으로 건전한 커뮤니티를 만들어주세요! 🐾
+        </div>
+      </div>
 
-  
+      <div id="boardList">
+        <!-- 게시글이 없을 때 표시할 메시지 -->
+        <div th:if="${#lists.isEmpty(boardList)}" class="no-posts">
+          <img src="/images/empty-box.svg" alt="빈 박스">
+          <div class="message">아직 등록된 게시글이 없어요!</div>
+          <div class="sub-message">첫 번째 게시글의 주인공이 되어보세요 🐾</div>
+        </div>
+        <!-- 게시글 목록 -->
+        <th:block th:if="${not #lists.isEmpty(boardList)}" th:each="board, iterStat : ${boardList}">
+          <div class="board-item" 
+               th:classappend="${board.bType == '공지사항'} ? 'notice-post' : (${board.member != null && board.member.role != null && board.member.role.name() == 'ADMIN'} ? 'admin-post')"
+               th:style="${iterStat.index >= 10 ? 'display: none;' : ''}"
+               th:onclick="'location.href=\'/board/detail/' + ${board.bIdx} + '\''">
+            <div class="board-content">
+              <div class="board-info">
+                <span class="board-category" th:text="${board.bType}">카테고리</span>
+              </div>
+              <h3 class="board-title" th:classappend="${#strings.length(board.title) > 20} ? 'long-title'" 
+                  th:text="${#strings.length(board.title) > 20} ? ${#strings.substring(board.title,0,20) + '...'} : ${board.title}">제목</h3>
+              <div class="board-meta">
+                <span th:text="${board.member.name}">작성자</span>
+                <span th:text="${board.insertDate}">작성일</span>
+                <span class="has-image" th:if="${attachmentCounts.get(board.bIdx) > 0}">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path>
+                  </svg>
+                  <span th:text="${attachmentCounts.get(board.bIdx)}">0</span>
+                </span>
+              </div>
+            </div>
+          </div>
+        </th:block>
+      </div>
+      <!-- 더보기 버튼 -->
+      <div class="load-more-container" th:if="${#lists.size(boardList) > 10}">
+        <button id="loadMoreBtn" class="load-more-btn">
+          더보기
+          <span class="loading"></span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 글쓰기 버튼 -->
+    <div class="write-button" 
+        th:if="${session.sessionMember != null}"
+        onclick="handleWriteButtonClick()"
+        title="글쓰기">
+        <img src="/images/write-button.svg" alt="글쓰기">
+    </div>
+    <div class="write-button" 
+        th:unless="${session.sessionMember != null}"
+        onclick="alert('로그인이 필요한 서비스입니다.'); location.href='/member/login';"
+        title="글쓰기">
+        <img src="/images/write-button.svg" alt="글쓰기">
+    </div>
+  </div>
 
   <!-- footer -->
   <div th:replace="~{common/footer :: footer}"></div>
   <!-- /footer -->
 
-    <!-- Loading Modal -->
-    <div id="loadingModal" class="loading-modal">
-        <div class="loading-content">
-            <div class="loading-dog">🐕</div>
-            <div class="loading-text">글쓰기 페이지로 이동중...</div>
-        </div>
+  <!-- Loading Modal -->
+  <div id="loadingModal" class="loading-modal">
+    <div class="loading-content">
+      <div class="loading-dog">🐕</div>
+      <div class="loading-text">글쓰기 페이지로 이동중...</div>
     </div>
+  </div>
 
   <script>
-        function handleWriteButtonClick() {
-            const writeButton = document.querySelector('.write-button');
-            const loadingModal = document.getElementById('loadingModal');
-            
-            // 먼저 툴팁 보여주기
-            writeButton.classList.add('show-tooltip');
-            
-            // 1초 후에 툴팁 숨기고 로딩 모달 보여주기
-            setTimeout(() => {
-                writeButton.classList.remove('show-tooltip');
-                loadingModal.style.display = 'flex';
-                
-                // 0.5초 후에 페이지 이동
-                setTimeout(() => {
-                    location.href = '/board/create';
-                }, 500);
-            }, 1000);
-        }
-
     function filterPosts(type) {
-        // 모든 카테고리 버튼의 active 클래스 제거
-        document.querySelectorAll('.boardMenu > div').forEach(div => {
-            div.classList.remove('active');
-        });
-        
-        // 클릭된 버튼에 active 클래스 추가
-        event.currentTarget.classList.add('active');
-        
-        // 카테고리에 따른 URL 설정
-        let url = '/board';
-        if (type !== '전체') {
-            url += '?category=' + type;
-        }
-        
-        // 페이지 이동
-        window.location.href = url;
+      // 모든 카테고리 버튼의 active 클래스 제거
+      document.querySelectorAll('.boardMenu > div').forEach(div => {
+        div.classList.remove('active');
+      });
+      
+      // 클릭된 버튼에 active 클래스 추가
+      event.currentTarget.classList.add('active');
+      
+      // 카테고리에 따른 URL 설정
+      let url = '/board';
+      if (type !== '전체') {
+        url += '?category=' + encodeURIComponent(type);
+      }
+      
+      // 페이지 이동
+      window.location.href = url;
     }
-    
-    // 현재 카테고리에 따라 버튼 활성화
+
+    function handleWriteButtonClick() {
+      const writeButton = document.querySelector('.write-button');
+      const loadingModal = document.getElementById('loadingModal');
+      
+      // 먼저 툴팁 보여주기
+      writeButton.classList.add('show-tooltip');
+      
+      // 1초 후에 툴팁 숨기고 로딩 모달 보여주기
+      setTimeout(() => {
+        writeButton.classList.remove('show-tooltip');
+        loadingModal.style.display = 'flex';
+        
+        // 0.5초 후에 페이지 이동
+        setTimeout(() => {
+          location.href = '/board/create';
+        }, 500);
+      }, 1000);
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const category = urlParams.get('category') || '전체';
-        
-        const targetDiv = document.querySelector(`.boardMenu > div[onclick="filterPosts('${category}')"]`);
-        if (targetDiv) {
-            document.querySelectorAll('.boardMenu > div').forEach(div => {
-                div.classList.remove('active');
-            });
-            targetDiv.classList.add('active');
+      let startY = 0;
+      let pullDistance = 0;
+      const THRESHOLD = 80;
+      const postsContainer = document.querySelector('.posts-container');
+      const refreshIndicator = document.querySelector('.refresh-indicator');
+      const refreshSpinner = document.querySelector('.refresh-spinner');
+      const refreshText = document.querySelector('.refresh-text');
+      let isRefreshing = false;
+
+      // 현재 카테고리에 따라 버튼 활성화
+      const urlParams = new URLSearchParams(window.location.search);
+      const category = urlParams.get('category') || '전체';
+      
+      const targetDiv = document.querySelector(`.boardMenu > div[onclick="filterPosts('${category}')"]`);
+      if (targetDiv) {
+        document.querySelectorAll('.boardMenu > div').forEach(div => {
+          div.classList.remove('active');
+        });
+        targetDiv.classList.add('active');
+      }
+
+      let currentlyShown = 10;
+      const postsPerPage = 10;
+      
+      const loadMoreBtn = document.getElementById('loadMoreBtn');
+      if(loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', function() {
+          // 로딩 상태 추가
+          this.classList.add('loading-state');
+          
+          setTimeout(() => {
+            const posts = document.querySelectorAll('.board-item');
+            const totalPosts = posts.length;
+            
+            // 다음 10개의 게시글 표시
+            for(let i = currentlyShown; i < currentlyShown + postsPerPage && i < totalPosts; i++) {
+              posts[i].style.display = '';
+            }
+            
+            currentlyShown += postsPerPage;
+            
+            // 로딩 상태 제거
+            this.classList.remove('loading-state');
+            
+            // 모든 게시글을 다 보여줬다면 더보기 버튼 페이드아웃 후 제거
+            if(currentlyShown >= totalPosts) {
+              this.style.opacity = '0';
+              setTimeout(() => {
+                this.style.display = 'none';
+              }, 300);
+            }
+          }, 800); // 로딩 효과를 보여주기 위한 지연
+        });
+      }
+
+      postsContainer.addEventListener('touchstart', (e) => {
+        if (postsContainer.scrollTop === 0 && !isRefreshing) {
+          startY = e.touches[0].clientY;
+          refreshIndicator.style.display = 'block';
+          refreshIndicator.style.opacity = '0';
         }
-    });
+      });
 
-    function toggleMenu() {
-        // 메뉴 토글 구현
-    }
+      postsContainer.addEventListener('touchmove', (e) => {
+        if (startY === 0 || isRefreshing) return;
+        
+        const currentY = e.touches[0].clientY;
+        pullDistance = currentY - startY;
 
-    // 스크롤 이벤트 처리
-    const postsContainer = document.querySelector('.posts-container');
-    const topBtn = document.getElementById('top-btn');
+        if (postsContainer.scrollTop === 0 && pullDistance > 0) {
+          e.preventDefault();
+          const translateY = Math.min(pullDistance/2, THRESHOLD);
+          postsContainer.style.transform = `translateY(${translateY}px)`;
+          
+          // 인디케이터 표시
+          refreshIndicator.style.opacity = (translateY / THRESHOLD).toString();
+          
+          // 스피너 회전 각도 계산
+          const rotation = (translateY / THRESHOLD) * 360;
+          refreshSpinner.style.transform = `rotate(${rotation}deg)`;
+          
+          // 텍스트 업데이트
+          if (translateY >= THRESHOLD) {
+            refreshText.textContent = '놓아서 새로고침';
+          } else {
+            refreshText.textContent = '당겨서 새로고침';
+          }
+        }
+      });
 
-    // 페이지 로드 시 버튼이 보이는지 확인
+      postsContainer.addEventListener('touchend', () => {
+        if (!startY || isRefreshing) {
+          return;
+        }
 
-    postsContainer.addEventListener('scroll', function() {
+        if (pullDistance > THRESHOLD) {
+          isRefreshing = true;
+          refreshText.textContent = '새로고침 중...';
+          refreshSpinner.classList.add('spinning');
+          refreshIndicator.style.opacity = '1';
+          
+          const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+          const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+          // 새로고침 중에는 목록을 약간 내린 상태로 유지
+          postsContainer.style.transition = 'transform 0.3s';
+          postsContainer.style.transform = 'translateY(40px)';
+
+          setTimeout(() => {
+            // 현재 페이지 URL 사용
+            fetch(window.location.href, {
+              method: 'GET',
+              headers: {
+                [header]: token,
+                'X-Requested-With': 'XMLHttpRequest'
+              },
+              credentials: 'same-origin'
+            })
+            .then(response => {
+              if (response.ok) {
+                window.location.reload();
+              }
+            })
+            .catch(error => {
+              console.error('새로고침 중 오류 발생:', error);
+            })
+            .finally(() => {
+              window.location.reload();
+            });
+          }, 500);
+        } else {
+          resetRefreshState();
+        }
+      });
+
+      function resetRefreshState() {
+        postsContainer.style.transition = 'transform 0.3s';
+        postsContainer.style.transform = 'translateY(0)';
+        refreshSpinner.classList.remove('spinning');
+        refreshSpinner.style.transform = 'rotate(0deg)';
+        refreshText.textContent = '당겨서 새로고침';
+        refreshIndicator.style.opacity = '0';
+        
+        setTimeout(() => {
+          postsContainer.style.transition = '';
+          refreshIndicator.style.display = 'none';
+          isRefreshing = false;
+          startY = 0;
+          pullDistance = 0;
+        }, 300);
+      }
+
+      // 스크롤 이벤트 처리
+      const topBtn = document.getElementById('top-btn');
+
+      // 페이지 로드 시 버튼이 보이는지 확인
+
+      postsContainer.addEventListener('scroll', function() {
         const scrollTop = this.scrollTop;
         
         if (scrollTop > 100) {
-            topBtn.classList.add('visible');
+          topBtn.classList.add('visible');
         } else {
-            topBtn.classList.remove('visible');
+          topBtn.classList.remove('visible');
         }
-    });
+      });
 
-    // 초기 스크롤 위치 확인
-    if (postsContainer.scrollTop > 100) {
+      // 초기 스크롤 위치 확인
+      if (postsContainer.scrollTop > 100) {
         topBtn.classList.add('visible');
-    }
+      }
 
-    function scrollToTop() {
+      function scrollToTop() {
         // 버튼 클릭시 먼저 버튼을 위로 올리면서 사라지게
         topBtn.style.transform = 'translateX(-50%) translateY(-20px)';
         topBtn.style.opacity = '0';
         
         // 그 다음 스크롤
         setTimeout(() => {
-            postsContainer.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-            
-            // 스크롤이 끝나면 버튼 스타일 초기화
-            setTimeout(() => {
-                topBtn.style.transform = '';
-                topBtn.style.opacity = '';
-                if (postsContainer.scrollTop > 100) {
-                    topBtn.classList.add('visible');
-                }
-            }, 500); // 스크롤 애니메이션이 끝날 때쯤
+          postsContainer.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+          });
+          
+          // 스크롤이 끝나면 버튼 스타일 초기화
+          setTimeout(() => {
+            topBtn.style.transform = '';
+            topBtn.style.opacity = '';
+            if (postsContainer.scrollTop > 100) {
+              topBtn.classList.add('visible');
+            }
+          }, 500); // 스크롤 애니메이션이 끝날 때쯤
         }, 200);
-    }
+      }
 
-    // 전광판 애니메이션 재시작
-    function restartTicker() {
+      // 전광판 애니메이션 재시작
+      function restartTicker() {
         const ticker = document.querySelector('.notice-ticker');
         ticker.style.animation = 'none';
         ticker.offsetHeight; // Trigger reflow
         ticker.style.animation = null;
-    }
+      }
 
-    // 전광판이 끝에 도달하면 자동으로 재시작
-    document.querySelector('.notice-ticker').addEventListener('animationend', restartTicker);
-    
-    // 게시글 더보기 기능
-    let currentlyShown = 10;
-    const postsPerPage = 10;
-    
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    if(loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', function() {
-            // 로딩 상태 추가
-            this.classList.add('loading-state');
-            
-            setTimeout(() => {
-                const posts = document.querySelectorAll('.board-item');
-                const totalPosts = posts.length;
-                
-                // 다음 10개의 게시글 표시
-                for(let i = currentlyShown; i < currentlyShown + postsPerPage && i < totalPosts; i++) {
-                    posts[i].style.display = '';
-                }
-                
-                currentlyShown += postsPerPage;
-                
-                // 로딩 상태 제거
-                this.classList.remove('loading-state');
-                
-                // 모든 게시글을 다 보여줬다면 더보기 버튼 페이드아웃 후 제거
-                if(currentlyShown >= totalPosts) {
-                    this.style.opacity = '0';
-                    setTimeout(() => {
-                        this.style.display = 'none';
-                    }, 300);
-                }
-            }, 800); // 로딩 효과를 보여주기 위한 지연
-        });
-    }
+      // 전광판이 끝에 도달하면 자동으로 재시작
+      document.querySelector('.notice-ticker').addEventListener('animationend', restartTicker);
+    });
   </script>
 </body>
 </html>

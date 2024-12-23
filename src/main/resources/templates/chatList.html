@@ -93,6 +93,8 @@
                 overflow-x: hidden;
                 scroll-behavior: smooth;
                 position: relative;
+                transition: transform 0.3s ease-out;
+                padding-top: 10px;
             }
 
             .chat-list-title {
@@ -271,7 +273,7 @@
             .delete-selected-btn {
                 background-color: #ff4444;
                 color: white;
-                margin-left: 10px;
+                margin-left: 100px;
             }
 
             .cancel-select-btn {
@@ -295,6 +297,47 @@
                 top: 50%;
                 transform: translateY(-50%);
             }
+
+            /* 새로고침 인디케이터 스타일 */
+            .refresh-indicator {
+                position: fixed;
+                top: 70px;
+                left: 50%;
+                transform: translateX(-50%);
+                text-align: center;
+                width: 100%;
+                padding: 15px;
+                background-color: rgba(255, 255, 255, 0.95);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                z-index: 1000;
+                display: none;
+            }
+
+            .refresh-spinner {
+                width: 30px;
+                height: 30px;
+                margin: 0 auto;
+                border: 3px solid #f3f3f3;
+                border-top: 3px solid #2C74D2;
+                border-radius: 50%;
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .refresh-text {
+                margin-top: 8px;
+                color: #2C74D2;
+                font-size: 14px;
+                font-weight: bold;
+            }
+
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+
+            .spinning {
+                animation: spin 1s linear infinite;
+            }
         </style>
     </head>
     <body>
@@ -302,6 +345,11 @@
         <!-- /header -->
         <div class="main-content">
             <div class="chat">
+                <!-- 새로고침 인디케이터 추가 -->
+                <div class="refresh-indicator">
+                    <div class="refresh-spinner"></div>
+                    <div class="refresh-text">당겨서 새로고침</div>
+                </div>
                 <div class="chat-list">
                     <div class="chat-list-title">
                         <span>채팅 목록</span>
@@ -391,6 +439,10 @@
             let lastScrollTop = 0;
             const chatList = document.querySelector('.chat-list');
             const scrollIndicator = document.querySelector('.scroll-indicator');
+            const refreshIndicator = document.querySelector('.refresh-indicator');
+            const refreshSpinner = document.querySelector('.refresh-spinner');
+            const refreshText = document.querySelector('.refresh-text');
+            let isRefreshing = false;
 
             // 스크롤 위치 감지 및 표시기 제어
             chatList.addEventListener('scroll', () => {
@@ -464,6 +516,112 @@
             document.addEventListener('DOMContentLoaded', function() {
                 // 초기 채팅 목록 상태 체크
                 checkChatList();
+
+                let startY = 0;
+                let pullDistance = 0;
+                const THRESHOLD = 80;
+                const chatList = document.querySelector('.chat-list');
+                const refreshIndicator = document.querySelector('.refresh-indicator');
+                const refreshSpinner = document.querySelector('.refresh-spinner');
+                const refreshText = document.querySelector('.refresh-text');
+                let isRefreshing = false;
+
+                chatList.addEventListener('touchstart', (e) => {
+                    if (chatList.scrollTop === 0 && !isRefreshing) {
+                        startY = e.touches[0].clientY;
+                        refreshIndicator.style.display = 'block';
+                        refreshIndicator.style.opacity = '0';
+                    }
+                });
+
+                chatList.addEventListener('touchmove', (e) => {
+                    if (startY === 0 || isRefreshing) return;
+                    
+                    const currentY = e.touches[0].clientY;
+                    pullDistance = currentY - startY;
+
+                    if (chatList.scrollTop === 0 && pullDistance > 0) {
+                        e.preventDefault();
+                        const translateY = Math.min(pullDistance/2, THRESHOLD);
+                        chatList.style.transform = `translateY(${translateY}px)`;
+                        
+                        // 인디케이터 표시
+                        refreshIndicator.style.opacity = (translateY / THRESHOLD).toString();
+                        
+                        // 스피너 회전 각도 계산
+                        const rotation = (translateY / THRESHOLD) * 360;
+                        refreshSpinner.style.transform = `rotate(${rotation}deg)`;
+                        
+                        // 텍스트 업데이트
+                        if (translateY >= THRESHOLD) {
+                            refreshText.textContent = '놓아서 새로고침';
+                        } else {
+                            refreshText.textContent = '당겨서 새로고침';
+                        }
+                    }
+                });
+
+                chatList.addEventListener('touchend', () => {
+                    if (!startY || isRefreshing) {
+                        return;
+                    }
+
+                    if (pullDistance > THRESHOLD) {
+                        isRefreshing = true;
+                        refreshText.textContent = '새로고침 중...';
+                        refreshSpinner.classList.add('spinning');
+                        refreshIndicator.style.opacity = '1';
+                        
+                        const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
+                        const header = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+                        // 새로고침 중에는 목록을 약간 내린 상태로 유지
+                        chatList.style.transition = 'transform 0.3s';
+                        chatList.style.transform = 'translateY(40px)';
+
+                        setTimeout(() => {
+                            // 현재 페이지 URL 사용
+                            fetch(window.location.href, {
+                                method: 'GET',
+                                headers: {
+                                    [header]: token,
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                },
+                                credentials: 'same-origin'
+                            })
+                            .then(response => {
+                                if (response.ok) {
+                                    window.location.reload();
+                                }
+                            })
+                            .catch(error => {
+                                console.error('새로고침 중 오류 발생:', error);
+                            })
+                            .finally(() => {
+                                window.location.reload(); // 오류가 발생하더라도 페이지 새로고침
+                            });
+                        }, 500);
+                    } else {
+                        resetRefreshState();
+                    }
+                });
+
+                function resetRefreshState() {
+                    chatList.style.transition = 'transform 0.3s';
+                    chatList.style.transform = 'translateY(0)';
+                    refreshSpinner.classList.remove('spinning');
+                    refreshSpinner.style.transform = 'rotate(0deg)';
+                    refreshText.textContent = '당겨서 새로고침';
+                    refreshIndicator.style.opacity = '0';
+                    
+                    setTimeout(() => {
+                        chatList.style.transition = '';
+                        refreshIndicator.style.display = 'none';
+                        isRefreshing = false;
+                        startY = 0;
+                        pullDistance = 0;
+                    }, 300);
+                }
 
                 // 스크롤 차단 방지 (항상 chat-list는 수직 스크롤만 유지)
                 document.querySelector('.chat-list').addEventListener('touchmove', e => {

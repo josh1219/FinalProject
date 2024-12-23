@@ -11,25 +11,28 @@
             <span th:if="${isAdmin}" class="admin-badge">관리자 로그인</span>
         </div>
     </div>
-        <div class="header-right">
-            <div class="logout" th:if="${session.isLoggedIn}">
-                <button onclick="location.href='/member/logout'" class="logout-button">
-                    <img th:src="@{/images/logoutButton.svg}" alt="로그아웃">
-                </button>
-            </div>
-            <div class="gotochat">
+    <div class="header-right">
+        <div class="logout" th:if="${session.isLoggedIn}">
+            <button onclick="location.href='/member/logout'" class="logout-button">
+                <img th:src="@{/images/logoutButton.svg}" alt="로그아웃">
+            </button>
+        </div>
+        <div class="gotochat">
+            <div class="chat-icon-container">
                 <button onclick="location.href='/chatList'" class="chat-button">
                     <img th:src="@{/images/chatbutton.svg}" alt="채팅">
                 </button>
-            </div>
-            <div class="gotomypage">
-                <button th:if="${session.mIdx != null}" onclick="location.href='/mypage'" class="mypage-button">
-                    <img th:src="@{/images/mypage.svg}" alt="마이페이지">
-                </button>
-                <button th:unless="${session.mIdx != null}" onclick="location.href='/member/login'" class="mypage-button">
-                    <img th:src="@{/images/mypage.svg}" alt="마이페이지">
-                </button>
+                <span class="chat-badge" style="display: none;">0</span>
             </div>
         </div>
-    </header>
-    <!-- /header -->
+        <div class="gotomypage">
+            <button th:if="${session.mIdx != null}" onclick="location.href='/mypage'" class="mypage-button">
+                <img th:src="@{/images/mypage.svg}" alt="마이페이지">
+            </button>
+            <button th:unless="${session.mIdx != null}" onclick="location.href='/member/login'" class="mypage-button">
+                <img th:src="@{/images/mypage.svg}" alt="마이페이지">
+            </button>
+        </div>
+    </div>
+</header>
+<!-- /header -->

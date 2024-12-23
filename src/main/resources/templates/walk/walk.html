@@ -332,14 +332,6 @@
                     return;
                 }
 
-                // 네이티브 위치 권한 확인
-                if (window.Android) {
-                    if (!window.Android.hasLocationPermission()) {
-                        window.Android.requestLocationPermission();
-                        return;
-                    }
-                }
-
                 // 새로운 산책 시작 시 변수 초기화
                 isTracking = true;
                 totalDistance = 0;

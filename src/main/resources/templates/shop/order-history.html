@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>주문목록 - PETOPIA</title>
     <link rel="stylesheet" href="/css/alert.css">
     <link rel="stylesheet" href="/css/shop.css">
@@ -32,25 +34,6 @@
             font-size: 30px;
             font-weight: 500;
             color: #333;
-        }
-        .period-filter {
-            margin-top: 16px;
-            display: flex;
-            gap: 8px;
-        }
-        .period-btn {
-            padding: 8px 16px;
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            background: white;
-            cursor: pointer;
-            font-size: 14px;
-            color: #666;
-        }
-        .period-btn.active {
-            background: #040516;
-            color: white;
-            border-color: #040516;
         }
         .order-items {
             margin-top: 16px;
@@ -184,12 +167,6 @@
     <div class="order-container">
         <div class="order-header">
             <h2>주문목록</h2>
-            <div class="period-filter">
-                <button class="period-btn" data-period="1w">1주일</button>
-                <button class="period-btn" data-period="1m">1개월</button>
-                <button class="period-btn active" data-period="3m">3개월</button>
-                <button class="period-btn" data-period="6m">6개월</button>
-            </div>
         </div>
 
         <div class="order-items" th:if="${not #lists.isEmpty(orders)}">
@@ -251,16 +228,23 @@
     </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        // 기간 필터 버튼 클릭 이벤트
-        $('.period-btn').click(function() {
-            $('.period-btn').removeClass('active');
-            $(this).addClass('active');
-            
-            const period = $(this).data('period');
-            window.location.href = '/shop/orders?period=' + period;
-        });
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        document.addEventListener('DOMContentLoaded', function() {
+            const orderItemsContainer = document.querySelector('.order-items');
+            const noOrdersMessage = document.querySelector('.no-orders');
 
+            // CSRF 토큰 설정
+            const token = document.querySelector('meta[name="_csrf"]').content;
+            const header = document.querySelector('meta[name="_csrf_header"]').content;
+
+            if (noOrdersMessage && orderItemsContainer.children.length > 0) {
+                noOrdersMessage.style.display = 'none';
+            }
+        });
+        /*]]>*/
+    </script>
+    <script>
         // 반품 신청
         function requestReturn(orderId) {
             if (confirm('해당 주문을 반품 신청하시겠습니까?')) {

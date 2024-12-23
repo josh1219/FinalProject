@@ -12,6 +12,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -33,51 +35,11 @@ public class OrderController {
             return "redirect:/member/login";
         }
 
-        // 사용자 정보 조회
-        String userEmail = null;
-        Member member = null;
-
-        if (authentication.getPrincipal() instanceof OAuth2User) {
-            OAuth2User oauth2User = (OAuth2User) authentication.getPrincipal();
-            
-            // OAuth2 제공자 확인
-            String provider = "";
-            if (authentication instanceof OAuth2AuthenticationToken) {
-                provider = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
-            }
-            
-            // 제공자별로 이메일 또는 ID 가져오기
-            if ("google".equals(provider)) {
-                userEmail = oauth2User.getAttribute("email");
-            } else if ("naver".equals(provider)) {
-                Map<String, Object> response = oauth2User.getAttribute("response");
-                if (response != null) {
-                    userEmail = (String) response.get("email");
-                }
-            } else if ("kakao".equals(provider)) {
-                // 카카오의 경우 ID를 통해 회원 조회
-                Object kakaoId = oauth2User.getAttribute("id");
-                String socialId = kakaoId != null ? String.valueOf(kakaoId) : null;
-                if (socialId != null) {
-                    member = memberService.findByProviderAndSocialId("kakao", socialId);
-                    if (member != null) {
-                        userEmail = member.getMEmail();
-                    }
-                }
-            }
-        } else {
-            userEmail = authentication.getName();
-        }
-
-        // 이메일로 회원 조회 (카카오 로그인이 아닌 경우)
-        if (userEmail != null && member == null) {
-            member = memberService.getMemberByEmail(userEmail);
-        }
-
+        Member member = getCurrentMember(authentication);
         if (member != null) {
-            // 주문 내역 조회 로직 구현 예정
-            // List<Order> orders = orderService.getOrdersByMember(member);
-            // model.addAttribute("orders", orders);
+            // 주문 내역 조회
+            List<Order> orders = orderService.getOrderHistory(member.getMEmail(), null, null);
+            model.addAttribute("orders", orders);
             
             // 회원 정보 추가
             model.addAttribute("memberName", member.getName());

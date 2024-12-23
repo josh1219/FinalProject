@@ -88,9 +88,10 @@ public class CartService {
                 .orElseThrow(() -> new IllegalArgumentException("상품을 찾을 수 없습니다."));
 
         CartItem cartItem = cartItemRepository.findByMemberAndProduct(member, product)
-                .orElse(new CartItem());
+                .orElse(null);
 
-        if (cartItem.getCIdx() == 0) {
+        if (cartItem == null) {
+            cartItem = new CartItem();
             cartItem.setMember(member);
             cartItem.setProduct(product);
             cartItem.setQuantity(quantity);

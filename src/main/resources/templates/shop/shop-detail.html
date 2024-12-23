@@ -394,10 +394,11 @@
 
     <script th:inline="javascript">
         /*<![CDATA[*/
-        const productPrice = [[${product.price}]];
-        const productId = [[${product.pIdx}]];
+        const productId = [[${product.PIdx}]];
         const token = document.querySelector('meta[name="_csrf"]').content;
         const header = document.querySelector('meta[name="_csrf_header"]').content;
+        let isInCart = false;
+        const productPrice = [[${product.price}]];
         let quantity = 1;
 
         // 페이지 로드 시 장바구니 상태 확인

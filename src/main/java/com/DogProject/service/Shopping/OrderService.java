@@ -33,26 +33,31 @@ public class OrderService {
     private CartService cartService;
 
     public List<Order> getOrderHistory(String userEmail, String period, String status) {
-        LocalDateTime startDate = calculateStartDate(period);
         int mIdx = memberService.findBymEmail(userEmail).getMIdx();
+        LocalDateTime startDate = LocalDateTime.now().minusYears(100); // 모든 주문 내역을 가져오기 위해 충분히 과거 시점 설정
         
         if (status != null && !status.isEmpty()) {
-            return orderRepository.findByMember_mIdxAndOrderDateAfterAndStatus(mIdx, startDate, status);
+            return orderRepository.findByMember_mIdxAndOrderDateAfterAndStatusOrderByOrderDateDesc(mIdx, startDate, status);
         }
-        return orderRepository.findByMember_mIdxAndOrderDateAfter(mIdx, startDate);
+        return orderRepository.findByMember_mIdxAndOrderDateAfterOrderByOrderDateDesc(mIdx, startDate);
     }
 
     public List<Order> getReturnHistory(String userEmail, String period) {
         LocalDateTime startDate = calculateStartDate(period);
-        int mIdx = memberService.findBymEmail(userEmail).getMIdx();
-        return orderRepository.findByMember_mIdxAndOrderDateAfterAndStatusIn(
-            mIdx, 
-            startDate, 
-            List.of("RETURNED", "RETURN_REQUESTED")
-        );
-    }
-
-    @Transactional
+                int mIdx = memberService.findBymEmail(userEmail).getMIdx();
+                return orderRepository.findByMember_mIdxAndOrderDateAfterAndStatusInOrderByOrderDateDesc(
+                    mIdx, 
+                    startDate, 
+                    List.of("RETURNED", "RETURN_REQUESTED")
+                );
+            }
+        
+            private LocalDateTime calculateStartDate(String period) {
+                // TODO Auto-generated method stub
+                throw new UnsupportedOperationException("Unimplemented method 'calculateStartDate'");
+            }
+        
+            @Transactional
     public Order createOrder(Member member, int productId, int quantity,
                            String recipientName, String recipientPhone,
                            String address, String shippingRequest) {
@@ -145,23 +150,5 @@ public class OrderService {
         return savedOrder;
     }
 
-    private LocalDateTime calculateStartDate(String period) {
-        LocalDateTime now = LocalDateTime.now();
-        if (period == null || period.isEmpty()) {
-            return now.minusMonths(3); // 기본값: 3개월
-        }
-        
-        switch (period) {
-            case "1w":
-                return now.minusWeeks(1);
-            case "1m":
-                return now.minusMonths(1);
-            case "3m":
-                return now.minusMonths(3);
-            case "6m":
-                return now.minusMonths(6);
-            default:
-                return now.minusMonths(3);
-        }
-    }
+    
 }

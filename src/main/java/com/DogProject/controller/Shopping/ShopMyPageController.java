@@ -1,7 +1,6 @@
 package com.DogProject.controller.Shopping;
 
 import com.DogProject.entity.Member;
-import com.DogProject.entity.Order;
 import com.DogProject.service.MemberService;
 import com.DogProject.service.Shopping.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 
 @Controller

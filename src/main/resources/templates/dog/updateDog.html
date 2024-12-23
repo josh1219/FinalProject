@@ -306,14 +306,13 @@
                             <button type="button" class="img-button" onclick="openCamera()">
                                 <img src="/images/camera-1.svg" alt="카메라">
                             </button>
-                            <label for="file-input" class="img-button">
+                            <button type="button" class="img-button" onclick="openGallery()">
                                 <img src="/images/photo-1.svg" alt="사진">
-                            </label>
+                            </button>
                             <button type="button" class="img-button" onclick="removeImage()">
                                 <img src="/images/trash.svg" alt="제거">
                             </button>
                         </div>
-                        <input type="file" id="file-input" name="image" accept="image/*" class="file-input" onchange="previewImage(this)" style="display: none;">
                     </div>
                 </div>
 
@@ -367,49 +366,57 @@
     <!-- /footer -->
 
     <script>
-        let lastClickedButton = null;
-
         function openCamera() {
-            lastClickedButton = 'camera';
-            const input = document.getElementById('file-input');
-            input.setAttribute('capture', 'camera');
-            input.removeAttribute('accept');
-            input.setAttribute('accept', 'image/*;capture=camera');
-            input.click();
+            if (window.Android) {
+                window.Android.openImagePicker('camera');
+            }
         }
 
         function openGallery() {
-            lastClickedButton = 'gallery';
-            const input = document.getElementById('file-input');
-            input.removeAttribute('capture');
-            input.removeAttribute('accept');
-            input.setAttribute('accept', 'image/*');
-            input.click();
+            if (window.Android) {
+                window.Android.openImagePicker('gallery');
+            }
         }
 
-        async function previewImage(input) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    document.getElementById('preview').src = e.target.result;
-                    document.getElementById('preview').style.display = 'block';
-                    // 이미지가 로드되면 견종 식별 실행
-                    identifyBreed(input.files[0]);
-                }
-                reader.readAsDataURL(input.files[0]);
+        function handleCapturedImage(base64Image) {
+            const imgPreview = document.getElementById('preview');
+            imgPreview.src = 'data:image/jpeg;base64,' + base64Image;
+            imgPreview.style.display = 'block';
+            
+            const byteString = atob(base64Image);
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
             }
+            const blob = new Blob([ab], { type: 'image/jpeg' });
+            const file = new File([blob], "camera_image.jpg", { type: 'image/jpeg' });
+            
+            identifyBreed(file);
+        }
+
+        function handleSelectedImage(imagePath) {
+            const imgPreview = document.getElementById('preview');
+            imgPreview.src = imagePath;
+            imgPreview.style.display = 'block';
+            
+            fetch(imagePath)
+                .then(response => response.blob())
+                .then(blob => {
+                    const file = new File([blob], "gallery_image.jpg", { type: 'image/jpeg' });
+                    identifyBreed(file);
+                })
+                .catch(error => console.error('Error:', error));
         }
 
         function removeImage() {
             const preview = document.getElementById('preview');
-            const fileInput = document.getElementById('file-input');
-            
-            preview.src = '/images/dogdefault.png';
-            fileInput.value = '';
+            preview.src = '';
+            preview.style.display = 'none';
+            document.getElementById('dType').value = '';
         }
 
         async function identifyBreed(imageFile) {
-            // 로딩 모달 표시
             const loadingModal = document.getElementById('loading-modal');
             loadingModal.style.display = 'block';
             
@@ -433,7 +440,6 @@
                 const breedName = await response.text();
                 console.log('서버 응답 데이터:', breedName);
                 
-                // 로딩 모달 숨기기
                 loadingModal.style.display = 'none';
                 
                 if (breedName && breedName.trim() !== '') {
@@ -444,7 +450,6 @@
                 }
             } catch (error) {
                 console.error('견종 식별 중 오류 발생:', error);
-                // 로딩 모달 숨기기
                 loadingModal.style.display = 'none';
                 document.getElementById('dType').value = '';
                 alert('견종 식별에 실패했습니다. 수동으로 입력해주세요.\n오류: ' + error.message);

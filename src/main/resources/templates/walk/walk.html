@@ -297,31 +297,34 @@
             var timerInterval = null;
             var wsIdx = null; // 현재 산책 세션의 ID를 저장할 변수
             var locationInterval = null; // 위치 전송 인터벌 ID를 저장할 변수
+            var warningTimeout = null;  // 경고 메시지 타이머
+            var pendingStartWalk = false;
 
-            // 위치 권한 체크 함수
+            // 위치 권한 체크 및 요청
             function checkLocationPermission() {
                 if (!window.Android) {
                     showWarningMessage('안드로이드 앱에서만 사용 가능합니다.');
-                    //onLocationPermissionDenied();
                     return false;
                 }
+                return window.Android.checkLocationPermission();
+            }
 
-                // 권한이 없으면 요청
-                if (!window.Android.hasLocationPermission()) {
-                    showWarningMessage('위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.');
-                    window.Android.requestLocationPermission();
-                    onLocationPermissionDenied();
-                    return false;
+            // 위치 권한 허용됨
+            function onLocationPermissionGranted() {
+                console.log('Location permission granted');
+                if (pendingStartWalk) {
+                    startWalk();
                 }
+            }
 
-                // GPS 상태 체크
-                if (window.Android.isGPSEnabled && !window.Android.isGPSEnabled()) {
-                    showWarningMessage('GPS를 켜주세요.');
-                    onLocationPermissionDenied();
-                    return false;
-                }
-
-                return true;
+            // 위치 권한 거부됨
+            function onLocationPermissionDenied() {
+                console.log('Location permission denied');
+                isTracking = false;
+                pendingStartWalk = false;
+                showWarningMessage('위치 권한이 필요합니다.');
+                document.querySelector('.Go-button-site').textContent = 'GO!';
+                document.querySelector('.Go-button-site').classList.remove('stop');
             }
 
             function startWalk() {
@@ -332,6 +335,7 @@
 
                 // 위치 권한 체크
                 if (!checkLocationPermission()) {
+                    pendingStartWalk = true;
                     return;
                 }
 
@@ -342,7 +346,7 @@
                 pathCoordinates = [];
                 lastValidLocation = null;
                 currentLocation = null;
-                wsIdx = null; // wsIdx 초기화
+                wsIdx = null;
 
                 // polyline 초기화
                 if (polyline) {
@@ -365,7 +369,7 @@
                 // 네이티브 위치 추적 시작
                 if (window.Android) {
                     window.Android.startTracking();
-                    console.log('Started tracking'); // 추적 시작 로그
+                    console.log('Started tracking');
                 }
 
                 // 타이머 시작
@@ -374,91 +378,44 @@
                 // UI 업데이트
                 document.querySelector('.Go-button-site').textContent = 'STOP';
                 document.querySelector('.Go-button-site').classList.add('stop');
-
-                // 2초마다 위치 데이터 전송
-                locationInterval = setInterval(() => {
-                    if (currentLocation) {
-                        $.ajax({
-                            url: '/walk/record',
-                            type: 'POST',
-                            data: {
-                                latitude: currentLocation.lat,
-                                longitude: currentLocation.lng,
-                                distance: totalDistance,
-                                wsIdx: wsIdx
-                            },
-                            headers: {
-                                'X-CSRF-TOKEN': csrfToken
-                            },
-                            success: function(response) {
-                                if (response.wsIdx && !wsIdx) {
-                                    wsIdx = response.wsIdx; // 첫 번째 응답에서 wsIdx 저장
-                                }
-                                console.log('위치 데이터 저장 성공:', response);
-                            },
-                            error: function(xhr, status, error) {
-                                console.error('위치 데이터 저장 실패:', error);
-                            }
-                        });
-                    }
-                }, 2000);
             }
 
             function stopWalk() {
                 if (!isTracking) return;
 
-                console.log('Stopping walk...'); // 산책 중지 로그
-
-                // 네이티브 위치 추적 중지
                 if (window.Android) {
                     window.Android.stopTracking();
                 }
 
-                // 위치 데이터 전송 중지
-                clearInterval(locationInterval);
-
-                stopTimer();
                 isTracking = false;
+                pendingStartWalk = false;
+                stopTimer();
+
+                // UI 업데이트
                 document.querySelector('.Go-button-site').textContent = 'GO!';
                 document.querySelector('.Go-button-site').classList.remove('stop');
 
-                if (totalDistance < 100) {
-                    pathCoordinates = [];
-                    if (polyline) {
-                        polyline.setMap(null);
-                    }
-                    $('#distance').text('0m');
-                    $('#timer').text('00:00:00');
-                    $('.plusMile').text('( + 0 mile)');
-                    showWarningMessage('최소 100m 이상 걸어야 포인트가 적립됩니다.');
-                    return;
-                }
-
-                // 산책 종료 처리
-                $.ajax({
-                    url: '/walk/save',
-                    type: 'POST',
-                    data: {
-                        'totalDistance': totalDistance,
-                        'wsIdx': wsIdx
-                    },
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    success: function(data) {
-                        if (data.success) {
-                            const earnedPoints = data.earnedPoints;
-                            showWarningMessage(`산책이 완료되었습니다! ${earnedPoints}포인트가 적립되었습니다.`);
-                            document.getElementById('currentPoint').textContent = data.currentPoint;
-                        } else {
-                            showWarningMessage(data.message || '산책 데이터 저장에 실패했습니다.');
+                // 서버에 산책 종료 요청
+                if (wsIdx) {
+                    $.ajax({
+                        url: '/walk/end',
+                        type: 'POST',
+                        data: {
+                            wsIdx: wsIdx
+                        },
+                        headers: {
+                            'X-CSRF-TOKEN': csrfToken
+                        },
+                        success: function(response) {
+                            console.log('산책 종료 성공:', response);
+                            window.location.href = '/walk/result/' + wsIdx;
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('산책 종료 실패:', error);
+                            showWarningMessage('산책 종료 중 오류가 발생했습니다.');
                         }
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error saving walk data:', error);
-                        showWarningMessage('산책 데이터 저장에 실패했습니다.');
-                    }
-                });
+                    });
+                }
             }
 
             // 네이티브에서 전달받은 초기 위치로 지도 중심 설정
@@ -473,7 +430,7 @@
 
             // 네이티브에서 전달받은 위치 정보 처리
             function handleNativeLocation(location) {
-                console.log('Received location:', location); // 위치 업데이트 로그
+                console.log('Received location:', location);
 
                 if (!isTracking) return;
 
@@ -490,23 +447,6 @@
 
                 // 경로에 위치 추가 및 거리 계산
                 updatePathWithDistance(pos);
-            }
-
-            // 위치 권한 허용됨
-            function onLocationPermissionGranted() {
-                showWarningMessage('위치 권한이 허용되었습니다.');
-                if (document.querySelector('.Go-button-site').textContent === 'GO!') {
-                    startWalk();
-                }
-            }
-
-            // 위치 권한 거부됨
-            function onLocationPermissionDenied() {
-                showWarningMessage('위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.');
-                stopWalk(); // 권한이 없으면 산책 중지
-                if (window.Android) {
-                    window.Android.openAppSettings();
-                }
             }
 
             function handleLocationUpdate(position) {
@@ -615,18 +555,28 @@
             }
 
             function showWarningMessage(message) {
-                const warningElement = document.getElementById('warningMessage');
-                warningElement.textContent = message;
-                warningElement.classList.add('show');
-
                 // 이전 타이머가 있다면 제거
                 if (warningTimeout) {
                     clearTimeout(warningTimeout);
                 }
 
-                // 3초 후에 메시지 페이드아웃
+                const warningDiv = document.createElement('div');
+                warningDiv.style.position = 'fixed';
+                warningDiv.style.top = '20px';
+                warningDiv.style.left = '50%';
+                warningDiv.style.transform = 'translateX(-50%)';
+                warningDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.8)';
+                warningDiv.style.color = 'white';
+                warningDiv.style.padding = '10px 20px';
+                warningDiv.style.borderRadius = '5px';
+                warningDiv.style.zIndex = '1000';
+                warningDiv.textContent = message;
+
+                document.body.appendChild(warningDiv);
+
+                // 3초 후 메시지 제거
                 warningTimeout = setTimeout(() => {
-                    warningElement.classList.remove('show');
+                    warningDiv.remove();
                 }, 3000);
             }
 

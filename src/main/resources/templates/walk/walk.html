@@ -302,6 +302,7 @@
             function checkLocationPermission() {
                 if (!window.Android) {
                     showWarningMessage('안드로이드 앱에서만 사용 가능합니다.');
+                    //onLocationPermissionDenied();
                     return false;
                 }
 
@@ -309,12 +310,14 @@
                 if (!window.Android.hasLocationPermission()) {
                     showWarningMessage('위치 권한이 필요합니다. 설정에서 권한을 허용해주세요.');
                     window.Android.requestLocationPermission();
+                    onLocationPermissionDenied();
                     return false;
                 }
 
                 // GPS 상태 체크
                 if (window.Android.isGPSEnabled && !window.Android.isGPSEnabled()) {
                     showWarningMessage('GPS를 켜주세요.');
+                    onLocationPermissionDenied();
                     return false;
                 }
 

@@ -17,12 +17,12 @@
                     <img th:src="@{/images/logoutButton.svg}" alt="로그아웃">
                 </button>
             </div>
-            <div class="chat">
+            <div class="gotochat">
                 <button onclick="location.href='/chatList'" class="chat-button">
                     <img th:src="@{/images/chatbutton.svg}" alt="채팅">
                 </button>
             </div>
-            <div class="mypage">
+            <div class="gotomypage">
                 <button th:if="${session.mIdx != null}" onclick="location.href='/mypage'" class="mypage-button">
                     <img th:src="@{/images/mypage.svg}" alt="마이페이지">
                 </button>

@@ -45,7 +45,7 @@
     text-decoration: none;
 }
 
-.chat, .mypage, .logout {
+.gotochat, .gotomypage, .logout {
     width: 40px;
     height: 40px;
     display: flex;

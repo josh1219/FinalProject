@@ -213,7 +213,7 @@
                 errorMsg: '이름은 2자 이상의 한글이어야 합니다.'
             },
             birthday: {
-                regex: /^\d{8}$/,
+                regex: /^(19\d{2}|20[0-2]\d)(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])$/,
                 errorMsg: '생년월일은 8자리 숫자(YYYYMMDD)로 입력해주세요.'
             },
             phone: {
@@ -419,7 +419,7 @@
     /*<![CDATA[*/
     var isKakao = /*[[${memberDTO != null && memberDTO.provider == 'kakao'}]]*/ false;
     var kakaoEmail = /*[[${memberDTO != null ? memberDTO.mEmail : ''}]]*/ '';
-    /*]]>*/
+    /*]]*/
     
     function handleKakaoEmail(input) {
         if (!input.value.includes('@kakao.com')) {

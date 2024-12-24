@@ -294,11 +294,13 @@ public class MemberService implements UserDetailsService {
     /**
      * 소셜 아이디로 회원 조회
      *
-     * @param socialId
+     * @param provider 소셜 로그인 제공자
+     * @param socialId 소셜 아이디
      * @return
      */
-    public Member getMemberBySocialId(String socialId) {
-        return memberRepository.findBySocialId(socialId);
+    public Member getMemberBySocialId(String provider, String socialId) {
+        return memberRepository.findByProviderAndSocialId(provider, socialId)
+                .orElse(null);
     }
 
 }

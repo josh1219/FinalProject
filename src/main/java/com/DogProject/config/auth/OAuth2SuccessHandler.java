@@ -70,7 +70,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     System.out.println("Member Email: " + member.getMEmail());
                     System.out.println("Member Provider: " + member.getProvider());
                     
-                    member.updateOAuth2Info(name, picture, provider, socialId);
+                    member.updateOAuth2Info(picture, provider, socialId);
                     memberRepository.save(member);
                     
                     setLoginSession(response, member);
@@ -79,7 +79,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 } else {
                     System.out.println("\nNew Naver Member - Redirecting to Join Page");
                     Member socialMember = Member.socialBuilder()
-                        .name(name)
                         .mEmail(email)
                         .picture(picture)
                         .provider(provider)
@@ -115,7 +114,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     System.out.println("Member Email: " + member.getMEmail());
                     System.out.println("Member Provider: " + member.getProvider());
                     
-                    member.updateOAuth2Info(name, picture, provider, socialId);
+                    member.updateOAuth2Info(picture, provider, socialId);
                     memberRepository.save(member);
                     
                     setLoginSession(response, member);
@@ -124,7 +123,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 } else {
                     System.out.println("\nNew Google Member - Redirecting to Join Page");
                     Member socialMember = Member.socialBuilder()
-                        .name(name)
                         .mEmail(email)
                         .picture(picture)
                         .provider(provider)
@@ -164,7 +162,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                     System.out.println("Member Provider: " + member.getProvider());
                     
                     // 기존 회원 정보 업데이트 (이메일은 업데이트하지 않음)
-                    member.updateOAuth2Info(name, picture, provider, socialId);
+                    member.updateOAuth2Info(picture, provider, socialId);
                     memberRepository.save(member);
                     
                     setLoginSession(response, member);
@@ -173,7 +171,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 } else {
                     System.out.println("\nNew Kakao Member - Redirecting to Join Page");
                     Member socialMember = Member.socialBuilder()
-                        .name(name)
                         .mEmail(email)
                         .picture(picture)
                         .provider(provider)

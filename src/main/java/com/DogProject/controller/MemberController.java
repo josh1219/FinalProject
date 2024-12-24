@@ -43,19 +43,18 @@ public class MemberController {
         if (socialMember != null) {
             // 소셜 로그인 정보가 있으면 DTO에 설정
             System.out.println("Social Member found in session:");
-            System.out.println("Name: " + socialMember.getName());
             System.out.println("Email: " + socialMember.getMEmail());
             System.out.println("Provider: " + socialMember.getProvider());
             System.out.println("SocialId: " + socialMember.getSocialId());
             
-            memberDTO.setName(socialMember.getName());
+            // 소셜 로그인 정보만 설정하고 name은 제외 (사용자 입력값 사용)
             memberDTO.setMEmail(socialMember.getMEmail());
             memberDTO.setPicture(socialMember.getPicture());
             memberDTO.setProvider(socialMember.getProvider());
             memberDTO.setSocialId(socialMember.getSocialId());
+            memberDTO.setName(null);  // name 값을 null로 설정하여 사용자 입력값이 사용되도록 함
             
             System.out.println("MemberDTO after conversion:");
-            System.out.println("Name: " + memberDTO.getName());
             System.out.println("Email: " + memberDTO.getMEmail());
             System.out.println("Provider: " + memberDTO.getProvider());
             System.out.println("SocialId: " + memberDTO.getSocialId());

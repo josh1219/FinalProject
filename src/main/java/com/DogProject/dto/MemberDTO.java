@@ -46,7 +46,6 @@ public class MemberDTO {
 
     public Member toEntity() {
         Member member = Member.socialBuilder()
-            .name(name)
             .mEmail(mEmail.toLowerCase())
             .picture(picture)
             .provider(provider)
@@ -56,6 +55,7 @@ public class MemberDTO {
             .gender(gender)
             .address(address)
             .enabled(true)
+            .name(name)  // 폼에서 입력받은 name을 마지막에 설정
             .build();
         
         member.setRole(Role.USER);

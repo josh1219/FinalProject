@@ -108,11 +108,9 @@ public class Member {
      * 소셜 로그인 회원을 위한 빌더
      */
     @Builder(builderMethodName = "socialBuilder")
-    public Member(String name, String mEmail, String picture, String provider, 
-                 boolean enabled, String socialId, String birthday, String phone, String gender, String address) {
-        this.name = name;
+    public Member(String mEmail, String picture, String provider, 
+                 boolean enabled, String socialId, String birthday, String phone, String gender, String address, String name) {
         this.mEmail = mEmail;
-        //this.mPassword = mPassword;
         this.picture = picture;
         this.provider = provider;
         this.enabled = enabled;
@@ -122,12 +120,13 @@ public class Member {
         this.phone = phone;
         this.gender = gender;
         this.address = address;
+        this.name = name;  
         this.point = 0;
     }
 
-    /**
-     * 일반 회원가입을 위한 빌더
-     */
+    /*
+    일반 회원가입을 위한 빌더
+     
     @Builder(builderMethodName = "userBuilder")
     public Member(String name, String mEmail, String birthday, String phone,
                  String gender, String address) {
@@ -143,12 +142,13 @@ public class Member {
         this.role = Role.USER;
         this.provider = "local";  // 명시적으로 provider를 'local'로 설정
     }
+    */
 
     /**
      * OAuth2 정보 업데이트
      */
-    public void updateOAuth2Info(String name, String picture, String provider, String socialId) {
-        if (name != null) this.name = name;
+    public void updateOAuth2Info(String picture, String provider, String socialId) {
+        // name은 업데이트하지 않음 (사용자 입력값 유지)
         if (picture != null) this.picture = picture;
         if (provider != null) this.provider = provider;
         if (socialId != null) this.socialId = socialId;

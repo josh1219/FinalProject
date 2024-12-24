@@ -4,81 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PETOPIA - 내가 쓴 게시글</title>
-    <link rel="stylesheet" href="/css/join.css">
+    <link rel="stylesheet" href="/css/tourMain.css">
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/footer.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-</head>
-<body>
-    
-    <div class="container-fluid main-content">
-        <button id="top-btn" onclick="scrollToTop()">↑</button>
-        
-        <!-- 페이지 헤더 -->
-        <div th:replace="~{common/header :: header}"></div>
-        <!-- /헤더 -->
-    <div class="container">
-        <div class="page-header">
-            <h2>내 게시물</h2>
-            <div class="header-actions">
-                <a href="/board" class="write-btn">
-                    <i class="fas fa-pen"></i>
-                    <span>커뮤니티</span>
-                </a>
-            </div>
-        </div>
-    
-
-        <!-- 게시글 목록 -->
-        <div class="posts-container">
-            <!-- 게시글 아이템 -->
-            <div th:each="board : ${myBoards}" class="post-item" th:classappend="${board.bType == '공지사항'} ? 'notice-post' : ''">
-                <div class="post-content">
-                    <div class="post-header">
-                        <span class="board-category" th:text="${board.bType}"></span>
-                        <span class="post-date" th:text="${board.insertDate}"></span>
-                    </div>
-                    <a th:href="@{/board/detail/{id}(id=${board.bIdx})}" class="post-title">
-                        <h3 th:text="${board.title}"></h3>
-                    </a>
-                    <div class="post-stats">
-                        <div class="stat-item">
-                            <i class="fas fa-eye"></i>
-                            <span th:text="${board.readRate}"></span>
-                        </div>
-                        <div class="stat-item">
-                            <i class="fas fa-heart"></i>
-                            <span th:text="${board.likeCount}"></span>
-                        </div>
-                        <div class="post-number">
-                            <span>#</span>
-                            <span th:text="${board.bIdx}"></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-            <!-- 빈 상태 -->
-            <div th:if="${#lists.isEmpty(myBoards)}" class="empty-state">
-                <img src="/images/empty-posts.png" alt="빈 게시판">
-                <p>아직 작성한 게시글이 없습니다.</p>
-                <a href="/board" class="write-btn">
-                    <i class="fas fa-pen"></i>
-                    <span>커뮤니티로 이동</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- footer -->
-    <div th:replace="~{common/footer :: footer}"></div>
-    <!-- /footer -->
 
     <style>
         /* 메인 컨텐츠 스타일 */
+        .header{
+            height: 21px;
+        }
+
+        .container {
+                padding: 13px 0px;
+                margin-top: 40px;
+            }
+            
         .main-content {
             padding: 0px;
-            max-width: 1200px;
+            max-width: 477px;
             margin: 0 auto;
             position: relative;
             min-height: calc(100vh - 160px); /* header와 footer 높이를 고려한 최소 높이 */
@@ -86,6 +30,7 @@
 
         /* 커뮤니티 버튼 링크 스타일 */
         .header-actions a {
+            margin-top: 20px;
             text-decoration: none;
         }
 
@@ -261,7 +206,7 @@
         }
 
         /* 반응형 스타일 */
-        @media (max-width: 768px) {
+        @media (max-width: 477px) {
             .page-header {
                 flex-direction: row;
                 align-items: flex-start;
@@ -286,12 +231,76 @@
                 right: 20px;
             }
             .container {
-                padding: 13px 20px;
-                margin-top: 55px;
+                padding: 13px 0px;
+                margin-top: 40px;
             }
         }
     </style>
+</head>
+<body>
+    <div class="map-container">
+    <!-- 페이지 헤더 -->
+    <div th:replace="~{common/header :: header}"></div>
+    <!-- /헤더 -->
+    <div class="container-fluid main-content">        
+        
+    <div class="container">
+        <div class="page-header">
+            <h2>내 게시물</h2>
+            <div class="header-actions">
+                <a href="/board" class="write-btn">
+                    <i class="fas fa-pen"></i>
+                    <span>커뮤니티</span>
+                </a>
+            </div>
+        </div>
+    
 
+        <!-- 게시글 목록 -->
+        <div class="posts-container">
+            <!-- 게시글 아이템 -->
+            <div th:each="board : ${myBoards}" class="post-item" th:classappend="${board.bType == '공지사항'} ? 'notice-post' : ''">
+                <div class="post-content">
+                    <div class="post-header">
+                        <span class="board-category" th:text="${board.bType}"></span>
+                        <span class="post-date" th:text="${board.insertDate}"></span>
+                    </div>
+                    <a th:href="@{/board/detail/{id}(id=${board.bIdx})}" class="post-title">
+                        <h3 th:text="${board.title}"></h3>
+                    </a>
+                    <div class="post-stats">
+                        <div class="stat-item">
+                            <i class="fas fa-eye"></i>
+                            <span th:text="${board.readRate}"></span>
+                        </div>
+                        <div class="stat-item">
+                            <i class="fas fa-heart"></i>
+                            <span th:text="${board.likeCount}"></span>
+                        </div>
+                        <div class="post-number">
+                            <span>#</span>
+                            <span th:text="${board.bIdx}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            <!-- 빈 상태 -->
+            <div th:if="${#lists.isEmpty(myBoards)}" class="empty-state">
+                <img src="/images/empty-posts.png" alt="빈 게시판">
+                <p>아직 작성한 게시글이 없습니다.</p>
+                <a href="/board" class="write-btn">
+                    <i class="fas fa-pen"></i>
+                    <span>커뮤니티로 이동</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- footer -->
+    <div th:replace="~{common/footer :: footer}"></div>
+    <!-- /footer -->
+</div>
     <script>
         // 스크롤 이벤트 처리
         window.addEventListener('scroll', function() {

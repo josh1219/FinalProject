@@ -100,9 +100,6 @@
         margin-bottom: 30px;
         margin-top: 55px;
     }
-
-
-
   </style>
 </head>
 <body>
@@ -190,14 +187,20 @@
   <script>
     // 주소 검색 API
     function sample6_execDaumPostcode() {
-      new daum.Postcode({
-        oncomplete: function(data) {
-          document.getElementById('sample6_postcode').value = data.zonecode;
-          document.getElementById('sample6_address').value = data.address;
-          document.getElementById('sample6_detailAddress').focus();
-          updateFullAddress();
-        }
-      }).open();
+      // 안드로이드 환경인지 확인
+      if (window.Android) {
+        // 안드로이드의 주소 검색 액티비티 호출
+        window.Android.searchAddress();
+      } else {
+        new daum.Postcode({
+          oncomplete: function(data) {
+            document.getElementById('sample6_postcode').value = data.zonecode;
+            document.getElementById('sample6_address').value = data.address;
+            document.getElementById('sample6_detailAddress').focus();
+            updateFullAddress();
+          }
+        }).open();
+      }
     }
 
     // 전체 주소 업데이트

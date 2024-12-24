@@ -52,7 +52,7 @@
       border-radius: 6px;
       font-size: 16px;
       cursor: pointer;
-      margin-top: 0px;
+      margin-top: 20px;
     }
     .submit-button:hover {
       background-color: #45a049;
@@ -99,6 +99,24 @@
     .header-container {
         margin-bottom: 30px;
         margin-top: 55px;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      margin-bottom: 100px;
+    }
+
+    /* readonly 입력 필드 스타일 */
+    .input-box[readonly] {
+      background-color: #f5f5f5;
+      color: #666;
+      cursor: not-allowed;
+      border-color: #ddd;
+    }
+    .input-box[readonly]:focus {
+      border-color: #ddd;
+      outline: none;
     }
   </style>
 </head>

@@ -6,7 +6,38 @@
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>반려동물 동반 가능 문화시설</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="/css/tourMain.css">
+    <style>
+        .like-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #ccc;
+            transition: all 0.3s ease;
+            padding: 5px;
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            z-index: 1;
+        }
+        
+        .like-button:hover {
+            transform: scale(1.1);
+        }
+        
+        .like-button.active {
+            color: #ff4b4b;
+            animation: heart-burst 0.8s ease-out;
+        }
+        
+        @keyframes heart-burst {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+    </style>
 </head>
 <body>
     <!-- 로딩 모달 추가 -->
@@ -74,6 +105,7 @@
             <div class="detail-header">
                 <div class="detail-title"></div>
                 <div class="detail-category"></div>
+                <div class="detail-likecheck"></div>
                 <button class="close-detail" onclick="closeDetailPanel()">×</button>
             </div>
             <div class="detail-content">
@@ -575,8 +607,12 @@
 
                 const placeItem = document.createElement('div');
                 placeItem.className = 'place-item';
+                
+                // 찜하기 상태 체크를 위한 버튼 생성
                 placeItem.innerHTML = `
-                    <button class="like-button" onclick="toggleLike(event, '${place.name}')" data-place-name="${place.name}">♥</button>
+                    <button class="like-button" onclick="toggleLike(event, '${place.name}')" data-place-name="${place.name}">
+                        <i class="fa-heart far"></i>
+                    </button>
                     <div class="place-info">
                         <img src="${markerIcons[place.category]}" alt="${place.category}" class="place-marker">
                         <div class="place-details">
@@ -587,7 +623,21 @@
                         </div>
                     </div>
                 `;
-
+                
+                // 찜하기 상태 확인 및 아이콘 업데이트
+                const likeButton = placeItem.querySelector('.like-button');
+                fetch(`/tour/like/check?placeName=${encodeURIComponent(place.name)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.liked) {
+                            const heartIcon = likeButton.querySelector('i');
+                            heartIcon.classList.remove('far');
+                            heartIcon.classList.add('fas');
+                            likeButton.classList.add('active');
+                        }
+                    })
+                    .catch(error => console.error('Error checking like status:', error));
+                
                 // 마커 이미지 동적 효과
                 const markerImg = placeItem.querySelector('.place-marker');
                 markerImg.addEventListener('mouseenter', () => {
@@ -860,7 +910,8 @@
 
         function toggleLike(event, name) {
             event.stopPropagation();
-            currentLikeButton = event.target;
+            // 클릭된 요소가 i 태그인 경우 부모 버튼을 찾음
+            currentLikeButton = event.target.closest('.like-button');
             currentPlaceName = name;
             
             const isLiked = currentLikeButton.classList.contains('active');
@@ -871,6 +922,11 @@
             
             document.getElementById('likeModalOverlay').style.display = 'block';
             document.getElementById('likeModal').style.display = 'block';
+        }
+
+        function closeLikeModal() {
+            document.getElementById('likeModalOverlay').style.display = 'none';
+            document.getElementById('likeModal').style.display = 'none';
         }
 
         function confirmLike() {
@@ -889,6 +945,14 @@
                 .then(data => {
                     if (data.success) {
                         currentLikeButton.classList.toggle('active', data.liked);
+                        const heartIcon = currentLikeButton.querySelector('i');
+                        if (data.liked) {
+                            heartIcon.classList.remove('far');
+                            heartIcon.classList.add('fas');
+                        } else {
+                            heartIcon.classList.remove('fas');
+                            heartIcon.classList.add('far');
+                        }
                     } else {
                         alert(data.message);
                     }
@@ -899,11 +963,6 @@
                 });
             }
             closeLikeModal();
-        }
-
-        function closeLikeModal() {
-            document.getElementById('likeModalOverlay').style.display = 'none';
-            document.getElementById('likeModal').style.display = 'none';
         }
 
         // 페이지 로드시 찜하기 상태 체크

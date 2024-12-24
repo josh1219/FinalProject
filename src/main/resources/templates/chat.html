@@ -20,8 +20,8 @@
             <th:block th:each="chat,status : ${chatHistory}">
                 <!-- 첫 메시지이거나 날짜가 바뀌는 경우 새로운 날짜 표시 -->
                 <th:block th:if="${status.index == 0 || !#strings.equals(#strings.substring(chat.sendTime, 0, 10), #strings.substring(chatHistory[status.index-1].sendTime, 0, 10))}">
-                    <div class="date-divider" th:with="dateStr=${#strings.substring(chat.sendTime, 0, 10)},
-                                                    weekday=${datesToWeekdays[#strings.substring(chat.sendTime, 0, 10)]}"
+                    <div class="date-divider" 
+                         th:with="dateStr=${#strings.substring(chat.sendTime, 0, 10)}, weekday=${datesToWeekdays[#strings.substring(chat.sendTime, 0, 10)]}"
                          th:attr="data-date=${dateStr}">
                         <span th:text="${#strings.substring(dateStr, 0, 4) + '년 ' + 
                                       #strings.substring(dateStr, 5, 7) + '월 ' + 
@@ -88,7 +88,6 @@
     <!-- footer -->
     <div th:replace="~{common/footer :: footer}"></div>
     <!-- /footer -->
-
     <script th:inline="javascript">
         const currentMember = /*[[${currentMember}]]*/ {};
         const roomId = /*[[${roomId}]]*/ '';
@@ -104,9 +103,17 @@
             document.getElementById('remove-preview').addEventListener('click', removeFilePreview);
             document.getElementById('send-button').addEventListener('click', sendMessage);
 
-            // 채팅 메시지 컨테이너를 최하단으로 스크롤
-            const messageContainer = document.querySelector('.chat-messages');
-            messageContainer.scrollTop = messageContainer.scrollHeight;
+            // 마지막 메시지로 스크롤
+            const messagesDiv = document.querySelector('.chat-messages');
+            const lastMessage = messagesDiv.lastElementChild;
+            if (lastMessage) {
+                setTimeout(() => {
+                    lastMessage.scrollIntoView({
+                        behavior: 'auto',
+                        block: 'center'
+                    });
+                }, 100);
+            }
         });
 
         function getWeekday(dateStr) {
@@ -194,10 +201,16 @@
             const messagesDiv = document.querySelector('.chat-messages');
             messagesDiv.insertAdjacentHTML('beforeend', messageHTML);
 
-            // setTimeout을 사용하여 DOM 업데이트 후 스크롤
+            // 새로운 메시지로 스크롤
+            const newMessage = messagesDiv.lastElementChild;
+            
+            // 메시지가 완전히 보이도록 스크롤
             setTimeout(() => {
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-            }, 100);
+                newMessage.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'center'  // 메시지를 화면 중앙에 위치시킴
+                });
+            }, 50);
         }
 
         async function sendMessage() {

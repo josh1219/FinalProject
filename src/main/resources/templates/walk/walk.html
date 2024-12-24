@@ -275,6 +275,25 @@
             background: #6c757d;
             color: white;
         }
+
+        .warning-message {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 0, 0, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            z-index: 100000;
+            text-align: center;
+            min-width: 300px;
+            white-space: pre-line;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 16px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -392,7 +411,12 @@
             var lastMovementTime = null;
             var isMoving = true;
             var locationUpdateInterval;
-            var MAX_SPEED = 10; // 최대 허용 속도 (m/s) - 약 72km/h
+            var MAX_SPEED = 10; // 최대 허용 속도 (m/s)
+            var warningTimeout = null;  // 경고 메시지 타이머
+            var isTracking = false;  // 산책 트래킹 상태
+            var totalSeconds = 0;
+            var timerInterval = null;
+            var pendingStartWalk = false;
 
             // AJAX 전역 설정
             $.ajaxSetup({
@@ -402,11 +426,6 @@
                     }
                 }
             });
-
-            var isTracking = false;  // 산책 트래킹 상태
-            var totalSeconds = 0;
-            var timerInterval = null;
-            var pendingStartWalk = false;
 
             // 위치 권한 체크 및 요청
             function checkLocationPermission() {
@@ -698,55 +717,30 @@
             }
 
             function showWarningMessage(message) {
-                // 이전 메시지와 오버레이 제거
-                const existingWarning = document.querySelector('.warning-message');
-                const existingOverlay = document.querySelector('.warning-overlay');
-                if (existingWarning) existingWarning.remove();
-                if (existingOverlay) existingOverlay.remove();
-                if (warningTimeout) clearTimeout(warningTimeout);
+                // 기존 타이머가 있다면 제거
+                if (warningTimeout) {
+                    clearTimeout(warningTimeout);
+                }
 
-                const warningDiv = document.createElement('div');
-                warningDiv.className = 'warning-message';
-                warningDiv.style.position = 'fixed';
-                warningDiv.style.top = '50%';
-                warningDiv.style.left = '50%';
-                warningDiv.style.transform = 'translate(-50%, -50%)';
-                warningDiv.style.backgroundColor = 'rgba(255, 0, 0, 0.9)';
-                warningDiv.style.color = 'white';
-                warningDiv.style.padding = '20px';
-                warningDiv.style.borderRadius = '10px';
-                warningDiv.style.zIndex = '100000';
-                warningDiv.style.textAlign = 'center';
-                warningDiv.style.minWidth = '300px';
-                warningDiv.style.whiteSpace = 'pre-line';
-                warningDiv.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-                warningDiv.style.fontSize = '16px';
-                warningDiv.style.fontWeight = 'bold';
-                warningDiv.textContent = message;
+                var warningElement = document.querySelector('.warning-message');
+                if (!warningElement) {
+                    warningElement = document.createElement('div');
+                    warningElement.className = 'warning-message';
+                    document.body.appendChild(warningElement);
+                }
 
-                const overlay = document.createElement('div');
-                overlay.className = 'warning-overlay';
-                overlay.style.position = 'fixed';
-                overlay.style.top = '0';
-                overlay.style.left = '0';
-                overlay.style.width = '100%';
-                overlay.style.height = '100%';
-                overlay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
-                overlay.style.zIndex = '99999';
+                warningElement.textContent = message;
+                warningElement.style.display = 'block';
 
-                document.body.appendChild(overlay);
-                document.body.appendChild(warningDiv);
-
-                return new Promise((resolve) => {
-                    warningTimeout = setTimeout(() => {
-                        if (warningDiv.parentNode) warningDiv.remove();
-                        if (overlay.parentNode) overlay.remove();
-                        resolve();
-                    }, 2000);
-                });
+                warningTimeout = setTimeout(function() {
+                    warningElement.style.display = 'none';
+                }, 2000);
             }
 
             function hideWarningMessage() {
+                if (warningTimeout) {
+                    clearTimeout(warningTimeout);
+                }
                 var warningElement = document.querySelector('.warning-message');
                 if (warningElement) {
                     warningElement.style.display = 'none';

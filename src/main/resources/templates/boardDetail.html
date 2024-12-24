@@ -18,6 +18,114 @@
     <link rel="stylesheet" href="/css/footer.css">
     <link rel="stylesheet" href="/css/boardDetail.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/11.4.8/sweetalert2.min.css"/>
+    <style>
+        .post-stats {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-left: auto;
+        }
+
+        .views {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #666;
+        }
+
+        .like-btn {
+            background: none;
+            border: 2px solid #ff4b4b;
+            border-radius: 20px;
+            padding: 5px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .like-btn:hover {
+            background-color: #ff4b4b;
+            color: white;
+        }
+        
+        .board-stats {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .like-button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .like-button .heart-icon {
+            opacity: 0.5;
+            transition: all 0.3s ease;
+        }
+
+        .like-button.liked .heart-icon {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .like-count-only {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .like-section {
+            text-align: center;
+            padding: 10px 0;
+            margin: 10px 0;
+        }
+
+        .like-button {
+            background: none;
+            border: 1px solid #ff4b4b;
+            border-radius: 20px;
+            cursor: pointer;
+            padding: 5px 15px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            color: #ff4b4b;
+        }
+
+        .like-button:hover {
+            background-color: #fff0f0;
+        }
+
+        .like-button.liked {
+            background-color: #ff4b4b;
+            color: white;
+        }
+
+        .like-count-only {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #ff4b4b;
+        }
+
+        .like-guide {
+            color: #6c757d;
+            font-size: 0.85em;
+            margin-left: 10px;
+            display: inline-block;
+        }
+    </style>
 </head>
 <body>
     <!-- header -->
@@ -43,6 +151,7 @@
                     <span class="custom-tooltip">👈 눌러서 채팅 시작! 💬</span>
                 </div>
                 <span class="post-date" th:text="${board.insertDate}"></span>
+                <span class="views" title="조회수">👁️ <span th:text="${board.readRate}">0</span></span>
             </div>
         </div>
 
@@ -90,6 +199,21 @@
             <th:block th:if="${isAdmin and !isAuthor}">
                 <button class="delete-button admin-delete" th:onclick="'confirmAdminDelete()'">관리자 삭제</button>
             </th:block>
+        </div>
+
+        <!-- 좋아요 버튼 -->
+        <div class="like-section">
+            <button id="likeButton" class="like-button" th:classappend="${isLiked} ? 'liked'" 
+                    th:if="${sessionMember != null}" th:data-bidx="${board.BIdx}">
+                <span class="heart-icon">❤️</span>
+                <span class="like-count" th:text="${board.likeCount}">0</span>
+            </button>
+            <span class="like-count-only" th:if="${sessionMember == null}">
+                ❤️ <span th:text="${board.likeCount}">0</span>
+            </span>
+            <span class="like-guide" th:if="${sessionMember == null}">
+                로그인 후 좋아요를 누를 수 있어요
+            </span>
         </div>
 
         <!-- 댓글 섹션 -->
@@ -526,6 +650,39 @@
                     toast.remove();
                 });
             }
+        });
+    </script>
+
+    <script th:inline="javascript">
+        document.getElementById('likeButton')?.addEventListener('click', function() {
+            const bIdx = this.getAttribute('data-bidx');
+            fetch(`/board/toggleLike/${bIdx}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="_csrf"]').content
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 좋아요 수 업데이트
+                    document.querySelector('.like-count').textContent = data.likeCount;
+                    
+                    // 버튼 스타일 토글
+                    if (data.isLiked) {
+                        this.classList.add('liked');
+                    } else {
+                        this.classList.remove('liked');
+                    }
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('처리 중 오류가 발생했습니다.');
+            });
         });
     </script>
 

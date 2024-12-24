@@ -170,60 +170,54 @@ public class BoardController {
     // 게시글 상세 페이지
     @GetMapping("/detail/{bIdx}")
     public String boardDetail(@PathVariable int bIdx, Model model, HttpSession session) {
-        try {
-            // 게시글 조회
-            Board board = boardService.getBoardByIdx(bIdx);
-            if (board == null || board.getDeleteCheck().equals("Y")) {
-                return "redirect:/board?error=notfound";
-            }
-
-            // 현재 로그인한 사용자 정보를 세션에서 가져오기
-            Member sessionMember = (Member) session.getAttribute("sessionMember");
-            
-            // 디버그 로그 추가
-            System.out.println("=== Session Debug in BoardDetail ===");
-            System.out.println("Session ID: " + session.getId());
-            System.out.println("Session Member: " + sessionMember);
-            if (sessionMember != null) {
-                System.out.println("Session Member mIdx: " + sessionMember.getMIdx());
-                System.out.println("Board Member mIdx: " + board.getMember().getMIdx());
-                System.out.println("Is Same User: " + (sessionMember.getMIdx() == board.getMember().getMIdx()));
-            } else {
-                System.out.println("No session member found");
-            }
-
-            // 조회수 증가 (자신의 게시글이 아닐 경우에만)
-            if (sessionMember == null || sessionMember.getMIdx() != board.getMember().getMIdx()) {
-                boardService.increaseViewCount(bIdx);
-                board = boardService.getBoardByIdx(bIdx); // 업데이트된 정보 다시 조회
-            }
-
-            // 게시글의 첨부 파일 조회 (fType이 1인 경우 게시글 첨부파일)
-            List<File> boardFiles = fileService.findAllByTypeAndIdx(1, bIdx);
-            if (!boardFiles.isEmpty()) {
-                model.addAttribute("boardFiles", boardFiles);
-            }
-
-            // 댓글 목록 조회
-            List<Reply> replies = replyService.findByBoardId(bIdx);
-            model.addAttribute("replies", replies);
-
-            model.addAttribute("board", board);
-            model.addAttribute("sessionMember", sessionMember); // 세션 멤버 정보 전달
-            
-            // 작성자 본인인지 여부를 추가
-            boolean isAuthor = sessionMember != null && sessionMember.getMIdx() == board.getMember().getMIdx();
-            model.addAttribute("isAuthor", isAuthor);
-            
-            // 관리자 여부 확인 추가
-            boolean isAdmin = sessionMember != null && Role.ADMIN.equals(sessionMember.getRole());
-            model.addAttribute("isAdmin", isAdmin);
-            
-            return "boardDetail";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "redirect:/board?error=error";
+        Member member = (Member) session.getAttribute("sessionMember");
+        Board board = boardService.getBoardByIdxWithViewCount(bIdx, member);
+        
+        if(board == null || board.getDeleteCheck().equals("Y")) {
+            return "redirect:/board";
         }
+
+        // 현재 로그인한 사용자 정보를 세션에서 가져오기
+        Member sessionMember = (Member) session.getAttribute("sessionMember");
+        
+        // 디버그 로그 추가
+        System.out.println("=== Session Debug in BoardDetail ===");
+        System.out.println("Session ID: " + session.getId());
+        System.out.println("Session Member: " + sessionMember);
+        if (sessionMember != null) {
+            System.out.println("Session Member mIdx: " + sessionMember.getMIdx());
+            System.out.println("Board Member mIdx: " + board.getMember().getMIdx());
+            System.out.println("Is Same User: " + (sessionMember.getMIdx() == board.getMember().getMIdx()));
+        } else {
+            System.out.println("No session member found");
+        }
+
+        // 게시글의 첨부 파일 조회 (fType이 1인 경우 게시글 첨부파일)
+        List<File> boardFiles = fileService.findAllByTypeAndIdx(1, bIdx);
+        if (!boardFiles.isEmpty()) {
+            model.addAttribute("boardFiles", boardFiles);
+        }
+
+        // 댓글 목록 조회
+        List<Reply> replies = replyService.findByBoardId(bIdx);
+        model.addAttribute("replies", replies);
+
+        model.addAttribute("board", board);
+        model.addAttribute("sessionMember", sessionMember); // 세션 멤버 정보 전달
+        
+        // 작성자 본인인지 여부를 추가
+        boolean isAuthor = sessionMember != null && sessionMember.getMIdx() == board.getMember().getMIdx();
+        model.addAttribute("isAuthor", isAuthor);
+        
+        // 관리자 여부 확인 추가
+        boolean isAdmin = sessionMember != null && Role.ADMIN.equals(sessionMember.getRole());
+        model.addAttribute("isAdmin", isAdmin);
+        
+        // 좋아요 상태 추가
+        boolean isLiked = boardService.isLikedByMember(board, sessionMember);
+        model.addAttribute("isLiked", isLiked);
+        
+        return "boardDetail";
     }
 
     // 게시글 삭제
@@ -337,6 +331,41 @@ public class BoardController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("수정 중 오류가 발생했습니다: " + e.getMessage());
+        }
+    }
+
+    // 좋아요 토글 기능 추가
+    @PostMapping("/toggleLike/{bIdx}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> toggleLike(@PathVariable int bIdx, HttpSession session) {
+        Map<String, Object> response = new HashMap<>();
+        
+        try {
+            Member member = (Member) session.getAttribute("sessionMember");
+            if (member == null) {
+                response.put("success", false);
+                response.put("message", "로그인이 필요합니다.");
+                return ResponseEntity.ok(response);
+            }
+
+            Board board = boardService.getBoardByIdx(bIdx);  // 조회수 증가 없이 조회
+            if (board == null) {
+                response.put("success", false);
+                response.put("message", "게시글을 찾을 수 없습니다.");
+                return ResponseEntity.ok(response);
+            }
+
+            boolean isLiked = boardService.toggleLike(board, member);
+            response.put("success", true);
+            response.put("likeCount", board.getLikeCount());
+            response.put("isLiked", isLiked);
+            response.put("message", isLiked ? "좋아요를 눌렀습니다." : "좋아요를 취소했습니다.");
+            
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "처리 중 오류가 발생했습니다.");
+            return ResponseEntity.ok(response);
         }
     }
 

@@ -56,6 +56,19 @@
       transition: transform 0.3s ease-out;
       padding-top: 10px;
     }
+
+    .board-stats {
+        margin-left: auto;
+        display: flex;
+        gap: 10px;
+        color: #666;
+    }
+
+    .views, .likes {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+    }
   </style>
 </head>
 <body>
@@ -124,9 +137,12 @@
             <div class="board-content">
               <div class="board-info">
                 <span class="board-category" th:text="${board.bType}">카테고리</span>
+                <span class="board-stats">
+                  <span class="views" title="조회수">👁️ <span th:text="${board.readRate}">0</span></span>
+                  <span class="likes" title="좋아요">❤️ <span th:text="${board.likeCount}">0</span></span>
+                </span>
               </div>
-              <h3 class="board-title" th:classappend="${#strings.length(board.title) > 20} ? 'long-title'" 
-                  th:text="${#strings.length(board.title) > 20} ? ${#strings.substring(board.title,0,20) + '...'} : ${board.title}">제목</h3>
+              <h3 class="board-title" th:text="${board.title}">제목</h3>
               <div class="board-meta">
                 <span th:text="${board.member.name}">작성자</span>
                 <span th:text="${board.insertDate}">작성일</span>

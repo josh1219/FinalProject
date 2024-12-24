@@ -3,7 +3,11 @@ package com.DogProject.service;
 import com.DogProject.entity.Board;
 import com.DogProject.entity.File;
 import com.DogProject.entity.Member;
+import com.DogProject.entity.BoardView;
+import com.DogProject.entity.BoardLike;
 import com.DogProject.repository.BoardRepository;
+import com.DogProject.repository.BoardViewRepository;
+import com.DogProject.repository.BoardLikeRepository;
 import com.DogProject.service.FileService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -12,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -26,6 +31,8 @@ import java.util.stream.Collectors;
 public class BoardService {
 
     private final BoardRepository boardRepository;
+    private final BoardViewRepository boardViewRepository;
+    private final BoardLikeRepository boardLikeRepository;
     private final FileService fileService;
 
     @Transactional
@@ -76,8 +83,40 @@ public class BoardService {
     }
 
     // 게시글 번호로 게시글 조회
+    @Transactional(readOnly = true)
     public Board getBoardByIdx(int bIdx) {
         return boardRepository.findById(bIdx).orElse(null);
+    }
+
+    // 게시글 번호로 게시글 조회 (조회수 증가 포함)
+    @Transactional
+    public Board getBoardByIdxWithViewCount(int bIdx, Member member) {
+        Board board = boardRepository.findById(bIdx).orElse(null);
+        
+        // 게시글이 없거나 삭제된 경우
+        if (board == null || "Y".equals(board.getDeleteCheck())) {
+            return null;
+        }
+        
+        // 조회수 증가 처리 (member가 null이 아닐 때만)
+        if (member != null) {
+            LocalDate today = LocalDate.now();
+            // 오늘 해당 사용자가 이 게시글을 조회한 적이 없는 경우에만 조회수 증가
+            if (!boardViewRepository.existsByBoardAndMemberAndViewDate(board, member, today)) {
+                // 조회 기록 저장
+                BoardView boardView = new BoardView();
+                boardView.setBoard(board);
+                boardView.setMember(member);
+                boardView.setViewDate(today);
+                boardViewRepository.save(boardView);
+
+                // 조회수 증가
+                board.setReadRate(board.getReadRate() + 1);
+                boardRepository.save(board);
+            }
+        }
+        
+        return board;
     }
 
     // 조회수 증가
@@ -176,5 +215,39 @@ public class BoardService {
                 .sorted((b1, b2) -> b2.getBIdx() - b1.getBIdx())  // bIdx 기준 내림차순 정렬
                 .limit(5)  // 상위 5개만 선택
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void saveBoard(Board board) {
+        boardRepository.save(board);
+    }
+
+    // 게시글 좋아요 토글
+    @Transactional
+    public boolean toggleLike(Board board, Member member) {
+        boolean exists = boardLikeRepository.existsByBoardAndMember(board, member);
+        
+        if (exists) {
+            // 좋아요 취소
+            boardLikeRepository.deleteByBoardAndMember(board, member);
+            board.setLikeCount(board.getLikeCount() - 1);
+            boardRepository.save(board);
+            return false;
+        } else {
+            // 좋아요 추가
+            BoardLike boardLike = new BoardLike();
+            boardLike.setBoard(board);
+            boardLike.setMember(member);
+            boardLikeRepository.save(boardLike);
+            board.setLikeCount(board.getLikeCount() + 1);
+            boardRepository.save(board);
+            return true;
+        }
+    }
+
+    // 좋아요 상태 확인
+    public boolean isLikedByMember(Board board, Member member) {
+        if (member == null) return false;
+        return boardLikeRepository.existsByBoardAndMember(board, member);
     }
 }

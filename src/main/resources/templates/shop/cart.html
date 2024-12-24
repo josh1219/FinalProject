@@ -196,6 +196,7 @@
             font-size: 14px;
             color: #666;
             margin-bottom: 8px;
+            font-family: 'Noto Sans KR', sans-serif;
         }
         .shipping-field input {
             width: 95%;
@@ -231,6 +232,7 @@
             margin-bottom: 8px;
             font-weight: 500;
             color: #333;
+            font-family: 'Noto Sans KR', sans-serif;
         }
         .shipping-field input {
             width: 100%;
@@ -239,6 +241,7 @@
             border-radius: 6px;
             font-size: 16px;
             box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
         }
         .address-wrapper {
             margin-bottom: 8px;
@@ -256,6 +259,7 @@
             border-radius: 4px;
             font-size: 14px;
             cursor: pointer;
+            font-family: 'Noto Sans KR', sans-serif;
         }
         .address-search-btn:hover {
             background: #4B50E6;
@@ -383,11 +387,13 @@
         <div th:unless="${cartItems.empty}" class="cart-items">
             <div th:each="item : ${cartItems}" class="cart-item" th:data-price="${item.product.price}" th:data-product-id="${item.product.pIdx}">
                 <div class="item-header">
-                    <img th:src="${item.product.imageUrl}" class="item-image" alt="상품 이미지">
-                    <div class="item-info">
-                        <div class="item-name" th:text="${item.product.name}">상품명</div>
-                        <div class="item-price" th:text="${#numbers.formatInteger(item.product.price, 0, 'COMMA') + '원'}">가격</div>
-                    </div>
+                    <a th:href="@{'/shop/detail/' + ${item.product.pIdx}}" style="text-decoration: none; display: flex; align-items: center; flex: 1; color: inherit;">
+                        <img th:src="${item.product.imageUrl}" class="item-image" alt="상품 이미지">
+                        <div class="item-info">
+                            <div class="item-name" th:text="${item.product.name}">상품명</div>
+                            <div class="item-price" th:text="${#numbers.formatInteger(item.product.price, 0, 'COMMA') + '원'}">가격</div>
+                        </div>
+                    </a>
                     <button class="remove-btn" th:onclick="'removeItem(' + ${item.product.pIdx} + ')'">
                         삭제
                     </button>

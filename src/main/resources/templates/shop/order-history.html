@@ -234,12 +234,14 @@
                 </div>
 
                 <div th:each="item : ${order.orderItems}" class="item-header">
-                    <img th:src="${item.product.imageUrl}" class="item-image" alt="상품 이미지">
-                    <div class="item-info">
-                        <div class="item-name" th:text="${item.product.name}">상품명</div>
-                        <div class="item-price" th:text="${#numbers.formatInteger(item.price, 0, 'COMMA') + '원'}">가격</div>
-                        <div class="item-quantity" th:text="'수량: ' + ${item.quantity} + '개'">수량</div>
-                    </div>
+                    <a th:href="@{'/shop/detail/' + ${item.product.pIdx}}" style="text-decoration: none; display: flex; align-items: center; flex: 1; color: inherit;">
+                        <img th:src="${item.product.imageUrl}" class="item-image" alt="상품 이미지">
+                        <div class="item-info">
+                            <div class="item-name" th:text="${item.product.name}">상품명</div>
+                            <div class="item-price" th:text="${#numbers.formatInteger(item.price, 0, 'COMMA') + '원'}">가격</div>
+                            <div class="item-quantity" th:text="'수량: ' + ${item.quantity} + '개'">수량</div>
+                        </div>
+                    </a>
                 </div>
 
                 <!-- 상품 금액 정보 -->

@@ -222,10 +222,9 @@ public class ProductService {
     }
 
     // 상품 정렬 메서드
+    @Transactional(readOnly = true)
     public List<Product> getProductsSorted(String sortType) {
         switch (sortType.toLowerCase()) {
-            case "new":
-                return productRepository.findAllByOrderByCreatedAtDesc();
             case "popular":
                 return productRepository.findAllByOrderBySalesCountDesc();
             case "low":
@@ -233,7 +232,26 @@ public class ProductService {
             case "high":
                 return productRepository.findAllByOrderByPriceDesc();
             default:
-                return getAllProducts();
+                return productRepository.findAllByOrderBySalesCountDesc(); // 기본값도 인기순
+        }
+    }
+
+    // 카테고리별 상품 조회 (정렬 포함)
+    @Transactional(readOnly = true)
+    public List<Product> getProductsByCategory(String category, String sortType) {
+        if (sortType == null || sortType.isEmpty()) {
+            return productRepository.findByCategoryOrderBySalesCountDesc(category); // 기본값은 인기순
+        }
+
+        switch (sortType.toLowerCase()) {
+            case "popular":
+                return productRepository.findByCategoryOrderBySalesCountDesc(category);
+            case "low":
+                return productRepository.findByCategoryOrderByPriceAsc(category);
+            case "high":
+                return productRepository.findByCategoryOrderByPriceDesc(category);
+            default:
+                return productRepository.findByCategoryOrderBySalesCountDesc(category);
         }
     }
 
@@ -290,5 +308,11 @@ public class ProductService {
                 }
             }
         }
+    }
+
+    @Transactional
+    public void incrementSalesCount(Product product, int quantity) {
+        product.setSalesCount(product.getSalesCount() + quantity);
+        productRepository.save(product);
     }
 }

@@ -259,11 +259,13 @@
 
         <div class="purchase-item">
             <div class="item-header">
-                <img th:src="${product.imageUrl}" alt="상품 이미지" class="item-image">
-                <div class="item-info">
-                    <div class="item-name" th:text="${product.name}">상품명</div>
-                    <div class="item-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">가격</div>
-                </div>
+                <a th:href="@{'/shop/detail/' + ${product.pIdx}}" style="text-decoration: none; display: flex; align-items: center; flex: 1; color: inherit;">
+                    <img th:src="${product.imageUrl}" alt="상품 이미지" class="item-image">
+                    <div class="item-info">
+                        <div class="item-name" th:text="${product.name}">상품명</div>
+                        <div class="item-price" th:text="${#numbers.formatDecimal(product.price, 0, 'COMMA', 0, 'POINT')} + '원'">가격</div>
+                    </div>
+                </a>
             </div>
             <div class="quantity-display">
                 수량: <span th:text="${quantity}">1</span>개

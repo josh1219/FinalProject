@@ -43,20 +43,27 @@ public class ShopController {
     @GetMapping("")
     public String shopMain(Model model, HttpServletRequest request, Principal principal,
                       @RequestParam(required = false) String category,
-                      @RequestParam(required = false) String keyword) {
+                      @RequestParam(required = false) String keyword,
+                      @RequestParam(required = false, defaultValue = "popular") String sort) {
         addUserInfoToModel(model, request, principal);
         List<Product> products;
         
+        // 카테고리별 상품 조회
         if (category != null && !category.isEmpty()) {
-            products = productService.getProductsByCategory(category);
+            products = productService.getProductsByCategory(category, sort);
             model.addAttribute("category", category);
-        } else if (keyword != null && !keyword.isEmpty()) {
+        } 
+        // 검색어로 상품 조회
+        else if (keyword != null && !keyword.isEmpty()) {
             products = productService.searchProducts(keyword);
-        } else {
-            products = productService.getAllProducts();
+        } 
+        // 전체 상품 조회 (정렬 조건 적용)
+        else {
+            products = productService.getProductsSorted(sort);
         }
         
         model.addAttribute("products", products);
+        model.addAttribute("selectedSort", sort);
         return "shop/shop";
     }
 

@@ -116,6 +116,9 @@ public class OrderService {
         product.setStock(product.getStock() - quantity);
         productService.saveProduct(product);
 
+        // 판매량 증가
+        productService.incrementSalesCount(product, quantity);
+
         // 주문 저장
         return orderRepository.save(order);
     }
@@ -181,6 +184,9 @@ public class OrderService {
             // 재고 감소
             product.setStock(product.getStock() - cartItem.getQuantity());
             productService.saveProduct(product);
+
+            // 판매량 증가
+            productService.incrementSalesCount(product, cartItem.getQuantity());
         }
 
         order.setOrderItems(orderItems);

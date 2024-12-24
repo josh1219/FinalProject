@@ -199,65 +199,6 @@
         .address-search-btn:hover {
             background: #4B50E6;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            z-index: 1000;
-        }
-        
-        .modal-content {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-        
-        .modal-title {
-            font-size: 18px;
-            font-weight: 500;
-            margin: 0;
-        }
-        
-        .close-button {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 0;
-            color: #666;
-        }
-        
-        #address-search-container {
-            width: 100%;
-            height: 400px;
-        }
-        .address-wrapper {
-            margin-bottom: 8px;
-        }
-        .detail-address {
-            margin-top: 8px;
-        }
         .point-field {
             margin: 20px 0;
             padding: 16px;
@@ -418,17 +359,6 @@
         </div>
     </div>
 
-    <!-- 주소 검색 모달 -->
-    <div id="addressModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">주소 검색</h3>
-                <button class="close-button" onclick="closeAddressModal()">&times;</button>
-            </div>
-            <div id="address-search-container"></div>
-        </div>
-    </div>
-
     <script th:inline="javascript">
         // CSRF 토큰 설정
         const token = document.querySelector("meta[name='_csrf']").getAttribute("content");
@@ -531,41 +461,31 @@
         });
 
         function searchAddress() {
-            const modal = document.getElementById('addressModal');
-            modal.style.display = 'block';
-            
-            new daum.Postcode({
-                oncomplete: function(data) {
-                    let address = data.address;
-                    let extraAddress = '';
+            // 안드로이드 환경인지 확인
+            if (window.Android) {
+                // 안드로이드의 주소 검색 액티비티 호출
+                window.Android.searchAddress();
+            } else {
+                // 웹 환경에서는 다음 주소 검색 API 사용
+                new daum.Postcode({
+                    oncomplete: function(data) {
+                        let address = data.address;
+                        let extraAddress = '';
 
-                    if (data.buildingName !== '') {
-                        extraAddress = (data.bname !== '' ? `${data.bname}, ` : '') + 
-                                     (data.buildingName !== '' ? data.buildingName : '');
-                    }
-                    if (extraAddress !== '') {
-                        address += ` (${extraAddress})`;
-                    }
+                        if (data.buildingName !== '') {
+                            extraAddress = (data.bname !== '' ? `${data.bname}, ` : '') + 
+                                         (data.buildingName !== '' ? data.buildingName : '');
+                        }
+                        if (extraAddress !== '') {
+                            address += ` (${extraAddress})`;
+                        }
 
-                    document.getElementById('recipientAddress').value = address;
-                    document.getElementById('recipientAddressDetail').focus();
-                    closeAddressModal();
-                },
-                width: '100%',
-                height: '100%'
-            }).embed(document.getElementById('address-search-container'));
-        }
-
-        function closeAddressModal() {
-            const modal = document.getElementById('addressModal');
-            modal.style.display = 'none';
-        }
-
-        // 모달 외부 클릭 시 닫기
-        window.onclick = function(event) {
-            const modal = document.getElementById('addressModal');
-            if (event.target == modal) {
-                closeAddressModal();
+                        document.getElementById('recipientAddress').value = address;
+                        document.getElementById('recipientAddressDetail').focus();
+                    },
+                    width: '100%',
+                    height: '100%'
+                }).open();
             }
         }
 

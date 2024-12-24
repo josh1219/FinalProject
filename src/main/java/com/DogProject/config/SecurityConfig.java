@@ -80,7 +80,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             .authorizeRequests()
                 .antMatchers("/", "/css/**", "/images/**", "/js/**", "/video/**", "/error", 
                         "/home", "/board", "/board/detail", "/dog/**", "/shop/**", "/shop/detail/**", "/chat/**", "/walk/**", "/api/**",
-                        "/uploads/**", "/schedule/**", "/ws/**", "/ws/chat/**", "/topic/**", "/member/login", "/member/join", "/member/checkEmail").permitAll()
+                        "/uploads/**", "/schedule/**", "/ws/**", "/ws/chat/**", "/topic/**", "/member/login", "/member/join", "/member/checkEmail",
+                        "/address-search").permitAll()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/member/**").authenticated()
                 .antMatchers("/board/create").authenticated()

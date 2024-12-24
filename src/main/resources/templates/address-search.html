@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주소 검색</title>
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+        #address-search {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="address-search"></div>
+    <script>
+        function initDaumPostcode() {
+            new daum.Postcode({
+                oncomplete: function(data) {
+                    let address = data.address;
+                    let extraAddress = '';
+
+                    if (data.buildingName !== '') {
+                        extraAddress = (data.bname !== '' ? `${data.bname}, ` : '') + 
+                                     (data.buildingName !== '' ? data.buildingName : '');
+                    }
+                    if (extraAddress !== '') {
+                        address += ` (${extraAddress})`;
+                    }
+
+                    // 안드로이드로 주소 전달
+                    if (window.Android) {
+                        window.Android.processAddress(address);
+                    }
+                },
+                width: '100%',
+                height: '100%'
+            }).embed(document.getElementById('address-search'));
+        }
+
+        // 스크립트 로드 완료 후 실행
+        if (window.daum && window.daum.Postcode) {
+            initDaumPostcode();
+        } else {
+            window.onload = function() {
+                initDaumPostcode();
+            };
+        }
+    </script>
+</body>
+</html>

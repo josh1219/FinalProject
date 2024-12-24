@@ -78,6 +78,10 @@ public class DogService {
                 });
     }
 
+    public List<Dog> findAllByMember(Member member) {
+        return dogRepository.findAllByMember(member);
+    }
+
     public List<Dog> getDogsByMember(Member member) {
         return dogRepository.findAllByMemberAndDelYN(member, "N");
     }

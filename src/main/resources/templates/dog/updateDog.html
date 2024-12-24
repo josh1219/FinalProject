@@ -303,16 +303,17 @@
                             </div>
                         </div>
                         <div class="img-buttons">
-                            <button type="button" class="img-button" onclick="openCamera()">
-                                <img src="/images/camera-1.svg" alt="카메라">
-                            </button>
-                            <button type="button" class="img-button" onclick="openGallery()">
+                            <label for="file-input" class="img-button" onclick="openCamera()">
+                                <img src="/images/camera0.svg" alt="카메라">
+                            </label>
+                            <label for="file-input" class="img-button" onclick="openGallery()">
                                 <img src="/images/photo-1.svg" alt="사진">
-                            </button>
+                            </label>
                             <button type="button" class="img-button" onclick="removeImage()">
                                 <img src="/images/trash.svg" alt="제거">
                             </button>
                         </div>
+                        <input type="hidden" id="file-input" name="image" class="file-input">
                     </div>
                 </div>
 
@@ -368,91 +369,87 @@
     <script>
         function openCamera() {
             if (window.Android) {
-                window.Android.openImagePicker('camera');
+                // 카메라 권한 체크
+                if (window.Android.checkCameraPermission()) {
+                    window.Android.openCamera();
+                } else {
+                    window.Android.requestCameraPermission();
+                }
+            } else {
+                alert('카메라 기능은 안드로이드 앱에서만 사용 가능합니다.');
             }
         }
 
         function openGallery() {
             if (window.Android) {
-                window.Android.openImagePicker('gallery');
+                // 갤러리 권한 체크
+                if (window.Android.checkGalleryPermission()) {
+                    window.Android.openGallery();
+                } else {
+                    window.Android.requestGalleryPermission();
+                }
+            } else {
+                alert('갤러리 기능은 안드로이드 앱에서만 사용 가능합니다.');
             }
         }
 
-        function handleCapturedImage(base64Image) {
-            const imgPreview = document.getElementById('preview');
-            imgPreview.src = 'data:image/jpeg;base64,' + base64Image;
-            imgPreview.style.display = 'block';
+        function onImageSelected(imagePath) {
+            console.log('Selected image path:', imagePath);
+            const previewImg = document.getElementById('preview');
+            const imageInput = document.getElementById('file-input');
             
-            const byteString = atob(base64Image);
-            const ab = new ArrayBuffer(byteString.length);
-            const ia = new Uint8Array(ab);
-            for (let i = 0; i < byteString.length; i++) {
-                ia[i] = byteString.charCodeAt(i);
+            if (previewImg && imageInput) {
+                // content:// 또는 file:// URI를 직접 사용
+                previewImg.src = imagePath;
+                previewImg.style.display = 'block';
+                imageInput.value = imagePath;
+                
+                // 이미지가 선택되면 견종 식별 실행
+                identifyBreed(imagePath);
             }
-            const blob = new Blob([ab], { type: 'image/jpeg' });
-            const file = new File([blob], "camera_image.jpg", { type: 'image/jpeg' });
-            
-            identifyBreed(file);
         }
 
-        function handleSelectedImage(imagePath) {
-            const imgPreview = document.getElementById('preview');
-            imgPreview.src = imagePath;
-            imgPreview.style.display = 'block';
-            
-            fetch(imagePath)
-                .then(response => response.blob())
-                .then(blob => {
-                    const file = new File([blob], "gallery_image.jpg", { type: 'image/jpeg' });
-                    identifyBreed(file);
-                })
-                .catch(error => console.error('Error:', error));
-        }
-
-        function removeImage() {
-            const preview = document.getElementById('preview');
-            preview.src = '';
-            preview.style.display = 'none';
-            document.getElementById('dType').value = '';
-        }
-
-        async function identifyBreed(imageFile) {
+        async function identifyBreed(imagePath) {
+            // 로딩 모달 표시
             const loadingModal = document.getElementById('loading-modal');
             loadingModal.style.display = 'block';
             
             try {
                 const formData = new FormData();
-                formData.append('image', imageFile);
+                formData.append('image', imagePath);
                 
                 console.log('이미지 업로드 시작');
                 const response = await fetch('/api/identify-breed', {
                     method: 'POST',
                     body: formData
                 });
-
-                console.log('서버 응답 상태:', response.status);
+                
                 if (!response.ok) {
-                    const errorText = await response.text();
-                    console.error('서버 오류 응답:', errorText);
-                    throw new Error(errorText || '견종 식별에 실패했습니다.');
+                    throw new Error('견종 식별 실패');
                 }
-
-                const breedName = await response.text();
-                console.log('서버 응답 데이터:', breedName);
                 
-                loadingModal.style.display = 'none';
+                const data = await response.json();
+                console.log('견종 식별 결과:', data);
                 
-                if (breedName && breedName.trim() !== '') {
-                    document.getElementById('dType').value = breedName.trim();
-                    console.log('견종이 자동으로 입력되었습니다:', breedName);
-                } else {
-                    throw new Error('견종을 식별할 수 없습니다.');
-                }
+                // 견종 정보 업데이트
+                document.getElementById('dType').value = data.breed;
+                
             } catch (error) {
                 console.error('견종 식별 중 오류 발생:', error);
+                alert('견종 식별 중 오류가 발생했습니다. 수동으로 입력해주세요.');
+            } finally {
+                // 로딩 모달 숨기기
                 loadingModal.style.display = 'none';
-                document.getElementById('dType').value = '';
-                alert('견종 식별에 실패했습니다. 수동으로 입력해주세요.\n오류: ' + error.message);
+            }
+        }
+
+        function removeImage() {
+            const previewImg = document.getElementById('preview');
+            const imageInput = document.getElementById('file-input');
+            
+            if (previewImg && imageInput) {
+                previewImg.src = '/images/dogdefault.png';  // 기본 이미지로 변경
+                imageInput.value = '';  // 이미지 경로 초기화
             }
         }
 

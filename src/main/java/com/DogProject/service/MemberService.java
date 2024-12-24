@@ -277,7 +277,28 @@ public class MemberService implements UserDetailsService {
         Member existingMember = memberRepository.findById(member.getMIdx())
             .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
         existingMember.setPoint(member.getPoint());
+        existingMember.setTotalUsedPoint(member.getTotalUsedPoint());
         return memberRepository.save(existingMember);
+    }
+
+    /**
+     * ID로 회원 조회
+     *
+     * @param mIdx
+     * @return
+     */
+    public Member getMemberById(int mIdx) {
+        return memberRepository.findById(mIdx).orElse(null);
+    }
+
+    /**
+     * 소셜 아이디로 회원 조회
+     *
+     * @param socialId
+     * @return
+     */
+    public Member getMemberBySocialId(String socialId) {
+        return memberRepository.findBySocialId(socialId);
     }
 
 }

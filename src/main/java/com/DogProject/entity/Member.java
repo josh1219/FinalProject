@@ -69,6 +69,10 @@ public class Member {
     private int point = 0;
 
     @Column(nullable = false)
+    @Comment("총 사용 포인트")
+    private int totalUsedPoint = 0;
+
+    @Column(nullable = false)
     @Comment("계정 활성화 여부")
     private boolean enabled;
 

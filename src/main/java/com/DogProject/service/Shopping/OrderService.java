@@ -83,6 +83,7 @@ public class OrderService {
         // 포인트 차감
         if (usedPoint > 0) {
             member.setPoint(member.getPoint() - usedPoint);
+            member.setTotalUsedPoint(member.getTotalUsedPoint() + usedPoint);
             memberService.updateMemberPoint(member);
         }
 
@@ -137,6 +138,7 @@ public class OrderService {
         // 포인트 차감
         if (usedPoint > 0) {
             member.setPoint(member.getPoint() - usedPoint);
+            member.setTotalUsedPoint(member.getTotalUsedPoint() + usedPoint);
             memberService.updateMemberPoint(member);
         }
 
@@ -189,21 +191,6 @@ public class OrderService {
 
         // 주문 저장
         return orderRepository.save(order);
-    }
-
-    // 회원의 총 사용 포인트 조회
-    public int getTotalUsedPoints(int mIdx) {
-        // 회원의 모든 주문을 조회
-        List<Order> orders = orderRepository.findByMember_mIdx(mIdx);
-        System.out.println("주문 개수: " + orders.size()); // 디버깅용 로그
-        
-        int totalPoints = 0;
-        for (Order order : orders) {
-            totalPoints += order.getUsedPoint();
-            System.out.println("주문번호: " + order.getOIdx() + ", 사용포인트: " + order.getUsedPoint()); // 디버깅용 로그
-        }
-        System.out.println("총 사용 포인트: " + totalPoints); // 디버깅용 로그
-        return totalPoints;
     }
 
     // 회원의 총 주문 정보를 조회합니다.
@@ -261,5 +248,16 @@ public class OrderService {
                 orderRepository.save(order);
             }
         }
+    }
+
+    public Map<String, Long> getOrderStatusCount(int memberId) {
+        List<Order> orders = orderRepository.findByMember_mIdx(memberId);
+        
+        Map<String, Long> statusCount = new HashMap<>();
+        statusCount.put("배송준비중", orders.stream().filter(order -> "배송준비중".equals(order.getStatus())).count());
+        statusCount.put("배송중", orders.stream().filter(order -> "배송중".equals(order.getStatus())).count());
+        statusCount.put("배송완료", orders.stream().filter(order -> "배송완료".equals(order.getStatus())).count());
+        
+        return statusCount;
     }
 }

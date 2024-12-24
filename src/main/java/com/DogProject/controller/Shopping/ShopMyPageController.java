@@ -1,15 +1,16 @@
 package com.DogProject.controller.Shopping;
 
 import com.DogProject.entity.Member;
+import com.DogProject.entity.Shopping.Order;
 import com.DogProject.service.MemberService;
 import com.DogProject.service.Shopping.OrderService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import java.security.Principal;
+import javax.servlet.http.HttpSession;
 import java.util.Map;
+import java.security.Principal;
 
 @Controller
 @RequestMapping("/shop")
@@ -20,26 +21,33 @@ public class ShopMyPageController {
     private final MemberService memberService;
 
     @GetMapping("/mypage")
-    public String myPage(Model model, Authentication authentication) {
-        if (authentication == null || !authentication.isAuthenticated()) {
+    public String myPage(Model model, HttpSession session) {
+        // 세션에서 m_idx 가져오기
+        Integer mIdx = (Integer) session.getAttribute("mIdx");
+        
+        if (mIdx == null) {
             return "redirect:/member/login";
         }
 
-        String email = authentication.getName();
-        Member member = memberService.getMemberByEmail(email);
-        
+        Member member = memberService.getMemberById(mIdx);
         if (member != null) {
             // 현재 포인트
             model.addAttribute("point", member.getPoint());
 
             // 총 사용 포인트
-            int totalUsedPoints = orderService.getTotalUsedPoints(member.getMIdx());
+            int totalUsedPoints = member.getTotalUsedPoint();
             model.addAttribute("totalUsedPoints", totalUsedPoints);
 
             // 총 주문금액과 주문 횟수
-            Map<String, Object> orderInfo = orderService.getTotalOrderInfo(member.getMIdx());
+            Map<String, Object> orderInfo = orderService.getTotalOrderInfo(mIdx);
             model.addAttribute("totalAmount", orderInfo.get("totalAmount"));
             model.addAttribute("orderCount", orderInfo.get("orderCount"));
+            
+            // 주문 상태별 개수
+            Map<String, Long> statusCount = orderService.getOrderStatusCount(mIdx);
+            model.addAttribute("preparingCount", statusCount.get("배송준비중"));
+            model.addAttribute("shippingCount", statusCount.get("배송중"));
+            model.addAttribute("completedCount", statusCount.get("배송완료"));
         }
 
         return "shop/mypage";

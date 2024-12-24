@@ -404,6 +404,7 @@
             padding: 10px;
             border-bottom: 1px solid #f0f2f5;
             transition: background-color 0.2s ease;
+            cursor: pointer;
         }
 
         .newestBoard .board-item:hover {
@@ -598,7 +599,7 @@
         <div class="newestBoard">
             <h3>최근 게시글</h3>
             <div class="board-list">
-                <div class="board-item" th:each="board : ${recentBoards}">
+                <div class="board-item" th:each="board : ${recentBoards}" th:onclick="|location.href='@{/board/detail/{bIdx}(bIdx=${board.getBIdx()})}'|" style="cursor: pointer;">
                     <div class="title-section">
                         <a class="board-title" th:href="@{/board/detail/{bIdx}(bIdx=${board.getBIdx()})}" th:text="${board.getTitle()}">제목</a>
                         <span class="board-category" th:text="${board.getBType()}">카테고리</span>

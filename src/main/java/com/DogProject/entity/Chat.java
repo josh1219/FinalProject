@@ -30,4 +30,8 @@ public class Chat {
     @JoinColumn(name = "receiver_midx")
     @Comment("채팅을 받은 회원")
     private Member receiver;
+
+    @Column(name = "is_read", nullable = false, columnDefinition = "boolean default false")
+    @Comment("읽음 여부")
+    private boolean isRead = false;
 }

@@ -820,3 +820,18 @@ body {
     animation: float 2s ease-in-out infinite;
     box-shadow: 0 3px 6px rgba(0,0,0,0.1);
 }
+
+/* SweetAlert2 Custom Styles */
+.small-swal {
+    width: 300px !important;
+    font-size: 0.9em !important;
+}
+
+.small-swal .swal2-title {
+    font-size: 1.2em !important;
+}
+
+.small-swal .swal2-confirm, .small-swal .swal2-cancel {
+    font-size: 0.9em !important;
+    padding: 0.5em 1.5em !important;
+}

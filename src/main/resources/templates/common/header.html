@@ -1,7 +1,7 @@
 <!-- header -->
 <header th:fragment="header" class="header">
     <div class="logo-container">
-        <div th:if="${#httpServletRequest.requestURI.contains('board/detail')}" onclick="history.back()" class="back-button">
+        <div th:if="${#httpServletRequest.requestURI.contains('board/detail')}" onclick="location.href='/board'" class="back-button">
             <img src="/images/chevron-left.svg" alt="뒤로가기">
         </div>
         <div th:unless="${#httpServletRequest.requestURI.contains('board/detail')}">

@@ -4,8 +4,11 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -325,6 +328,32 @@ public class DogController {
         } catch (Exception e) {
             log.error("Error restoring dog", e);
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @GetMapping(value = "/check", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public ResponseEntity<?> checkDog(@RequestParam("m_idx") int m_idx) {
+        try {
+            List<Dog> dogs = dogService.getDogsByMemberIdx(m_idx);
+            
+            // 필요한 정보만 추출
+            List<Map<String, Object>> result = dogs.stream()
+                .map(dog -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("dIdx", dog.getDIdx());
+                    map.put("name", dog.getName());
+                    return map;
+                })
+                .collect(Collectors.toList());
+            
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(result);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body("Error checking dogs");
         }
     }
 

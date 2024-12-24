@@ -5,24 +5,29 @@ import com.DogProject.entity.File;
 import com.DogProject.entity.Member;
 import com.DogProject.repository.DogRepository;
 import com.DogProject.repository.FileRepository;
+import com.DogProject.service.FileService;
+import org.springframework.web.multipart.MultipartFile;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class DogService {
 
-    private final DogRepository dogRepository;
-    private final FileService fileService ;
-    private final FileRepository fileRepository ;
+    @Autowired
+    private DogRepository dogRepository;
+
+    @Autowired
+    private FileService fileService;
+
+    @Autowired
+    private FileRepository fileRepository;
 
     @Transactional
     public Dog saveDog(Dog dog) throws Exception {
@@ -73,16 +78,16 @@ public class DogService {
                 });
     }
 
-    public List<Dog> findAllByMember(Member member) {
-        return dogRepository.findAllByMember(member);
-    }
-
     public List<Dog> getDogsByMember(Member member) {
         return dogRepository.findAllByMemberAndDelYN(member, "N");
     }
 
     public List<Dog> getDeletedDogsByMember(Member member) {
         return dogRepository.findAllByMemberAndDelYN(member, "Y");
+    }
+
+    public List<Dog> getDogsByMemberIdx(int m_idx) {
+        return dogRepository.findByMIdxAndDeleteYn(m_idx, "N");
     }
 
     @Transactional

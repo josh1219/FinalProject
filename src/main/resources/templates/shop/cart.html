@@ -780,29 +780,35 @@
         }
 
         function searchAddress() {
-            const modal = document.getElementById('addressModal');
-            modal.style.display = 'block';
-            
-            new daum.Postcode({
-                oncomplete: function(data) {
-                    let address = data.address;
-                    let extraAddress = '';
+            // 안드로이드 환경인지 확인
+            if (window.Android) {
+                // 안드로이드의 주소 검색 액티비티 호출
+                window.Android.searchAddress();
+            } else {
+                const modal = document.getElementById('addressModal');
+                modal.style.display = 'block';
+                
+                new daum.Postcode({
+                    oncomplete: function(data) {
+                        let address = data.address;
+                        let extraAddress = '';
 
-                    if (data.buildingName !== '') {
-                        extraAddress = (data.bname !== '' ? `${data.bname}, ` : '') + 
-                                     (data.buildingName !== '' ? data.buildingName : '');
-                    }
-                    if (extraAddress !== '') {
-                        address += ` (${extraAddress})`;
-                    }
+                        if (data.buildingName !== '') {
+                            extraAddress = (data.bname !== '' ? `${data.bname}, ` : '') + 
+                                        (data.buildingName !== '' ? data.buildingName : '');
+                        }
+                        if (extraAddress !== '') {
+                            address += ` (${extraAddress})`;
+                        }
 
-                    document.getElementById('recipientAddress').value = address;
-                    document.getElementById('recipientAddressDetail').focus();
-                    closeAddressModal();
-                },
-                width: '100%',
-                height: '100%'
-            }).embed(document.getElementById('address-search-container'));
+                        document.getElementById('recipientAddress').value = address;
+                        document.getElementById('recipientAddressDetail').focus();
+                        closeAddressModal();
+                    },
+                    width: '100%',
+                    height: '100%'
+                }).embed(document.getElementById('address-search-container'));
+            }
         }
 
         function closeAddressModal() {

@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.5/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
+        * {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
         .container {
             max-width: 1200px;
             width: 100%;
@@ -141,33 +146,44 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.5/dist/sweetalert2.all.min.js"></script>
     <script th:inline="javascript">
         function restoreDog(dIdx) {
-            if (confirm('이 강아지를 복구하시겠습니까?')) {
-                const token = document.querySelector('meta[name="_csrf"]').content;
-                const header = document.querySelector('meta[name="_csrf_header"]').content;
+            Swal.fire({
+                title: '반려견 복구',
+                text: '이 강아지를 복구하시겠습니까?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '복구',
+                cancelButtonText: '취소'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const token = document.querySelector('meta[name="_csrf"]').content;
+                    const header = document.querySelector('meta[name="_csrf_header"]').content;
 
-                fetch(`/dog/restore/${dIdx}`, {
-                    method: 'POST',
-                    headers: {
-                        [header]: token
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.text();
-                    }
-                    throw new Error('복구 중 오류가 발생했습니다.');
-                })
-                .then(redirectUrl => {
-                    alert('복구되었습니다.');
-                    window.location.href = redirectUrl;
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert(error.message);
-                });
-            }
+                    fetch(`/dog/restore/${dIdx}`, {
+                        method: 'POST',
+                        headers: {
+                            [header]: token
+                        }
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            return response.text();
+                        }
+                        throw new Error('복구 중 오류가 발생했습니다.');
+                    })
+                    .then(redirectUrl => {
+                        Swal.fire('복구 완료', '성공적으로 복구되었습니다.', 'success').then(() => {
+                            window.location.href = redirectUrl;
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire('오류', error.message, 'error');
+                    });
+                }
+            });
         }
     </script>
 </body>

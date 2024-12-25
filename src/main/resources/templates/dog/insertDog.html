@@ -7,12 +7,15 @@
     <link rel="stylesheet" href="/css/dog.css">
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/footer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.5/dist/sweetalert2.min.css" rel="stylesheet">
 
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Noto Sans KR', sans-serif;
         }
 
         body {
@@ -374,6 +377,7 @@
     <div th:replace="~{common/footer :: footer}"></div>
     <!-- /footer -->
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.5/dist/sweetalert2.all.min.js"></script>
     <script>
         function openCamera() {
             if (window.Android) {
@@ -381,10 +385,11 @@
                 if (window.Android.checkCameraPermission()) {
                     window.Android.openCamera();
                 } else {
+                    Swal.fire('알림', '카메라 권한이 없습니다.', 'info');
                     window.Android.requestCameraPermission();
                 }
             } else {
-                alert('카메라 기능은 안드로이드 앱에서만 사용 가능합니다.');
+                Swal.fire('알림', '카메라 기능은 안드로이드 앱에서만 사용 가능합니다.', 'info');
             }
         }
 
@@ -394,10 +399,11 @@
                 if (window.Android.checkGalleryPermission()) {
                     window.Android.openGallery();
                 } else {
+                    Swal.fire('알림', '갤러리 권한이 없습니다.', 'info');
                     window.Android.requestGalleryPermission();
                 }
             } else {
-                alert('갤러리 기능은 안드로이드 앱에서만 사용 가능합니다.');
+                Swal.fire('알림', '갤러리 기능은 안드로이드 앱에서만 사용 가능합니다.', 'info');
             }
         }
 
@@ -444,7 +450,7 @@
                 
             } catch (error) {
                 console.error('견종 식별 중 오류 발생:', error);
-                alert('견종 식별 중 오류가 발생했습니다. 수동으로 입력해주세요.');
+                Swal.fire('오류', '견종 식별 중 오류가 발생했습니다. 수동으로 입력해주세요.', 'error');
             } finally {
                 // 로딩 모달 숨기기
                 loadingModal.style.display = 'none';
@@ -478,6 +484,31 @@
         document.getElementById('birthday').addEventListener('change', function() {
             calculateAge(this.value);
         });
+
+        function validateForm() {
+            var name = document.getElementById('name').value;
+            var birthday = document.getElementById('birthday').value;
+            var weight = document.getElementById('weight').value;
+            var imageInput = document.getElementById('file-input');
+
+            if (!name) {
+                Swal.fire('입력 오류', '이름을 입력해주세요.', 'warning');
+                return false;
+            }
+            if (!birthday) {
+                Swal.fire('입력 오류', '생년월일을 입력해주세요.', 'warning');
+                return false;
+            }
+            if (!weight) {
+                Swal.fire('입력 오류', '체중을 입력해주세요.', 'warning');
+                return false;
+            }
+            if (!imageInput.files[0]) {
+                Swal.fire('입력 오류', '이미지를 선택해주세요.', 'warning');
+                return false;
+            }
+            return true;
+        }
     </script>
 </body>
 </html>

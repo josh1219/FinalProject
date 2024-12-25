@@ -40,306 +40,310 @@
     </style>
 </head>
 <body>
-    <!-- 로딩 모달 추가 -->
-    <div class="loading-modal" id="loadingModal">
-        <div class="loading-content">
-            <p>로딩중...</p>
+<!-- 로딩 모달 추가 -->
+<div class="loading-modal" id="loadingModal">
+    <div class="loading-content">
+        <p>로딩중...</p>
+    </div>
+</div>
+<div class="map-container">
+    <div id="map"></div>
+    <div class="side-panel-container">
+        <div class="panel-handle">
+            <div class="handle-bar"></div>
+        </div>
+        <div class="places-panel">
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="장소 검색..." id="searchInput">
+                <button class="search-button" onclick="handleSearch()">검색</button>
+            </div>
+            <div id="places-list" style="overflow-y: auto; height: 100%;"></div>
         </div>
     </div>
-    <div class="map-container">
-        <div id="map"></div>
-        <div class="side-panel-container">
-            <div class="panel-handle">
-                <div class="handle-bar"></div>
-            </div>
-            <div class="places-panel">
-                <div class="search-box">
-                    <input type="text" class="search-input" placeholder="장소 검색..." id="searchInput">
-                    <button class="search-button" onclick="handleSearch()">검색</button>
-                </div>
-                <div id="places-list" style="overflow-y: auto; height: 100%;"></div>
-            </div>
+    <div class="category-list">
+        <button class="category-button" data-category="동물병원" onclick="toggleCategory(this)">
+            <img src="/images/markers/hospital.png" alt="동물병원">
+            병원
+        </button>
+        <button class="category-button" data-category="카페" onclick="toggleCategory(this)">
+            <img src="/images/markers/cafe.png" alt="카페">
+            카페
+        </button>
+        <button class="category-button" data-category="여행지" onclick="toggleCategory(this)">
+            <img src="/images/markers/travel.png" alt="여행지">
+            여행
+        </button>
+        <button class="category-button" data-category="미용" onclick="toggleCategory(this)">
+            <img src="/images/markers/beauty.png" alt="미용">
+            미용
+        </button>
+        <button class="category-button" data-category="반려동물용품" onclick="toggleCategory(this)">
+            <img src="/images/markers/pet-shop.png" alt="반려동물용품">
+            용품
+        </button>
+        <button class="category-button" data-category="문화시설" onclick="toggleCategory(this)">
+            <img src="/images/markers/museum.png" alt="문화시설">
+            문화
+        </button>
+        <button class="category-button" data-category="위탁관리" onclick="toggleCategory(this)">
+            <img src="/images/markers/pet-hotel.png" alt="위탁관리">
+            위탁
+        </button>
+        <button class="category-button" data-category="식당" onclick="toggleCategory(this)">
+            <img src="/images/markers/restaurant.png" alt="식당">
+            식당
+        </button>
+        <button class="category-button" data-category="숙박시설" onclick="toggleCategory(this)">
+            <img src="/images/markers/pension.png" alt="숙박시설">
+            숙박
+        </button>
+    </div>
+    <div id="placeDetailPanel">
+        <div class="panel-handle">
+            <div class="handle-bar"></div>
         </div>
-        <div class="category-list">
-            <button class="category-button" data-category="동물병원" onclick="toggleCategory(this)">
-                <img src="/images/markers/hospital.png" alt="동물병원">
-                병원
-            </button>
-            <button class="category-button" data-category="카페" onclick="toggleCategory(this)">
-                <img src="/images/markers/cafe.png" alt="카페">
-                카페
-            </button>
-            <button class="category-button" data-category="여행지" onclick="toggleCategory(this)">
-                <img src="/images/markers/travel.png" alt="여행지">
-                여행
-            </button>
-            <button class="category-button" data-category="미용" onclick="toggleCategory(this)">
-                <img src="/images/markers/beauty.png" alt="미용">
-                미용
-            </button>
-            <button class="category-button" data-category="반려동물용품" onclick="toggleCategory(this)">
-                <img src="/images/markers/pet-shop.png" alt="반려동물용품">
-                용품
-            </button>
-            <button class="category-button" data-category="문화시설" onclick="toggleCategory(this)">
-                <img src="/images/markers/museum.png" alt="문화시설">
-                문화
-            </button>
-            <button class="category-button" data-category="위탁관리" onclick="toggleCategory(this)">
-                <img src="/images/markers/pet-hotel.png" alt="위탁관리">
-                위탁
-            </button>
-            <button class="category-button" data-category="식당" onclick="toggleCategory(this)">
-                <img src="/images/markers/restaurant.png" alt="식당">
-                식당
-            </button>
-            <button class="category-button" data-category="숙박시설" onclick="toggleCategory(this)">
-                <img src="/images/markers/pension.png" alt="숙박시설">
-                숙박
-            </button>
+        <div class="detail-header">
+            <div class="detail-title"></div>
+            <div class="detail-category"></div>
+            <div class="detail-likecheck"></div>
+            <button class="close-detail" onclick="closeDetailPanel()">×</button>
         </div>
-        <div id="placeDetailPanel">
-            <div class="panel-handle">
-                <div class="handle-bar"></div>
-            </div>
-            <div class="detail-header">
-                <div class="detail-title"></div>
-                <div class="detail-category"></div>
-                <div class="detail-likecheck"></div>
-                <button class="close-detail" onclick="closeDetailPanel()">×</button>
-            </div>
-            <div class="detail-content">
-                <div class="detail-section">
-                    <div class="detail-section-title">기본 정보</div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">📍</span>
-                        <span class="detail-info-text detail-address"></span>
-                    </div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">⏰</span>
-                        <span class="detail-info-text detail-time"></span>
-                    </div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">📞</span>
-                        <span class="detail-info-text detail-phone"></span>
-                    </div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">🌐</span>
-                        <span class="detail-info-text detail-homepage"></span>
-                    </div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">🅿️</span>
-                        <span class="detail-info-text detail-parking"></span>
-                    </div>
+        <div class="detail-content">
+            <div class="detail-section">
+                <div class="detail-section-title">기본 정보</div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">📍</span>
+                    <span class="detail-info-text detail-address"></span>
                 </div>
-                <div class="detail-section">
-                    <div class="detail-section-title">반려동물 편의시설 이용 안내</div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">💰</span>
-                        <span class="detail-info-text detail-fee"></span>
-                    </div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">🐕</span>
-                        <span class="detail-info-text detail-pet-allowed"></span>
-                    </div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">🦮</span>
-                        <span class="detail-info-text detail-pet-exclusive"></span>
-                    </div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">📏</span>
-                        <span class="detail-info-text detail-pet-size"></span>
-                    </div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">⚠️</span>
-                        <span class="detail-info-text detail-restrictions"></span>
-                    </div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">🏠</span>
-                        <span class="detail-info-text detail-indoor-outdoor"></span>
-                    </div>
-                    <div class="detail-info-item">
-                        <span class="detail-info-icon">💵</span>
-                        <span class="detail-info-text detail-additional-fee"></span>
-                    </div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">⏰</span>
+                    <span class="detail-info-text detail-time"></span>
+                </div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">📞</span>
+                    <span class="detail-info-text detail-phone"></span>
+                </div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">🌐</span>
+                    <span class="detail-info-text detail-homepage"></span>
+                </div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">🅿️</span>
+                    <span class="detail-info-text detail-parking"></span>
+                </div>
+            </div>
+            <div class="detail-section">
+                <div class="detail-section-title">반려동물 편의시설 이용 안내</div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">💰</span>
+                    <span class="detail-info-text detail-fee"></span>
+                </div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">🐕</span>
+                    <span class="detail-info-text detail-pet-allowed"></span>
+                </div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">🦮</span>
+                    <span class="detail-info-text detail-pet-exclusive"></span>
+                </div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">📏</span>
+                    <span class="detail-info-text detail-pet-size"></span>
+                </div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">⚠️</span>
+                    <span class="detail-info-text detail-restrictions"></span>
+                </div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">🏠</span>
+                    <span class="detail-info-text detail-indoor-outdoor"></span>
+                </div>
+                <div class="detail-info-item">
+                    <span class="detail-info-icon">💵</span>
+                    <span class="detail-info-text detail-additional-fee"></span>
                 </div>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- 찜하기 모달 -->
-    <div class="modal-overlay" id="likeModalOverlay"></div>
-    <div class="like-modal" id="likeModal">
-        <p id="likeModalText">찜하기 목록에 추가하시겠습니까?</p>
-        <div class="like-modal-buttons">
-            <button class="confirm-btn" onclick="confirmLike()">확인</button>
-            <button class="cancel-btn" onclick="closeLikeModal()">취소</button>
-        </div>
+<!-- 찜하기 모달 -->
+<div class="modal-overlay" id="likeModalOverlay"></div>
+<div class="like-modal" id="likeModal">
+    <p id="likeModalText">찜하기 목록에 추가하시겠습니까?</p>
+    <div class="like-modal-buttons">
+        <button class="confirm-btn" onclick="confirmLike()">확인</button>
+        <button class="cancel-btn" onclick="closeLikeModal()">취소</button>
     </div>
+</div>
 
-    <script th:inline="javascript">
-        let map;
-        let markers = [];
-        let tourData = [];  // 전체 데이터 저장
-        let filteredPlaces = [];
-        let currentPage = 1;
-        let itemsPerPage = 10;
-        let isLoading = false;
-        const markerIcons = {
-            '동물병원': '/images/markers/hospital.png',
-            '동물약국': '/images/markers/pharmacy.png',
-            '식당': '/images/markers/restaurant.png',
-            '여행지': '/images/markers/travel.png',
-            '미용': '/images/markers/beauty.png',
-            '문화시설': '/images/markers/museum.png',
-            '반려동물용품': '/images/markers/pet-shop.png',
-            '위탁관리': '/images/markers/pet-hotel.png',
-            '카페': '/images/markers/cafe.png',
-            '숙박시설': '/images/markers/pension.png'
+<script th:inline="javascript">
+    let map;
+    let markers = [];
+    let tourData = [];  // 전체 데이터 저장
+    let filteredPlaces = [];
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    let isLoading = false;
+    const markerIcons = {
+        '동물병원': '/images/markers/hospital.png',
+        '동물약국': '/images/markers/pharmacy.png',
+        '식당': '/images/markers/restaurant.png',
+        '여행지': '/images/markers/travel.png',
+        '미용': '/images/markers/beauty.png',
+        '문화시설': '/images/markers/museum.png',
+        '반려동물용품': '/images/markers/pet-shop.png',
+        '위탁관리': '/images/markers/pet-hotel.png',
+        '카페': '/images/markers/cafe.png',
+        '숙박시설': '/images/markers/pension.png'
+    };
+
+    function getMarkerIcon(category) {
+        return {
+            url: markerIcons[category],
+            scaledSize: new google.maps.Size(20, 20), // 아이콘 크기 조절
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(15, 15)
         };
+    }
 
-        function getMarkerIcon(category) {
-            return {
-                url: markerIcons[category],
-                scaledSize: new google.maps.Size(20, 20), // 아이콘 크기 조절
-                origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(15, 15)
-            };
+    async function initMap() {
+        const mapOptions = {
+            center: { lat: 37.5665, lng: 126.9780 },
+            zoom: 14,
+            zoomControl: false,  // 확대/축소 컨트롤 제거
+            streetViewControl: false,  // 스트리트뷰 컨트롤 제거
+            mapTypeControl: false,  // 지도 타입 컨트롤 제거
+            fullscreenControl: false,  // 전체화면 컨트롤 제거
+            styles: [
+                {
+                    featureType: "poi",
+                    elementType: "labels",
+                    stylers: [
+                        { visibility: "on" }
+                    ]
+                }
+            ]
+        };
+        map = new google.maps.Map(document.getElementById('map'), mapOptions);
+
+        // 현재 위치 버튼 추가
+        const locationButton = document.createElement("button");
+        locationButton.classList.add("custom-map-control");
+        locationButton.innerHTML = `
+            <img src="/images/markers/location.png" alt="현재 위치" style="width: 20px; height: 20px;">
+        `;
+        locationButton.style.cssText = `
+            background-color: rgba(0, 0, 0, -0.9);
+            border: none;
+            border-radius: 2px;
+            box-shadow: 0px 0 5px rgba(0,0,0,0.3);
+            margin: 8px;
+            padding: 6px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            top: 65px;
+            right: 15px;
+        `;
+
+        // 홈 버튼 추가
+        const homeButton = document.createElement('button');
+        homeButton.innerHTML = `
+            <img src="/images/home.png" alt="홈으로" style="width: 30px; height: 30px;">
+        `;
+        homeButton.style.cssText = `
+            background-color: rgba(0, 0, 0, -0.9);
+            border: none;
+            border-radius: 2px;
+            box-shadow: 0px 0 5px rgba(0,0,0,0.3);
+            margin: 10px;
+            padding: 8px;
+            cursor: pointer;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            top: 15px;
+            right: 15px;
+            width: 32px;
+            height: 32px;
+        `;
+
+        homeButton.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+
+        map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(homeButton);
+        map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(locationButton);
+
+        // 현재 위치 마커
+        let currentLocationMarker = null;
+
+        // 현재 위치 버튼 클릭 이벤트
+        locationButton.addEventListener("click", getCurrentLocation);
+
+        // 데이터 로드
+        try {
+            const response = await fetch('/tour/data');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const text = await response.text();
+            tourData = JSON.parse(text);
+            showMarkers();
+        } catch (error) {
+            console.error('Error loading tour data:', error);
         }
 
-        async function initMap() {
-            const mapOptions = {
-                center: { lat: 37.5665, lng: 126.9780 },
-                zoom: 14,
-                zoomControl: false,  // 확대/축소 컨트롤 제거
-                streetViewControl: false,  // 스트리트뷰 컨트롤 제거
-                mapTypeControl: false,  // 지도 타입 컨트롤 제거
-                fullscreenControl: false,  // 전체화면 컨트롤 제거
-                styles: [
-                    {
-                        featureType: "poi",
-                        elementType: "labels",
-                        stylers: [
-                            { visibility: "on" }
-                        ]
-                    }
-                ]
-            };
-            map = new google.maps.Map(document.getElementById('map'), mapOptions);
+        // 초기에 장소 리스트 패널 펼치기
+        togglePlaceList();
+    }
 
-            // 현재 위치 버튼 추가
-            const locationButton = document.createElement("button");
-            locationButton.classList.add("custom-map-control");
-            locationButton.innerHTML = `
-                <img src="/images/markers/location.png" alt="현재 위치" style="width: 20px; height: 20px;">
-            `;
-            locationButton.style.cssText = `
-                background-color: rgba(0, 0, 0, -0.9);
-                border: none;
-                border-radius: 2px;
-                box-shadow: 0px 0 5px rgba(0,0,0,0.3);
-                margin: 8px;
-                padding: 6px;
-                cursor: pointer;
-                width: 32px;
-                height: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 65px;
-                right: 15px;
-            `;
+    // 웹/앱 환경 체크 함수
+    function isNativeApp() {
+        return window.Android !== undefined;
+    }
 
-            // 홈 버튼 추가
-            const homeButton = document.createElement('button');
-            homeButton.innerHTML = `
-                <img src="/images/home.png" alt="홈으로" style="width: 30px; height: 30px;">
-            `;
-            homeButton.style.cssText = `
-                background-color: rgba(0, 0, 0, -0.9);
-                border: none;
-                border-radius: 2px;
-                box-shadow: 0px 0 5px rgba(0,0,0,0.3);
-                margin: 10px;
-                padding: 8px;
-                cursor: pointer;
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 15px;
-                right: 15px;
-                width: 32px;
-                height: 32px;
-            `;
-
-            homeButton.addEventListener('click', () => {
-                window.location.href = '/';
-            });
-
-            map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(homeButton);
-            map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(locationButton);
-
-            // 현재 위치 마커
-            let currentLocationMarker = null;
-
-            // 현재 위치 버튼 클릭 이벤트
-            locationButton.addEventListener("click", () => {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        (position) => {
-                            const pos = {
-                                lat: position.coords.latitude,
-                                lng: position.coords.longitude
-                            };
-
-                            // 기존 마커가 있다면 제거
-                            if (currentLocationMarker) {
-                                currentLocationMarker.setMap(null);
-                            }
-
-                            // 현재 위치 마커 생성
-                            currentLocationMarker = new google.maps.Marker({
-                                position: pos,
-                                map: map,
-                                icon: {
-                                    path: google.maps.SymbolPath.CIRCLE,
-                                    scale: 10,
-                                    fillColor: "#4285F4",
-                                    fillOpacity: 1,
-                                    strokeColor: "#ffffff",
-                                    strokeWeight: 2,
-                                }
-                            });
-
-                            // 지도 중심을 현재 위치로 이동
-                            map.setCenter(pos);
-                            map.setZoom(15);
-                        },
-                        (error) => {
-                            console.error("Error getting current location:", error);
-                            alert("현재 위치를 가져올 수 없습니다.");
-                        }
-                    );
+    // 현재 위치 가져오기 함수
+    function getCurrentLocation() {
+        if (isNativeApp()) {
+            // 안드로이드 앱에서 위치 권한 확인
+            if (window.Android.checkLocationPermission()) {
+                // GPS가 활성화되어 있는지 확인
+                if (window.Android.isGPSEnabled()) {
+                    // 위치 추적 시작
+                    window.Android.startTracking();
                 } else {
-                    alert("이 브라우저에서는 위치 정보를 지원하지 않습니다.");
+                    // GPS 활성화 요청
+                    window.Android.showGPSDialog();
                 }
-            });
-
-            // 현재 위치 가져오기
+            } else {
+                // 위치 권한 요청
+                window.Android.requestLocationPermission();
+            }
+        } else {
+            // 웹 브라우저에서 위치 정보 가져오기
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        const currentPosition = {
-                            lat: position.coords.latitude,
-                            lng: position.coords.longitude
-                        };
-                        
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+
                         // 현재 위치로 지도 이동
+                        currentPosition = { lat: lat, lng: lng };
                         map.setCenter(currentPosition);
-                        map.setZoom(14);
-                        
-                        // 현재 위치 마커 표시
+                        map.setZoom(15);
+
+                        // 기존 현재 위치 마커 제거
+                        if (currentLocationMarker) {
+                            currentLocationMarker.setMap(null);
+                        }
+
+                        // 현재 위치 마커 생성
                         currentLocationMarker = new google.maps.Marker({
                             position: currentPosition,
                             map: map,
@@ -348,681 +352,715 @@
                                 scale: 10,
                                 fillColor: "#4285F4",
                                 fillOpacity: 1,
-                                strokeColor: "#FFFFFF",
-                                strokeWeight: 2
+                                strokeColor: "white",
+                                strokeWeight: 2,
                             },
-                            title: '현재 위치'
                         });
+
+                        // 현재 위치 기준으로 주변 검색
+                        searchInCurrentMap();
                     },
-                    (error) => {
-                        console.error('위치 정보를 가져오는데 실패했습니다:', error);
+                    function(error) {
+                        console.error("Error getting current location:", error);
+                        alert("현재 위치를 가져올 수 없습니다.");
                     }
                 );
-            }
-
-            // 데이터 로드
-            try {
-                const response = await fetch('/tour/data');
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                const text = await response.text();
-                tourData = JSON.parse(text);
-                showMarkers();
-            } catch (error) {
-                console.error('Error loading tour data:', error);
-            }
-            
-            // 초기에 장소 리스트 패널 펼치기
-            togglePlaceList();
-        }
-
-        function getCategoryMapping(category1, category2, category3) {            
-            // 카테고리 매핑
-            if (category1 === "동물병원" || category2 === "동물병원" || category3 === "동물병원") return "동물병원";
-            if (category1 === "동물약국" || category2 === "동물약국" || category3 === "동물약국") return "동물약국";
-            if (category1 === "식당" || category2 === "식당" || category3 === "식당") return "식당";
-            if (category1 === "여행지" || category2 === "여행지" || category3 === "여행지") return "여행지";
-            if (category1 === "미용" || category2 === "미용" || category3 === "미용") return "미용";
-            if (category1 === "박물관" || category2 === "박물관" || category3 === "박물관") return "문화시설";
-            if (category1 === "반려동물용품" || category2 === "반려동물용품" || category3 === "반려동물용품") return "반려동물용품";
-            if (category1 === "문예회관" || category2 === "문예회관" || category3 === "문예회관") return "문화시설";
-            if (category1 === "미술관" || category2 === "미술관" || category3 === "미술관") return "문화시설";
-            if (category1 === "위탁관리" || category2 === "위탁관리" || category3 === "위탁관리") return "위탁관리";
-            if (category1 === "카페" || category2 === "카페" || category3 === "카페") return "카페";
-            if (category1 === "펜션" || category2 === "펜션" || category3 === "펜션") return "숙박시설";
-            if (category1 === "호텔" || category2 === "호텔" || category3 === "호텔") return "숙박시설";
-            return null;
-        }
-
-        // 거리 계산 함수 (km)
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
-            return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
-
-        // 카테고리 토글 함수
-        function toggleCategory(button) {
-            document.getElementById('loadingModal').style.display = 'flex';
-            button.classList.toggle('active');
-            searchInCurrentMap(); // 현재 지도 영역 내 검색
-            setTimeout(() => {
-                document.getElementById('loadingModal').style.display = 'none';
-            }, 500);
-        }
-
-        // 현재 지도 영역 내 검색
-        function searchInCurrentMap() {
-            const bounds = map.getBounds();
-            const searchInput = document.getElementById('searchInput');
-            const keyword = searchInput.value.toLowerCase();
-            
-            // 활성화된 카테고리 가져오기
-            const activeCategories = Array.from(document.querySelectorAll('.category-button.active'))
-                .map(button => button.getAttribute('data-category'));
-            
-            // 검색어가 있거나 카테고리가 선택된 경우만 필터링
-            if (keyword.trim() !== '' || activeCategories.length > 0) {
-                filteredPlaces = tourData.map(place => {
-                    const latitude = parseFloat(place.위도);
-                    const longitude = parseFloat(place.경도);
-                const position = new google.maps.LatLng(latitude, longitude);
-                    const category = getCategoryMapping(place.카테고리1, place.카테고리2, place.카테고리3);
-                    
-                    let distance = null;
-                    if (currentPosition) {
-                        distance = calculateDistance(
-                            currentPosition.lat,
-                            currentPosition.lng,
-                            latitude,
-                            longitude
-                        );
-                    }
-                    
-                    const matchesSearch = keyword === '' || 
-                        place.시설명.toLowerCase().includes(keyword) ||
-                        (place.도로명주소 && place.도로명주소.toLowerCase().includes(keyword)) ||
-                        category.toLowerCase().includes(keyword);
-                    
-                    const matchesCategory = activeCategories.length === 0 || activeCategories.includes(category);
-                    
-                    return {
-                        name: place.시설명,
-                        address: `${place.법정읍면동명칭 || ''} ${place.도로명주소 || ''}`,
-                        category: category,
-                        position: { lat: latitude, lng: longitude },
-                        phone: place.전화번호,
-                        time : place.운영시간,
-                        homepage : place.홈페이지,
-                        parking : place.주차가능여부,
-                        pay : place.입장이용료가격정보,
-                        dogcan : place.반려동물동반가능정보,
-                        dogonly : place.반려동물전용정보,
-                        dogsize : place.입장가능동물크기,
-                        dogstop : place.반려동물제한사항,
-                        dogin : place.장소실내여부,
-                        dogout : place.장소실외여부,
-                        dogpay : place.애견동반추가요금,
-                        distance: distance,
-                        matchesSearch: matchesSearch,
-                        matchesCategory: matchesCategory,
-                    isInBounds: bounds.contains(position)
-                    };
-                }).filter(place => 
-                    place.isInBounds && 
-                    (keyword.trim() === '' || place.matchesSearch) &&
-                    (activeCategories.length === 0 || place.matchesCategory)
-                ).sort((a, b) => (a.distance === null ? 1 : b.distance === null ? -1 : a.distance - b.distance));
-
-                showMarkers();
-                displayCurrentPage();
             } else {
-                filteredPlaces = [];
-                showMarkers();
-                displayCurrentPage();
+                alert("이 브라우저에서는 위치 정보를 지원하지 않습니다.");
             }
         }
+    }
 
-        // 검색 처리 함수 수정
-        function handleSearch() {
-            const bounds = map.getBounds();
-            const searchInput = document.getElementById('searchInput');
-            const keyword = searchInput.value.toLowerCase();
-            
-            // 활성화된 카테고리 가져오기
-            const activeCategories = Array.from(document.querySelectorAll('.category-button.active'))
-                .map(button => button.getAttribute('data-category'));
-            
-            if (keyword.trim() !== '') {
-                // 검색어가 있는 경우 전체 영역에서 검색하되, 카테고리도 함께 체크
-                filteredPlaces = tourData.map(place => {
-                    const latitude = parseFloat(place.위도);
-                    const longitude = parseFloat(place.경도);
-                    const category = getCategoryMapping(place.카테고리1, place.카테고리2, place.카테고리3);
-                    
-                    let distance = null;
-                    if (currentPosition) {
-                        distance = calculateDistance(
-                            currentPosition.lat,
-                            currentPosition.lng,
-                            latitude,
-                            longitude
-                        );
-                    }
-                    
-                    return {
-                        name: place.시설명,
-                        address: `${place.법정읍면동명칭 || ''} ${place.도로명주소 || ''}`,
-                        category: category,
-                        position: { lat: latitude, lng: longitude },
-                        phone: place.전화번호,
-                        time : place.운영시간,
-                        homepage : place.홈페이지,
-                        parking : place.주차가능여부,
-                        pay : place.입장이용료가격정보,
-                        dogcan : place.반려동물동반가능정보,
-                        dogonly : place.반려동물전용정보,
-                        dogsize : place.입장가능동물크기,
-                        dogstop : place.반려동물제한사항,
-                        dogin : place.장소실내여부,
-                        dogout : place.장소실외여부,
-                        dogpay : place.애견동반추가요금,
-                        distance: distance,
-                        matchesSearch: 
-                            place.시설명.toLowerCase().includes(keyword) ||
-                            (place.도로명주소 && place.도로명주소.toLowerCase().includes(keyword)) ||
-                            category.toLowerCase().includes(keyword),
-                        matchesCategory: activeCategories.length === 0 || activeCategories.includes(category)
-                    };
-                }).filter(place => place.matchesSearch && place.matchesCategory)
-                  .sort((a, b) => (a.distance === null ? 1 : b.distance === null ? -1 : a.distance - b.distance));
+    // 안드로이드에서 위치 정보를 받았을 때 호출되는 콜백 함수
+    function handleNativeLocation(locationData) {
+        const lat = locationData.latitude;
+        const lng = locationData.longitude;
 
-                if (filteredPlaces.length > 0) {
-                    const bounds = new google.maps.LatLngBounds();
-                    filteredPlaces.forEach(place => {
-                        bounds.extend(place.position);
-                    });
-                    map.fitBounds(bounds);
+        currentPosition = { lat: lat, lng: lng };
+        map.setCenter(currentPosition);
+        map.setZoom(15);
+
+        // 기존 현재 위치 마커 제거
+        if (currentLocationMarker) {
+            currentLocationMarker.setMap(null);
+        }
+
+        // 현재 위치 마커 생성
+        currentLocationMarker = new google.maps.Marker({
+            position: currentPosition,
+            map: map,
+            icon: {
+                path: google.maps.SymbolPath.CIRCLE,
+                scale: 10,
+                fillColor: "#4285F4",
+                fillOpacity: 1,
+                strokeColor: "white",
+                strokeWeight: 2,
+            },
+        });
+
+        // 현재 위치 기준으로 주변 검색
+        searchInCurrentMap();
+    }
+
+    // 위치 권한이 허용되었을 때 호출되는 콜백 함수
+    function onLocationPermissionGranted() {
+        if (isNativeApp() && window.Android.isGPSEnabled()) {
+            window.Android.startTracking();
+        }
+    }
+
+    // 위치 권한이 거부되었을 때 호출되는 콜백 함수
+    function onLocationPermissionDenied() {
+        alert("위치 권한이 거부되어 현재 위치를 가져올 수 없습니다.");
+    }
+
+    // 카테고리 매핑 함수
+    function getCategoryMapping(category1, category2, category3) {
+        // 카테고리 매핑
+        if (category1 === "동물병원" || category2 === "동물병원" || category3 === "동물병원") return "동물병원";
+        if (category1 === "동물약국" || category2 === "동물약국" || category3 === "동물약국") return "동물약국";
+        if (category1 === "식당" || category2 === "식당" || category3 === "식당") return "식당";
+        if (category1 === "여행지" || category2 === "여행지" || category3 === "여행지") return "여행지";
+        if (category1 === "미용" || category2 === "미용" || category3 === "미용") return "미용";
+        if (category1 === "박물관" || category2 === "박물관" || category3 === "박물관") return "문화시설";
+        if (category1 === "반려동물용품" || category2 === "반려동물용품" || category3 === "반려동물용품") return "반려동물용품";
+        if (category1 === "문예회관" || category2 === "문예회관" || category3 === "문예회관") return "문화시설";
+        if (category1 === "미술관" || category2 === "미술관" || category3 === "미술관") return "문화시설";
+        if (category1 === "위탁관리" || category2 === "위탁관리" || category3 === "위탁관리") return "위탁관리";
+        if (category1 === "카페" || category2 === "카페" || category3 === "카페") return "카페";
+        if (category1 === "펜션" || category2 === "펜션" || category3 === "펜션") return "숙박시설";
+        if (category1 === "호텔" || category2 === "호텔" || category3 === "호텔") return "숙박시설";
+        return null;
+    }
+
+    // 거리 계산 함수 (km)
+    function calculateDistance(lat1, lon1, lat2, lon2) {
+        const R = 6371;
+        const dLat = (lat2 - lat1) * Math.PI / 180;
+        const dLon = (lon2 - lon1) * Math.PI / 180;
+        const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+        return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    // 카테고리 토글 함수
+    function toggleCategory(button) {
+        document.getElementById('loadingModal').style.display = 'flex';
+        button.classList.toggle('active');
+        searchInCurrentMap(); // 현재 지도 영역 내 검색
+        setTimeout(() => {
+            document.getElementById('loadingModal').style.display = 'none';
+        }, 500);
+    }
+
+    // 현재 지도 영역 내 검색
+    function searchInCurrentMap() {
+        const bounds = map.getBounds();
+        const searchInput = document.getElementById('searchInput');
+        const keyword = searchInput.value.toLowerCase();
+
+        // 활성화된 카테고리 가져오기
+        const activeCategories = Array.from(document.querySelectorAll('.category-button.active'))
+            .map(button => button.getAttribute('data-category'));
+
+        // 검색어가 있거나 카테고리가 선택된 경우만 필터링
+        if (keyword.trim() !== '' || activeCategories.length > 0) {
+            filteredPlaces = tourData.map(place => {
+                const latitude = parseFloat(place.위도);
+                const longitude = parseFloat(place.경도);
+            const position = new google.maps.LatLng(latitude, longitude);
+                const category = getCategoryMapping(place.카테고리1, place.카테고리2, place.카테고리3);
+
+                let distance = null;
+                if (currentPosition) {
+                    distance = calculateDistance(
+                        currentPosition.lat,
+                        currentPosition.lng,
+                        latitude,
+                        longitude
+                    );
                 }
-            } else {
-                // 검색어가 없고 모든 카테고리가 비활성화된 경우
-                if (activeCategories.length === 0) {
-                    filteredPlaces = [];
-                } else {
-                    // 검색어가 없을 경우 현재 지도 영역 내 검색
-                    searchInCurrentMap();
-                    return;
-                }
-            }
+
+                const matchesSearch = keyword === '' ||
+                    place.시설명.toLowerCase().includes(keyword) ||
+                    (place.도로명주소 && place.도로명주소.toLowerCase().includes(keyword)) ||
+                    category.toLowerCase().includes(keyword);
+
+                const matchesCategory = activeCategories.length === 0 || activeCategories.includes(category);
+
+                return {
+                    name: place.시설명,
+                    address: `${place.법정읍면동명칭 || ''} ${place.도로명주소 || ''}`,
+                    category: category,
+                    position: { lat: latitude, lng: longitude },
+                    phone: place.전화번호,
+                    time : place.운영시간,
+                    homepage : place.홈페이지,
+                    parking : place.주차가능여부,
+                    pay : place.입장이용료가격정보,
+                    dogcan : place.반려동물동반가능정보,
+                    dogonly : place.반려동물전용정보,
+                    dogsize : place.입장가능동물크기,
+                    dogstop : place.반려동물제한사항,
+                    dogin : place.장소실내여부,
+                    dogout : place.장소실외여부,
+                    dogpay : place.애견동반추가요금,
+                    distance: distance,
+                    matchesSearch: matchesSearch,
+                    matchesCategory: matchesCategory,
+                isInBounds: bounds.contains(position)
+                };
+            }).filter(place =>
+                place.isInBounds &&
+                (keyword.trim() === '' || place.matchesSearch) &&
+                (activeCategories.length === 0 || place.matchesCategory)
+            ).sort((a, b) => (a.distance === null ? 1 : b.distance === null ? -1 : a.distance - b.distance));
 
             showMarkers();
-            currentPage = 1;
+            displayCurrentPage();
+        } else {
+            filteredPlaces = [];
+            showMarkers();
             displayCurrentPage();
         }
+    }
 
-        // 장소 리스트 표시
-        function displayCurrentPage() {
-            const placesList = document.getElementById('places-list');
-            placesList.innerHTML = ''; // 리스트 초기화
-            currentPage = 1; // 페이지 초기화
-            loadMoreItems(); // 첫 페이지 아이템 로드
-        }
+    // 검색 처리 함수 수정
+    function handleSearch() {
+        const bounds = map.getBounds();
+        const searchInput = document.getElementById('searchInput');
+        const keyword = searchInput.value.toLowerCase();
 
-        // 스크롤 이벤트 리스너 추가
-        document.getElementById('places-list').addEventListener('scroll', function(e) {
-            const element = e.target;
-            if (element.scrollHeight - element.scrollTop <= element.clientHeight + 1 && !isLoading) {
-                loadMoreItems();
-            }
-        });
+        // 활성화된 카테고리 가져오기
+        const activeCategories = Array.from(document.querySelectorAll('.category-button.active'))
+            .map(button => button.getAttribute('data-category'));
 
-        // 추가 아이템 로딩
-        function loadMoreItems() {
-            if (isLoading) return;
-            
-            const startIndex = (currentPage - 1) * itemsPerPage;
-            if (startIndex >= filteredPlaces.length) return;
-            
-            isLoading = true;
-            const endIndex = Math.min(startIndex + itemsPerPage, filteredPlaces.length);
-            
-            for (let i = startIndex; i < endIndex; i++) {
-                const place = filteredPlaces[i];
-                const distanceText = place.distance != null ? 
-                    (place.distance < 1000 ? 
-                        `${Math.round(place.distance)}m` : 
-                        `${(place.distance / 1000).toFixed(1)}km`) : '';
+        if (keyword.trim() !== '') {
+            // 검색어가 있는 경우 전체 영역에서 검색하되, 카테고리도 함께 체크
+            filteredPlaces = tourData.map(place => {
+                const latitude = parseFloat(place.위도);
+                const longitude = parseFloat(place.경도);
+                const category = getCategoryMapping(place.카테고리1, place.카테고리2, place.카테고리3);
 
-                const placeItem = document.createElement('div');
-                placeItem.className = 'place-item';
-                
-                // 찜하기 상태 체크를 위한 버튼 생성
-                placeItem.innerHTML = `
-                    <button class="like-button" onclick="toggleLike(event, '${place.name}', '${place.address}', '${place.phone}', '${place.category}')" 
-                            data-place-name="${place.name}" 
-                            data-category="${place.category}">
-                        <i class="fa-heart far"></i>
-                    </button>
-                    <div class="place-info">
-                        <img src="${markerIcons[place.category]}" alt="${place.category}" class="place-marker">
-                        <div class="place-details">
-                            <div class="place-name">${place.name}</div>
-                            <div class="place-category">${place.category}</div>
-                            <div class="place-address">${place.address}</div>
-                            ${distanceText ? `<div class="place-distance">${distanceText}</div>` : ''}
-                        </div>
-                    </div>
-                `;
-                
-                // 찜하기 상태 확인 및 아이콘 업데이트
-                const likeButton = placeItem.querySelector('.like-button');
-                fetch(`/tour/like/check?placeName=${encodeURIComponent(place.name)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.liked) {
-                            const heartIcon = likeButton.querySelector('i');
-                            heartIcon.classList.remove('far');
-                            heartIcon.classList.add('fas');
-                            likeButton.classList.add('active');
-                        }
-                    })
-                    .catch(error => console.error('Error checking like status:', error));
-                
-                // 마커 이미지 동적 효과
-                const markerImg = placeItem.querySelector('.place-marker');
-                markerImg.addEventListener('mouseenter', () => {
-                    markerImg.style.transform = 'scale(1.2)';
-                    markerImg.style.transition = 'transform 0.3s ease';
-                });
-                markerImg.addEventListener('mouseleave', () => {
-                    markerImg.style.transform = 'scale(1)';
-                });
-
-                // 장소 아이템 클릭 이벤트 추가
-                placeItem.addEventListener('click', () => {
-                    // 해당 위치로 지도 이동
-                    map.panTo(place.position);
-                    map.setZoom(17);
-                    
-                    // 상세보기 패널 표시
-                    showPlaceInfo(place);
-                    
-                    // 해당 마커 강조 표시
-                    const placeLatLng = new google.maps.LatLng(place.position.lat, place.position.lng);
-                    markers.forEach(marker => {
-                        if (marker.getPosition().equals(placeLatLng)) {
-                            marker.setAnimation(google.maps.Animation.BOUNCE);
-                            setTimeout(() => {
-                                marker.setAnimation(null);
-                            }, 2100);
-                        }
-                    });
-                });
-
-                document.getElementById('places-list').appendChild(placeItem);
-            }
-            
-            currentPage++;
-            isLoading = false;
-        }
-
-        // 마커 표시 함수
-        function showMarkers() {
-            // 기존 마커 제거
-            markers.forEach(marker => marker.setMap(null));
-            markers = [];
-
-            // 필터링된 장소들의 마커 생성
-            filteredPlaces.forEach(place => {
-                const marker = new google.maps.Marker({
-                    position: place.position,
-                    map: map,
-                    icon: getMarkerIcon(place.category)
-                });
-
-                // 마커 호버 정보창
-                const infoWindow = new google.maps.InfoWindow({
-                    content: `
-                        <div style="padding: 5px; min-width: 150px;">
-                            <div style="font-weight: bold; margin-bottom: 3px;">${place.name}</div>
-                            <div style="color: #666;">${place.category}</div>
-                        </div>
-                    `,
-                    disableAutoPan: true
-                });
-
-                // 마우스 오버 이벤트
-                marker.addListener('mouseover', () => {
-                    if (currentInfoWindow) {
-                        currentInfoWindow.close();
-                    }
-                    infoWindow.open(map, marker);
-                    currentInfoWindow = infoWindow;
-                });
-
-                // 마우스 아웃 이벤트
-                marker.addListener('mouseout', () => {
-                    if (currentInfoWindow) {
-                        currentInfoWindow.close();
-                        currentInfoWindow = null;
-                    }
-                });
-
-                // 마커 클릭 이벤트
-                marker.addListener('click', () => {
-                    showPlaceInfo(place);
-                });
-
-                markers.push(marker);
-            });
-        }
-
-        let currentPosition = null;
-        let currentLocationMarker = null;
-        let currentInfoWindow = null;
-
-        // 패널의 드래그 기능과 토글 기능을 구현했습니다. 사용자가 핸들을 드래그하여 패널의 높이를 조절할 수 있고, 클릭하여 패널을 접을 수 있습니다.
-        function togglePanel() {
-            const container = document.querySelector('.side-panel-container');
-            container.classList.toggle('collapsed');
-        }
-
-        // 패널 드래그 기능 구현
-        const panelHandle = document.querySelector('.panel-handle');
-        const container = document.querySelector('.side-panel-container');
-        let startY;
-        let startHeight;
-        let isDragging = false;
-
-        function initDrag(e) {
-            startY = e.clientY || e.touches[0].clientY;
-            startHeight = parseInt(document.defaultView.getComputedStyle(container).height, 10);
-            isDragging = true;
-            
-            document.addEventListener('mousemove', doDrag);
-            document.addEventListener('mouseup', stopDrag);
-            document.addEventListener('touchmove', doDrag);
-            document.addEventListener('touchend', stopDrag);
-        }
-
-        function doDrag(e) {
-            if (!isDragging) return;
-            
-            const y = e.clientY || e.touches[0].clientY;
-            const walk = startY - y;
-            let newHeight = startHeight + walk;
-            
-            // 최소, 최대 높이 제한
-            newHeight = Math.max(100, Math.min(window.innerHeight * 0.9, newHeight));
-            container.style.height = `${newHeight}px`;
-            
-            e.preventDefault();
-        }
-
-        function stopDrag() {
-            isDragging = false;
-            document.removeEventListener('mousemove', doDrag);
-            document.removeEventListener('mouseup', stopDrag);
-            document.removeEventListener('touchmove', doDrag);
-            document.removeEventListener('touchend', stopDrag);
-        }
-
-        panelHandle.addEventListener('mousedown', initDrag);
-        panelHandle.addEventListener('touchstart', initDrag);
-
-        // 패널의 드래그 기능과 토글 기능을 구현했습니다. 사용자가 핸들을 드래그하여 패널의 높이를 조절할 수 있고, 클릭하여 패널을 접을 수 있습니다.
-        function togglePlaceList() {
-            const container = document.querySelector('.side-panel-container');
-            container.classList.remove('collapsed');
-        }
-
-        function showPlaceInfo(place) {
-            // 상세보기 패널 표시
-            const detailPanel = document.getElementById('placeDetailPanel');
-            
-            // 기본 정보 업데이트
-            detailPanel.querySelector('.detail-title').textContent = place.name;
-            detailPanel.querySelector('.detail-category').textContent = place.category;
-            
-            // 기본 정보 섹션 업데이트
-            detailPanel.querySelector('.detail-address').textContent = "주소 : " + place.address || '주소 정보 없음';
-            detailPanel.querySelector('.detail-time').textContent = "운영시간 : " + place.time || '운영시간 정보 없음';
-            const phoneElement = detailPanel.querySelector('.detail-phone');
-            if (place.phone !== '') {
-                phoneElement.innerHTML = `<a href="tel:${place.phone}" class="phone-link">${place.phone}</a>`;
-            } else {
-                phoneElement.textContent = '전화번호 정보 없음';
-            }
-
-            const homepageElement = detailPanel.querySelector('.detail-homepage');
-            if (place.homepage!== '정보없음') {
-                homepageElement.innerHTML = `<a href="${place.homepage}" target="_blank" class="homepage-link">홈페이지</a>`;
-            } else if (place.homepage === '정보없음') {
-                homepageElement.textContent = '정보 없음';
-            }
-            
-            detailPanel.querySelector('.detail-parking').textContent = 
-                place.parking === 'Y' ? '주차 가능' : '주차 불가';
-
-            // 반려동물 편의시설 섹션 업데이트
-            detailPanel.querySelector('.detail-fee').textContent = 
-                "입장료 : " + place.pay || '입장료 정보 없음';
-            detailPanel.querySelector('.detail-pet-allowed').textContent = 
-                place.dogcan === 'Y' ? '반려동물 동반 가능' : '반려동물 동반 정보 없음';
-            detailPanel.querySelector('.detail-pet-exclusive').textContent = 
-                "반려동물 전용 : " + place.dogonly || '반려동물 전용 정보 없음';
-            detailPanel.querySelector('.detail-pet-size').textContent = 
-                "입장 가능 동물크기 : " + place.dogsize || '크기 제한 정보 없음';
-            detailPanel.querySelector('.detail-restrictions').textContent = 
-                "반려동물 제한사항 : " + place.dogstop || '제한사항 없음';
-
-            if(place.dogin === 'Y' && place.dogout === 'Y'){
-                const indoorOutdoor = "실내, 실외"
-                detailPanel.querySelector('.detail-indoor-outdoor').textContent = "장소 여부 : " + indoorOutdoor;
-            } else if(place.dogin === 'Y' || place.dogout === 'N'){
-                const indoorOutdoor = "실내"
-                detailPanel.querySelector('.detail-indoor-outdoor').textContent = "장소 여부 : " + indoorOutdoor;
-            } else if(place.dogin === 'N' || place.dogout === 'Y'){
-                const indoorOutdoor = "실외"
-                detailPanel.querySelector('.detail-indoor-outdoor').textContent = "장소 여부 : " + indoorOutdoor;
-            }
-            
-            detailPanel.querySelector('.detail-additional-fee').textContent = 
-                "애견동반 추가 요금 : " + place.dogpay || '추가 요금 없음';
-            
-            // 패널 표시
-            detailPanel.style.display = 'block';
-            if (window.innerWidth <= 768) {
-                requestAnimationFrame(() => {
-                    detailPanel.classList.remove('collapsed');
-                });
-            }
-
-            initDetailPanelTouch();
-        }
-
-        function closeDetailPanel() {
-            const detailPanel = document.getElementById('placeDetailPanel');
-            
-            // 모바일에서 부드럽게 사라지도록 처리
-            if (window.innerWidth <= 768) {
-                detailPanel.classList.add('collapsed');
-                // 애니메이션이 끝난 후 display none 처리
-                setTimeout(() => {
-                    detailPanel.style.display = 'none';
-                }, 300);
-            } else {
-                detailPanel.style.display = 'none';
-            }
-        }
-
-        // 상세 정보 패널 터치 이벤트 처리
-        function initDetailPanelTouch() {
-            const detailPanel = document.getElementById('placeDetailPanel');
-            const detailPanelHandle = detailPanel.querySelector('.panel-handle');
-            let startY = 0;
-            let startHeight = 0;
-            let isDragging = false;
-
-            detailPanelHandle.addEventListener('touchstart', function(e) {
-                const touch = e.touches[0];
-                startY = touch.clientY;
-                isDragging = true;
-                e.stopPropagation(); // 이벤트 버블링 방지
-            });
-
-            detailPanelHandle.addEventListener('touchmove', function(e) {
-                if (!isDragging) return;
-                
-                const touch = e.touches[0];
-                const deltaY = touch.clientY - startY;
-
-                // deltaY가 150px 이상이면 패널을 닫음
-                if (deltaY > 150) {
-                    closeDetailPanel();
-                    isDragging = false;
-                    return;
+                let distance = null;
+                if (currentPosition) {
+                    distance = calculateDistance(
+                        currentPosition.lat,
+                        currentPosition.lng,
+                        latitude,
+                        longitude
+                    );
                 }
 
-                e.stopPropagation(); // 이벤트 버블링 방지
-            });
+                return {
+                    name: place.시설명,
+                    address: `${place.법정읍면동명칭 || ''} ${place.도로명주소 || ''}`,
+                    category: category,
+                    position: { lat: latitude, lng: longitude },
+                    phone: place.전화번호,
+                    time : place.운영시간,
+                    homepage : place.홈페이지,
+                    parking : place.주차가능여부,
+                    pay : place.입장이용료가격정보,
+                    dogcan : place.반려동물동반가능정보,
+                    dogonly : place.반려동물전용정보,
+                    dogsize : place.입장가능동물크기,
+                    dogstop : place.반려동물제한사항,
+                    dogin : place.장소실내여부,
+                    dogout : place.장소실외여부,
+                    dogpay : place.애견동반추가요금,
+                    distance: distance,
+                    matchesSearch:
+                        place.시설명.toLowerCase().includes(keyword) ||
+                        (place.도로명주소 && place.도로명주소.toLowerCase().includes(keyword)) ||
+                        category.toLowerCase().includes(keyword),
+                    matchesCategory: activeCategories.length === 0 || activeCategories.includes(category)
+                };
+            }).filter(place => place.matchesSearch && place.matchesCategory)
+              .sort((a, b) => (a.distance === null ? 1 : b.distance === null ? -1 : a.distance - b.distance));
 
-            detailPanelHandle.addEventListener('touchend', function(e) {
-                isDragging = false;
-                e.stopPropagation(); // 이벤트 버블링 방지
-            });
-        }
-        
-        let currentLikeButton = null;
-        let currentPlaceName = '';
-        let currentPlaceAddress = '';
-        let currentPlacePhone = '';
-        let currentPlaceCategory = '';
-
-        function toggleLike(event, name, address, phone, category) {
-            event.stopPropagation();
-            currentLikeButton = event.target.closest('.like-button');
-            currentPlaceName = name;
-            currentPlaceAddress = address;
-            currentPlacePhone = phone;
-            currentPlaceCategory = category;
-            
-            const isLiked = currentLikeButton.classList.contains('active');
-            const modalText = document.getElementById('likeModalText');
-            modalText.textContent = isLiked ? "찜하기 해제" : "찜하기 등록";
-            
-            document.getElementById('likeModalOverlay').style.display = 'block';
-            document.getElementById('likeModal').style.display = 'block';
-        }
-
-        function closeLikeModal() {
-            document.getElementById('likeModalOverlay').style.display = 'none';
-            document.getElementById('likeModal').style.display = 'none';
-        }
-
-        function confirmLike() {
-            if (currentLikeButton && currentPlaceName) {
-                const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-                const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-                
-                const params = new URLSearchParams({
-                    placeName: currentPlaceName,
-                    category: currentPlaceCategory,
-                    address: currentPlaceAddress,
-                    phoneNumber: currentPlacePhone
+            if (filteredPlaces.length > 0) {
+                const bounds = new google.maps.LatLngBounds();
+                filteredPlaces.forEach(place => {
+                    bounds.extend(place.position);
                 });
-                
-                fetch(`/tour/like/toggle?${params.toString()}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        [csrfHeader]: csrfToken
-                    }
-                })
+                map.fitBounds(bounds);
+            }
+        } else {
+            // 검색어가 없고 모든 카테고리가 비활성화된 경우
+            if (activeCategories.length === 0) {
+                filteredPlaces = [];
+            } else {
+                // 검색어가 없을 경우 현재 지도 영역 내 검색
+                searchInCurrentMap();
+                return;
+            }
+        }
+
+        showMarkers();
+        currentPage = 1;
+        displayCurrentPage();
+    }
+
+    // 장소 리스트 표시
+    function displayCurrentPage() {
+        const placesList = document.getElementById('places-list');
+        placesList.innerHTML = ''; // 리스트 초기화
+        currentPage = 1; // 페이지 초기화
+        loadMoreItems(); // 첫 페이지 아이템 로드
+    }
+
+    // 스크롤 이벤트 리스너 추가
+    document.getElementById('places-list').addEventListener('scroll', function(e) {
+        const element = e.target;
+        if (element.scrollHeight - element.scrollTop <= element.clientHeight + 1 && !isLoading) {
+            loadMoreItems();
+        }
+    });
+
+    // 추가 아이템 로딩
+    function loadMoreItems() {
+        if (isLoading) return;
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        if (startIndex >= filteredPlaces.length) return;
+
+        isLoading = true;
+        const endIndex = Math.min(startIndex + itemsPerPage, filteredPlaces.length);
+
+        for (let i = startIndex; i < endIndex; i++) {
+            const place = filteredPlaces[i];
+            const distanceText = place.distance != null ?
+                (place.distance < 1000 ?
+                    `${Math.round(place.distance)}m` :
+                    `${(place.distance / 1000).toFixed(1)}km`) : '';
+
+            const placeItem = document.createElement('div');
+            placeItem.className = 'place-item';
+
+            // 찜하기 상태 체크를 위한 버튼 생성
+            placeItem.innerHTML = `
+                <button class="like-button" onclick="toggleLike(event, '${place.name}', '${place.address}', '${place.phone}', '${place.category}')"
+                        data-place-name="${place.name}"
+                        data-category="${place.category}">
+                    <i class="fa-heart far"></i>
+                </button>
+                <div class="place-info">
+                    <img src="${markerIcons[place.category]}" alt="${place.category}" class="place-marker">
+                    <div class="place-details">
+                        <div class="place-name">${place.name}</div>
+                        <div class="place-category">${place.category}</div>
+                        <div class="place-address">${place.address}</div>
+                        ${distanceText ? `<div class="place-distance">${distanceText}</div>` : ''}
+                    </div>
+                </div>
+            `;
+
+            // 찜하기 상태 확인 및 아이콘 업데이트
+            const likeButton = placeItem.querySelector('.like-button');
+            fetch(`/tour/like/check?placeName=${encodeURIComponent(place.name)}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.success) {
-                        currentLikeButton.classList.toggle('active', data.liked);
-                        const heartIcon = currentLikeButton.querySelector('i');
-                        if (data.liked) {
-                            heartIcon.classList.remove('far');
-                            heartIcon.classList.add('fas');
-                        } else {
-                            heartIcon.classList.remove('fas');
-                            heartIcon.classList.add('far');
-                        }
-                    } else {
-                        alert(data.message);
+                    if (data.success && data.liked) {
+                        const heartIcon = likeButton.querySelector('i');
+                        heartIcon.classList.remove('far');
+                        heartIcon.classList.add('fas');
+                        likeButton.classList.add('active');
                     }
                 })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('오류가 발생했습니다.');
-                });
-            }
-            closeLikeModal();
-        }
+                .catch(error => console.error('Error checking like status:', error));
 
-        // 찜하기 상태 체크 함수
-        async function checkLikeStatus() {
-            try {
-                const likeButtons = document.querySelectorAll('.like-button');
-                for (const button of likeButtons) {
-                    const placeName = button.getAttribute('data-place-name');
-                    if (placeName) {
-                        try {
-                            const response = await fetch(`/tour/like/check?placeName=${encodeURIComponent(placeName)}`);
-                            if (!response.ok) throw new Error('Network response was not ok');
-                            const data = await response.json();
-                            if (data.success && data.liked) {
-                                button.classList.add('active');
-                            }
-                        } catch (error) {
-                            console.warn(`Failed to check like status for ${placeName}:`, error);
-                        }
+            // 마커 이미지 동적 효과
+            const markerImg = placeItem.querySelector('.place-marker');
+            markerImg.addEventListener('mouseenter', () => {
+                markerImg.style.transform = 'scale(1.2)';
+                markerImg.style.transition = 'transform 0.3s ease';
+            });
+            markerImg.addEventListener('mouseleave', () => {
+                markerImg.style.transform = 'scale(1)';
+            });
+
+            // 장소 아이템 클릭 이벤트 추가
+            placeItem.addEventListener('click', () => {
+                // 해당 위치로 지도 이동
+                map.panTo(place.position);
+                map.setZoom(17);
+
+                // 상세보기 패널 표시
+                showPlaceInfo(place);
+
+                // 해당 마커 강조 표시
+                const placeLatLng = new google.maps.LatLng(place.position.lat, place.position.lng);
+                markers.forEach(marker => {
+                    if (marker.getPosition().equals(placeLatLng)) {
+                        marker.setAnimation(google.maps.Animation.BOUNCE);
+                        setTimeout(() => {
+                            marker.setAnimation(null);
+                        }, 2100);
                     }
-                }
-            } catch (error) {
-                console.error('Error in checkLikeStatus:', error);
-            }
+                });
+            });
+
+            document.getElementById('places-list').appendChild(placeItem);
         }
 
-        // 새로운 아이템이 로드될 때마다 찜하기 상태 체크
-        const observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(mutation) {
-                if (mutation.type === 'childList') {
-                    checkLikeStatus();
+        currentPage++;
+        isLoading = false;
+    }
+
+    // 마커 표시 함수
+    function showMarkers() {
+        // 기존 마커 제거
+        markers.forEach(marker => marker.setMap(null));
+        markers = [];
+
+        // 필터링된 장소들의 마커 생성
+        filteredPlaces.forEach(place => {
+            const marker = new google.maps.Marker({
+                position: place.position,
+                map: map,
+                icon: getMarkerIcon(place.category)
+            });
+
+            // 마커 호버 정보창
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div style="padding: 5px; min-width: 150px;">
+                        <div style="font-weight: bold; margin-bottom: 3px;">${place.name}</div>
+                        <div style="color: #666;">${place.category}</div>
+                    </div>
+                `,
+                disableAutoPan: true
+            });
+
+            // 마우스 오버 이벤트
+            marker.addListener('mouseover', () => {
+                if (currentInfoWindow) {
+                    currentInfoWindow.close();
+                }
+                infoWindow.open(map, marker);
+                currentInfoWindow = infoWindow;
+            });
+
+            // 마우스 아웃 이벤트
+            marker.addListener('mouseout', () => {
+                if (currentInfoWindow) {
+                    currentInfoWindow.close();
+                    currentInfoWindow = null;
                 }
             });
+
+            // 마커 클릭 이벤트
+            marker.addListener('click', () => {
+                showPlaceInfo(place);
+            });
+
+            markers.push(marker);
+        });
+    }
+
+    let currentPosition = null;
+    let currentLocationMarker = null;
+    let currentInfoWindow = null;
+
+    // 패널의 드래그 기능과 토글 기능을 구현했습니다. 사용자가 핸들을 드래그하여 패널의 높이를 조절할 수 있고, 클릭하여 패널을 접을 수 있습니다.
+    function togglePanel() {
+        const container = document.querySelector('.side-panel-container');
+        container.classList.toggle('collapsed');
+    }
+
+    // 패널 드래그 기능 구현
+    const panelHandle = document.querySelector('.panel-handle');
+    const container = document.querySelector('.side-panel-container');
+    let startY;
+    let startHeight;
+    let isDragging = false;
+
+    function initDrag(e) {
+        startY = e.clientY || e.touches[0].clientY;
+        startHeight = parseInt(document.defaultView.getComputedStyle(container).height, 10);
+        isDragging = true;
+
+        document.addEventListener('mousemove', doDrag);
+        document.addEventListener('mouseup', stopDrag);
+        document.addEventListener('touchmove', doDrag);
+        document.addEventListener('touchend', stopDrag);
+    }
+
+    function doDrag(e) {
+        if (!isDragging) return;
+
+        const y = e.clientY || e.touches[0].clientY;
+        const walk = startY - y;
+        let newHeight = startHeight + walk;
+
+        // 최소, 최대 높이 제한
+        newHeight = Math.max(100, Math.min(window.innerHeight * 0.9, newHeight));
+        container.style.height = `${newHeight}px`;
+
+        e.preventDefault();
+    }
+
+    function stopDrag() {
+        isDragging = false;
+        document.removeEventListener('mousemove', doDrag);
+        document.removeEventListener('mouseup', stopDrag);
+        document.removeEventListener('touchmove', doDrag);
+        document.removeEventListener('touchend', stopDrag);
+    }
+
+    panelHandle.addEventListener('mousedown', initDrag);
+    panelHandle.addEventListener('touchstart', initDrag);
+
+    // 패널의 드래그 기능과 토글 기능을 구현했습니다. 사용자가 핸들을 드래그하여 패널의 높이를 조절할 수 있고, 클릭하여 패널을 접을 수 있습니다.
+    function togglePlaceList() {
+        const container = document.querySelector('.side-panel-container');
+        container.classList.remove('collapsed');
+    }
+
+    function showPlaceInfo(place) {
+        // 상세보기 패널 표시
+        const detailPanel = document.getElementById('placeDetailPanel');
+
+        // 기본 정보 업데이트
+        detailPanel.querySelector('.detail-title').textContent = place.name;
+        detailPanel.querySelector('.detail-category').textContent = place.category;
+
+        // 기본 정보 섹션 업데이트
+        detailPanel.querySelector('.detail-address').textContent = "주소 : " + place.address || '주소 정보 없음';
+        detailPanel.querySelector('.detail-time').textContent = "운영시간 : " + place.time || '운영시간 정보 없음';
+        const phoneElement = detailPanel.querySelector('.detail-phone');
+        if (place.phone !== '') {
+            phoneElement.innerHTML = `<a href="tel:${place.phone}" class="phone-link">${place.phone}</a>`;
+        } else {
+            phoneElement.textContent = '전화번호 정보 없음';
+        }
+
+        const homepageElement = detailPanel.querySelector('.detail-homepage');
+        if (place.homepage!== '정보없음') {
+            homepageElement.innerHTML = `<a href="${place.homepage}" target="_blank" class="homepage-link">홈페이지</a>`;
+        } else if (place.homepage === '정보없음') {
+            homepageElement.textContent = '정보 없음';
+        }
+
+        detailPanel.querySelector('.detail-parking').textContent =
+            place.parking === 'Y' ? '주차 가능' : '주차 불가';
+
+        // 반려동물 편의시설 섹션 업데이트
+        detailPanel.querySelector('.detail-fee').textContent =
+            "입장료 : " + place.pay || '입장료 정보 없음';
+        detailPanel.querySelector('.detail-pet-allowed').textContent =
+            place.dogcan === 'Y' ? '반려동물 동반 가능' : '반려동물 동반 정보 없음';
+        detailPanel.querySelector('.detail-pet-exclusive').textContent =
+            "반려동물 전용 : " + place.dogonly || '반려동물 전용 정보 없음';
+        detailPanel.querySelector('.detail-pet-size').textContent =
+            "입장 가능 동물크기 : " + place.dogsize || '크기 제한 정보 없음';
+        detailPanel.querySelector('.detail-restrictions').textContent =
+            "반려동물 제한사항 : " + place.dogstop || '제한사항 없음';
+
+        if(place.dogin === 'Y' && place.dogout === 'Y'){
+            const indoorOutdoor = "실내, 실외"
+            detailPanel.querySelector('.detail-indoor-outdoor').textContent = "장소 여부 : " + indoorOutdoor;
+        } else if(place.dogin === 'Y' || place.dogout === 'N'){
+            const indoorOutdoor = "실내"
+            detailPanel.querySelector('.detail-indoor-outdoor').textContent = "장소 여부 : " + indoorOutdoor;
+        } else if(place.dogin === 'N' || place.dogout === 'Y'){
+            const indoorOutdoor = "실외"
+            detailPanel.querySelector('.detail-indoor-outdoor').textContent = "장소 여부 : " + indoorOutdoor;
+        }
+
+        detailPanel.querySelector('.detail-additional-fee').textContent =
+            "애견동반 추가 요금 : " + place.dogpay || '추가 요금 없음';
+
+        // 패널 표시
+        detailPanel.style.display = 'block';
+        if (window.innerWidth <= 768) {
+            requestAnimationFrame(() => {
+                detailPanel.classList.remove('collapsed');
+            });
+        }
+
+        initDetailPanelTouch();
+    }
+
+    function closeDetailPanel() {
+        const detailPanel = document.getElementById('placeDetailPanel');
+
+        // 모바일에서 부드럽게 사라지도록 처리
+        if (window.innerWidth <= 768) {
+            detailPanel.classList.add('collapsed');
+            // 애니메이션이 끝난 후 display none 처리
+            setTimeout(() => {
+                detailPanel.style.display = 'none';
+            }, 300);
+        } else {
+            detailPanel.style.display = 'none';
+        }
+    }
+
+    // 상세 정보 패널 터치 이벤트 처리
+    function initDetailPanelTouch() {
+        const detailPanel = document.getElementById('placeDetailPanel');
+        const detailPanelHandle = detailPanel.querySelector('.panel-handle');
+        let startY = 0;
+        let startHeight = 0;
+        let isDragging = false;
+
+        detailPanelHandle.addEventListener('touchstart', function(e) {
+            const touch = e.touches[0];
+            startY = touch.clientY;
+            isDragging = true;
+            e.stopPropagation(); // 이벤트 버블링 방지
         });
 
-        // places-list의 변화 감지 시작
-        const placesList = document.getElementById('places-list');
-        observer.observe(placesList, { childList: true, subtree: true });
+        detailPanelHandle.addEventListener('touchmove', function(e) {
+            if (!isDragging) return;
 
-        // URL에서 place 파라미터 가져오기
-        const urlParams = new URLSearchParams(window.location.search);
-        const placeToShow = urlParams.get('place');
-        
-        // 페이지 로드 완료 후 실행
-        document.addEventListener('DOMContentLoaded', async function() {
-            await checkLikeStatus();
-            
-            // place 파라미터가 있으면 해당 장소 검색
-            if (placeToShow) {
-                document.getElementById('searchInput').value = placeToShow;
-                setTimeout(() => {
-                    handleSearch();
-                }, 3000);
+            const touch = e.touches[0];
+            const deltaY = touch.clientY - startY;
+
+            // deltaY가 150px 이상이면 패널을 닫음
+            if (deltaY > 150) {
+                closeDetailPanel();
+                isDragging = false;
+                return;
+            }
+
+            e.stopPropagation(); // 이벤트 버블링 방지
+        });
+
+        detailPanelHandle.addEventListener('touchend', function(e) {
+            isDragging = false;
+            e.stopPropagation(); // 이벤트 버블링 방지
+        });
+    }
+
+    let currentLikeButton = null;
+    let currentPlaceName = '';
+    let currentPlaceAddress = '';
+    let currentPlacePhone = '';
+    let currentPlaceCategory = '';
+
+    function toggleLike(event, name, address, phone, category) {
+        event.stopPropagation();
+        currentLikeButton = event.target.closest('.like-button');
+        currentPlaceName = name;
+        currentPlaceAddress = address;
+        currentPlacePhone = phone;
+        currentPlaceCategory = category;
+
+        const isLiked = currentLikeButton.classList.contains('active');
+        const modalText = document.getElementById('likeModalText');
+        modalText.textContent = isLiked ? "찜하기 해제" : "찜하기 등록";
+
+        document.getElementById('likeModalOverlay').style.display = 'block';
+        document.getElementById('likeModal').style.display = 'block';
+    }
+
+    function closeLikeModal() {
+        document.getElementById('likeModalOverlay').style.display = 'none';
+        document.getElementById('likeModal').style.display = 'none';
+    }
+
+    function confirmLike() {
+        if (currentLikeButton && currentPlaceName) {
+            const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+            const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
+            const params = new URLSearchParams({
+                placeName: currentPlaceName,
+                category: currentPlaceCategory,
+                address: currentPlaceAddress,
+                phoneNumber: currentPlacePhone
+            });
+
+            fetch(`/tour/like/toggle?${params.toString()}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    currentLikeButton.classList.toggle('active', data.liked);
+                    const heartIcon = currentLikeButton.querySelector('i');
+                    if (data.liked) {
+                        heartIcon.classList.remove('far');
+                        heartIcon.classList.add('fas');
+                    } else {
+                        heartIcon.classList.remove('fas');
+                        heartIcon.classList.add('far');
+                    }
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('오류가 발생했습니다.');
+            });
+        }
+        closeLikeModal();
+    }
+
+    // 찜하기 상태 체크 함수
+    async function checkLikeStatus() {
+        try {
+            const likeButtons = document.querySelectorAll('.like-button');
+            for (const button of likeButtons) {
+                const placeName = button.getAttribute('data-place-name');
+                if (placeName) {
+                    try {
+                        const response = await fetch(`/tour/like/check?placeName=${encodeURIComponent(placeName)}`);
+                        if (!response.ok) throw new Error('Network response was not ok');
+                        const data = await response.json();
+                        if (data.success && data.liked) {
+                            button.classList.add('active');
+                        }
+                    } catch (error) {
+                        console.warn(`Failed to check like status for ${placeName}:`, error);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error in checkLikeStatus:', error);
+        }
+    }
+
+    // 새로운 아이템이 로드될 때마다 찜하기 상태 체크
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList') {
+                checkLikeStatus();
             }
         });
-    </script>
-    <script th:src="@{'https://maps.googleapis.com/maps/api/js?key='
-                    + ${@environment.getProperty('google.maps.key')} 
-                    + '&callback=initMap'}" ㄴ
-            async defer></script>
+    });
+
+    // places-list의 변화 감지 시작
+    const placesList = document.getElementById('places-list');
+    observer.observe(placesList, { childList: true, subtree: true });
+
+    // URL에서 place 파라미터 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const placeToShow = urlParams.get('place');
+
+    // 페이지 로드 완료 후 실행
+    document.addEventListener('DOMContentLoaded', async function() {
+        await checkLikeStatus();
+
+        // place 파라미터가 있으면 해당 장소 검색
+        if (placeToShow) {
+            document.getElementById('searchInput').value = placeToShow;
+            setTimeout(() => {
+                handleSearch();
+            }, 3000);
+        }
+    });
+</script>
+<script th:src="@{'https://maps.googleapis.com/maps/api/js?key='
+                    + ${@environment.getProperty('google.maps.key')}
+                    + '&callback=initMap'}" async defer></script>
 </body>
 </html>

@@ -79,11 +79,59 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            padding-left: 32px;
+            position: relative;
         }
         
         .place-name:before {
-            content: '📍';
-            font-size: 22px;
+            content: '';
+            width: 24px;
+            height: 24px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            position: absolute;
+            left: 0;
+        }
+        
+        .place-name[data-category="동물병원"]:before {
+            background-image: url('/images/markers/hospital.png');
+        }
+        .place-name[data-category="식당"]:before {
+            background-image: url('/images/markers/restaurant.png');
+        }
+        .place-name[data-category="여행지"]:before {
+            background-image: url('/images/markers/travel.png');
+        }
+        .place-name[data-category="미용"]:before {
+            background-image: url('/images/markers/beauty.png');
+        }
+        .place-name[data-category="문화시설"]:before {
+            background-image: url('/images/markers/museum.png');
+        }
+        .place-name[data-category="반려동물용품"]:before {
+            background-image: url('/images/markers/pet-shop.png');
+        }
+        .place-name[data-category="위탁관리"]:before {
+            background-image: url('/images/markers/pet-hotel.png');
+        }
+        .place-name[data-category="카페"]:before {
+            background-image: url('/images/markers/cafe.png');
+        }
+        .place-name[data-category="숙박시설"]:before {
+            background-image: url('/images/markers/pension.png');
+        }
+        
+        .place-address {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .place-phone {
+            margin-bottom: -5px;
+            font-size: 16px;
+            color: #666;
         }
         
         .place-actions {
@@ -94,7 +142,7 @@
         }
         
         .action-button {
-            padding: 14px 20px;
+            padding: 5px 20px;
             border: none;
             border-radius: 12px;
             cursor: pointer;
@@ -189,7 +237,10 @@
         <div th:unless="${#lists.isEmpty(likedPlaces)}" class="liked-places-flex">
             <div th:each="place : ${likedPlaces}" class="place-card">
                 <div class="place-info">
-                    <h2 class="place-name" th:text="${place.placeName}"></h2>
+                    <h2 class="place-name" th:attr="data-category=${place.category}" th:text="${place.placeName}">
+                    </h2>
+                    <p class="place-address" th:if="${place.address}" th:text="${place.address}"></p>
+                    <p class="place-phone" th:if="${place.phoneNumber}" th:text="${place.phoneNumber}"></p>
                 </div>
                 
                 <div class="place-actions">

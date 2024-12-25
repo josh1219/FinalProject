@@ -45,7 +45,12 @@ public class TourLikeController {
 
     @PostMapping("/toggle")
     @ResponseBody
-    public ResponseEntity<?> toggleLike(@RequestParam String placeName, HttpSession session) {
+    public ResponseEntity<?> toggleLike(
+            @RequestParam String placeName,
+            @RequestParam String category,
+            @RequestParam String address,
+            @RequestParam String phoneNumber,
+            HttpSession session) {
         String userEmail = (String) session.getAttribute("email");
         if (userEmail == null) {
             return ResponseEntity.ok(Map.of(
@@ -75,6 +80,9 @@ public class TourLikeController {
             TourLike tourLike = TourLike.builder()
                     .member(member)
                     .placeName(placeName)
+                    .category(category)
+                    .address(address)
+                    .phoneNumber(phoneNumber)
                     .createdAt(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
                     .build();
             tourLikeRepository.save(tourLike);

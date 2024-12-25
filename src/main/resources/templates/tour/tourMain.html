@@ -432,67 +432,65 @@
                 .map(button => button.getAttribute('data-category'));
             
             // 검색어가 있거나 카테고리가 선택된 경우만 필터링
-            if (keyword.trim() === '' && activeCategories.length === 0) {
+            if (keyword.trim() !== '' || activeCategories.length > 0) {
+                filteredPlaces = tourData.map(place => {
+                    const latitude = parseFloat(place.위도);
+                    const longitude = parseFloat(place.경도);
+                const position = new google.maps.LatLng(latitude, longitude);
+                    const category = getCategoryMapping(place.카테고리1, place.카테고리2, place.카테고리3);
+                    
+                    let distance = null;
+                    if (currentPosition) {
+                        distance = calculateDistance(
+                            currentPosition.lat,
+                            currentPosition.lng,
+                            latitude,
+                            longitude
+                        );
+                    }
+                    
+                    const matchesSearch = keyword === '' || 
+                        place.시설명.toLowerCase().includes(keyword) ||
+                        (place.도로명주소 && place.도로명주소.toLowerCase().includes(keyword)) ||
+                        category.toLowerCase().includes(keyword);
+                    
+                    const matchesCategory = activeCategories.length === 0 || activeCategories.includes(category);
+                    
+                    return {
+                        name: place.시설명,
+                        address: `${place.법정읍면동명칭 || ''} ${place.도로명주소 || ''}`,
+                        category: category,
+                        position: { lat: latitude, lng: longitude },
+                        phone: place.전화번호,
+                        time : place.운영시간,
+                        homepage : place.홈페이지,
+                        parking : place.주차가능여부,
+                        pay : place.입장이용료가격정보,
+                        dogcan : place.반려동물동반가능정보,
+                        dogonly : place.반려동물전용정보,
+                        dogsize : place.입장가능동물크기,
+                        dogstop : place.반려동물제한사항,
+                        dogin : place.장소실내여부,
+                        dogout : place.장소실외여부,
+                        dogpay : place.애견동반추가요금,
+                        distance: distance,
+                        matchesSearch: matchesSearch,
+                        matchesCategory: matchesCategory,
+                    isInBounds: bounds.contains(position)
+                    };
+                }).filter(place => 
+                    place.isInBounds && 
+                    (keyword.trim() === '' || place.matchesSearch) &&
+                    (activeCategories.length === 0 || place.matchesCategory)
+                ).sort((a, b) => (a.distance === null ? 1 : b.distance === null ? -1 : a.distance - b.distance));
+
+                showMarkers();
+                displayCurrentPage();
+            } else {
                 filteredPlaces = [];
                 showMarkers();
                 displayCurrentPage();
-                return;
             }
-            
-            // 현재 지도 영역 내의 장소만 필터링
-            filteredPlaces = tourData.map(place => {
-                const latitude = parseFloat(place.위도);
-                const longitude = parseFloat(place.경도);
-                const position = new google.maps.LatLng(latitude, longitude);
-                const category = getCategoryMapping(place.카테고리1, place.카테고리2, place.카테고리3);
-                
-                let distance = null;
-                if (currentPosition) {
-                    distance = calculateDistance(
-                        currentPosition.lat,
-                        currentPosition.lng,
-                        latitude,
-                        longitude
-                    );
-                }
-                
-                const matchesSearch = keyword === '' || 
-                    place.시설명.toLowerCase().includes(keyword) ||
-                    (place.도로명주소 && place.도로명주소.toLowerCase().includes(keyword)) ||
-                    category.toLowerCase().includes(keyword);
-                
-                const matchesCategory = activeCategories.length === 0 || activeCategories.includes(category);
-                
-                return {
-                    name: place.시설명,
-                    address: `${place.법정읍면동명칭 || ''} ${place.도로명주소 || ''}`,
-                    category: category,
-                    position: { lat: latitude, lng: longitude },
-                    phone: place.전화번호,
-                    time : place.운영시간,
-                    homepage : place.홈페이지,
-                    parking : place.주차가능여부,
-                    pay : place.입장이용료가격정보,
-                    dogcan : place.반려동물동반가능정보,
-                    dogonly : place.반려동물전용정보,
-                    dogsize : place.입장가능동물크기,
-                    dogstop : place.반려동물제한사항,
-                    dogin : place.장소실내여부,
-                    dogout : place.장소실외여부,
-                    dogpay : place.애견동반추가요금,
-                    distance: distance,
-                    matchesSearch: matchesSearch,
-                    matchesCategory: matchesCategory,
-                    isInBounds: bounds.contains(position)
-                };
-            }).filter(place => 
-                place.isInBounds && 
-                (keyword.trim() === '' || place.matchesSearch) &&
-                (activeCategories.length === 0 || place.matchesCategory)
-            ).sort((a, b) => (a.distance === null ? 1 : b.distance === null ? -1 : a.distance - b.distance));
-
-            showMarkers();
-            displayCurrentPage();
         }
 
         // 검색 처리 함수 수정
@@ -610,7 +608,9 @@
                 
                 // 찜하기 상태 체크를 위한 버튼 생성
                 placeItem.innerHTML = `
-                    <button class="like-button" onclick="toggleLike(event, '${place.name}')" data-place-name="${place.name}">
+                    <button class="like-button" onclick="toggleLike(event, '${place.name}', '${place.address}', '${place.phone}', '${place.category}')" 
+                            data-place-name="${place.name}" 
+                            data-category="${place.category}">
                         <i class="fa-heart far"></i>
                     </button>
                     <div class="place-info">
@@ -907,12 +907,17 @@
         
         let currentLikeButton = null;
         let currentPlaceName = '';
+        let currentPlaceAddress = '';
+        let currentPlacePhone = '';
+        let currentPlaceCategory = '';
 
-        function toggleLike(event, name) {
+        function toggleLike(event, name, address, phone, category) {
             event.stopPropagation();
-            // 클릭된 요소가 i 태그인 경우 부모 버튼을 찾음
             currentLikeButton = event.target.closest('.like-button');
             currentPlaceName = name;
+            currentPlaceAddress = address;
+            currentPlacePhone = phone;
+            currentPlaceCategory = category;
             
             const isLiked = currentLikeButton.classList.contains('active');
             const modalText = document.getElementById('likeModalText');
@@ -932,7 +937,14 @@
                 const csrfToken = document.querySelector('meta[name="_csrf"]').content;
                 const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
                 
-                fetch(`/tour/like/toggle?placeName=${encodeURIComponent(currentPlaceName)}`, {
+                const params = new URLSearchParams({
+                    placeName: currentPlaceName,
+                    category: currentPlaceCategory,
+                    address: currentPlaceAddress,
+                    phoneNumber: currentPlacePhone
+                });
+                
+                fetch(`/tour/like/toggle?${params.toString()}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

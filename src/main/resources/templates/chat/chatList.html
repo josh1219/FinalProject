@@ -5,14 +5,16 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="_csrf" th:content="${_csrf.token}"/>
         <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
         <link rel="stylesheet" href="/css/header.css">
         <link rel="stylesheet" href="/css/footer.css">
         <link rel="stylesheet" href="/css/chatList.css">
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <div th:replace="common/header :: header-resources"></div>
         <title>PETOPIA 채팅 목록</title>
     </head>
     <body>
-        <div th:replace="~{common/header :: header}"></div>
+        <div th:replace="common/header :: header"></div>
         <!-- /header -->
         <main>
             <div class="main-content">
@@ -26,7 +28,7 @@
                         </div>
                         
                         <div th:if="${#lists.isEmpty(latestChats)}" class="no-chat-message">
-                            <p>🐾 진행 중인 채팅이 없습니다 🐾</p>
+                            <p>진행 중인 채팅이 없습니다.</p>
                         </div>
                         
                         <div th:each="chat : ${latestChats}" class="chat-item" 
@@ -50,6 +52,7 @@
                             <div class="chat-content">
                                 <div class="chat-header">
                                     <span class="username" th:text="${chat.sender.getMIdx() == currentUser.getMIdx() ? chat.receiver.getName() : chat.sender.getName()}"></span>
+                                    <span th:if="${chat.unreadCount > 0}" class="chat-badge-list" th:text="${chat.unreadCount}"></span>
                                     <span class="time" th:text="${chat.sendTime}"></span>
                                 </div>
                                 <!-- 동영상인 경우 -->
@@ -82,7 +85,7 @@
                     </div>
         </main>
   <!-- footer -->
-  <div th:replace="~{common/footer :: footer}"></div>
+  <div th:replace="common/footer :: footer"></div>
   <!-- /footer -->
         
         <script>

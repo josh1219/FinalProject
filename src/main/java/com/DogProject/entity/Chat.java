@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.hibernate.annotations.Comment;
 
 @Entity
+@Table(name = "chat")
 @Getter
 @Setter
 public class Chat {
@@ -19,6 +20,7 @@ public class Chat {
     private String content;
 
     @Comment("채팅 전송 시간")
+    @Column(name = "send_time")
     private String sendTime;
 
     @ManyToOne
@@ -34,4 +36,7 @@ public class Chat {
     @Column(name = "is_read", nullable = false, columnDefinition = "boolean default false")
     @Comment("읽음 여부")
     private boolean isRead = false;
+
+    @Transient
+    private int unreadCount;
 }

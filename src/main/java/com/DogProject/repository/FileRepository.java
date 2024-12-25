@@ -1,9 +1,6 @@
 package com.DogProject.repository;
 
 import com.DogProject.entity.File;
-
-import static org.mockito.Answers.values;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -5,6 +5,7 @@ import com.DogProject.entity.Chat;
 import com.DogProject.entity.File;
 import com.DogProject.entity.Member;
 import com.DogProject.repository.MemberRepository;
+import com.DogProject.repository.ChatRepository;
 import com.DogProject.service.ChatService;
 import com.DogProject.service.FileService;
 import org.slf4j.Logger;
@@ -37,17 +38,28 @@ public class ChatController {
     private final ChatService chatService;
     private final FileService fileService;
     private final MemberRepository memberRepository;
+    private final ChatRepository chatRepository;
     private static final Logger log = LoggerFactory.getLogger(ChatController.class);
 
     @MessageMapping("/chat/{roomId}")
     @SendTo("/topic/messages/{roomId}")
     public ChatMessage handleMessage(@DestinationVariable String roomId, ChatMessage message) {
-        // DB에 저장
-        String[] ids = roomId.split("_");
-        int senderId = message.getSenderId().intValue();
-        int receiverId = Integer.parseInt(ids[0].equals(String.valueOf(message.getSenderId())) ? ids[1] : ids[0]);
-        chatService.saveChat(message.getContent(), senderId, receiverId);
-        return message;
+        try {
+            // DB에 저장
+            String[] ids = roomId.split("_");
+            int senderId = message.getSenderId().intValue();
+            int receiverId = Integer.parseInt(ids[0].equals(String.valueOf(message.getSenderId())) ? ids[1] : ids[0]);
+            
+            System.out.println("Saving chat message - sender: " + senderId + ", receiver: " + receiverId); // 디버깅
+            Chat savedChat = chatService.saveChat(message.getContent(), senderId, receiverId);
+            System.out.println("Chat saved with ID: " + savedChat.getCIdx() + ", read status: " + savedChat.isRead()); // 디버깅
+            
+            return message;
+        } catch (Exception e) {
+            System.err.println("Error saving chat message: " + e.getMessage()); // 디버깅
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     @GetMapping("/chatList")
@@ -72,7 +84,13 @@ public class ChatController {
         }
 
         try {
+            // 채팅 내역 조회
             List<Chat> chatHistory = chatService.getChatsBetweenUsers(member.getMIdx(), receiverId);
+            
+            // 상대방의 메시지를 읽음으로 표시
+            Member sender = memberRepository.findById(receiverId).orElseThrow();
+            chatService.markMessagesAsRead(member, sender);
+            
             model.addAttribute("currentUser", member);
             model.addAttribute("chatHistory", chatHistory);
             return "chat/chat";
@@ -108,6 +126,11 @@ public class ChatController {
 
         // 이전 채팅 내역 조회
         List<Chat> chatHistory = chatService.getChatsBetweenUsers(id1, id2);
+
+        // 상대방의 메시지를 읽음으로 표시
+        int otherId = member.getMIdx() == id1 ? id2 : id1;
+        Member sender = memberRepository.findById(otherId).orElseThrow();
+        chatService.markMessagesAsRead(member, sender);
 
         // 현재 날짜 정보
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -149,6 +172,28 @@ public class ChatController {
         model.addAttribute("today", todayStr);
         
         return "chat/chat";
+    }
+
+    @GetMapping("/api/chat/unread-count")
+    @ResponseBody
+    public ResponseEntity<String> getUnreadMessageCount(HttpSession session) {
+        try {
+            Member member = (Member) session.getAttribute("sessionMember");
+            if (member == null) {
+                System.out.println("No member in session");
+                return ResponseEntity.ok("0");
+            }
+            
+            System.out.println("Checking unread messages for member: " + member.getMIdx());
+            int count = chatRepository.countUnreadMessages(member);
+            System.out.println("Unread message count: " + count);
+            
+            return ResponseEntity.ok(String.valueOf(count));
+        } catch (Exception e) {
+            System.err.println("Error getting unread count: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.ok("0");
+        }
     }
 
     @PostMapping("/chat/upload")

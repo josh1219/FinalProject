@@ -4,6 +4,7 @@ import com.DogProject.entity.Chat;
 import com.DogProject.entity.Member;
 import com.DogProject.repository.ChatRepository;
 import com.DogProject.repository.MemberRepository;
+import com.DogProject.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import java.util.List;
 public class ChatService {
     private final ChatRepository chatRepository;
     private final MemberRepository memberRepository;
+    private final NotificationService notificationService;
     private static final Logger log = LoggerFactory.getLogger(ChatService.class);
 
     // 채팅 메시지 저장
@@ -31,8 +33,28 @@ public class ChatService {
         chat.setSender(sender);
         chat.setReceiver(receiver);
         chat.setSendTime(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        chat.setRead(false);  // 새 메시지는 기본적으로 읽지 않음 상태
 
-        return chatRepository.save(chat);
+        Chat savedChat = chatRepository.save(chat);
+        
+        // 수신자에게 알림 전송
+        notificationService.notifyUnreadMessages(receiverId);
+        
+        return savedChat;
+    }
+
+    // 사용자의 모든 채팅방 목록 조회 (각 상대방과의 최신 메시지만)
+    public List<Chat> getLatestChatsByUserId(int userId) {
+        List<Chat> latestChats = chatRepository.findLatestChatsByUserId(userId);
+        
+        // 각 채팅에 대해 읽지 않은 메시지 수 설정
+        for (Chat chat : latestChats) {
+            Member otherUser = chat.getSender().getMIdx() == userId ? chat.getReceiver() : chat.getSender();
+            int unreadCount = chatRepository.countUnreadMessages(userId, otherUser.getMIdx());
+            chat.setUnreadCount(unreadCount);
+        }
+        
+        return latestChats;
     }
 
     // 두 사용자 간의 채팅 내역 조회
@@ -42,39 +64,21 @@ public class ChatService {
         return chatRepository.findChatsBetweenUsers(user1, user2);
     }
 
-    // 사용자의 모든 채팅방 목록 조회 (각 상대방과의 최신 메시지만)
-    public List<Chat> getLatestChatsByUserId(int userId) {
-        System.out.println("\n===== 채팅방 목록 조회 =====");
-        System.out.println("사용자 ID: " + userId);
-        
-        List<Chat> chatRooms = chatRepository.findLatestChatsByUserId(userId);
-        System.out.println("조회된 채팅방 수: " + chatRooms.size());
-        
-        for (Chat chat : chatRooms) {
-            System.out.println("\n채팅방 정보:");
-            System.out.println("- 채팅 ID: " + chat.getCIdx());
-            System.out.println("- 보낸 사람: " + chat.getSender().getName());
-            System.out.println("- 받는 사람: " + chat.getReceiver().getName());
-            System.out.println("- 마지막 메시지: " + chat.getContent());
-            System.out.println("- 시간: " + chat.getSendTime());
-        }
-        
-        return chatRooms;
-    }
-
+    // 채팅방 삭제
     @Transactional
     public void deleteRooms(List<String> roomIds) {
         if (roomIds != null && !roomIds.isEmpty()) {
             for (String roomId : roomIds) {
-                try {
-                    String[] userIds = roomId.split("_");
-                    if (userIds.length == 2) {
-                        chatRepository.deleteByRoomId(roomId);
-                    }
-                } catch (Exception e) {
-                    log.error("Error deleting chat room {}: {}", roomId, e.getMessage());
-                }
+                chatRepository.deleteByRoomId(roomId);
             }
         }
+    }
+
+    // 메시지를 읽음으로 표시
+    @Transactional
+    public void markMessagesAsRead(Member receiver, Member sender) {
+        chatRepository.markAsRead(receiver, sender);
+        // 읽음 처리 후 알림 업데이트
+        notificationService.notifyUnreadMessages(receiver.getMIdx());
     }
 }

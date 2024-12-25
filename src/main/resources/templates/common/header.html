@@ -1,4 +1,9 @@
 <!-- header -->
+<div th:fragment="header-resources">
+    <script src="/js/chat-notification.js"></script>
+    <link href="/css/header.css" rel="stylesheet">
+</div>
+
 <header th:fragment="header" class="header">
     <div class="logo-container">
         <div th:if="${#httpServletRequest.requestURI.contains('board/detail')}" onclick="location.href='/board'" class="back-button">
@@ -17,13 +22,11 @@
                 <img th:src="@{/images/logoutButton.svg}" alt="로그아웃">
             </button>
         </div>
-        <div class="gotochat">
-            <div class="chat-icon-container">
-                <button onclick="location.href='/chatList'" class="chat-button">
-                    <img th:src="@{/images/chatbutton.svg}" alt="채팅">
-                </button>
-                <span class="chat-badge" style="display: none;">0</span>
-            </div>
+        <div class="gotochat" th:if="${session.isLoggedIn}">
+            <button onclick="location.href='/chatList'" class="chat-button">
+                <img th:src="@{/images/chatbutton.svg}" alt="채팅">
+                <span id="chatBadge" th:data-user-id="${session.mIdx}" class="chat-badge" style="display: none;">0</span>
+            </button>
         </div>
         <div class="gotomypage">
             <button th:if="${session.mIdx != null}" onclick="location.href='/mypage'" class="mypage-button">
@@ -35,4 +38,3 @@
         </div>
     </div>
 </header>
-<!-- /header -->

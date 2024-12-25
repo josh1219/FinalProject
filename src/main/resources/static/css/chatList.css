@@ -382,3 +382,60 @@ body {
 .bounce {
     animation: bounceAnimation 0.5s ease-in-out;
 }
+
+/* 채팅 배지 스타일 */
+.chat-badge-list {
+    position: relative;
+    background: linear-gradient(45deg, #FF6B6B, #FF8787);
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    margin-left: 8px;
+    transform-origin: center;
+    animation: badgePopList 0.3s ease-out;
+}
+
+@keyframes badgePopList {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* 새 메시지가 왔을 때의 애니메이션 */
+@keyframes newMessageList {
+    0% {
+        transform: scale(1);
+    }
+    10% {
+        transform: scale(1.2);
+    }
+    20% {
+        transform: scale(1);
+    }
+    30% {
+        transform: scale(1.1);
+    }
+    40% {
+        transform: scale(1);
+    }
+}
+
+.chat-badge-list.new-message {
+    animation: newMessageList 1s ease-in-out;
+}

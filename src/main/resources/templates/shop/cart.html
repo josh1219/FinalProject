@@ -874,7 +874,12 @@
 
             // 유효성 검사
             if (!recipientName || !recipientPhone || !address) {
-                alert('배송 정보를 모두 입력해주세요.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: '입력 오류',
+                    text: '배송 정보를 모두 입력해주세요.',
+                    confirmButtonText: '확인'
+                });
                 return;
             }
 
@@ -884,7 +889,7 @@
                 recipientPhone: recipientPhone,
                 recipientAddress: fullAddress,
                 shippingRequest: shippingRequest,
-                usedPoint: currentPoint  // 전역 변수에서 포인트 값을 가져옴
+                usedPoint: currentPoint
             };
 
             // 서버에 주문 요청
@@ -899,15 +904,33 @@
                 .then(response => response.json())
                 .then(result => {
                     if (result.success) {
-                        alert('주문이 완료되었습니다.');
-                        window.location.href = '/shop/order/history';
+                        Swal.fire({
+                            icon: 'success',
+                            title: '주문 완료',
+                            text: '주문이 완료되었습니다.',
+                            confirmButtonText: '확인'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '/shop/order/history';
+                            }
+                        });
                     } else {
-                        alert(result.message || '주문 처리 중 오류가 발생했습니다.');
+                        Swal.fire({
+                            icon: 'error',
+                            title: '주문 오류',
+                            text: result.message || '주문 처리 중 오류가 발생했습니다.',
+                            confirmButtonText: '확인'
+                        });
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('주문 처리 중 오류가 발생했습니다.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: '주문 오류',
+                        text: '주문 처리 중 오류가 발생했습니다.',
+                        confirmButtonText: '확인'
+                    });
                 });
         }
 

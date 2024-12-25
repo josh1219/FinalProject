@@ -137,7 +137,7 @@ public class MemberController {
             Member member = memberService.findBymEmail(userEmail);
             if (member != null) {
                 MemberDTO memberDTO = MemberDTO.fromEntity(member);
-                String[] address = member.getAddress().split("|");
+                String[] address = member.getAddress().split("\\|");
                 String zipCode = address[0];
                 String address1 = address[1];
                 String address2 = address[2];

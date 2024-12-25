@@ -916,9 +916,7 @@
             
             const isLiked = currentLikeButton.classList.contains('active');
             const modalText = document.getElementById('likeModalText');
-            modalText.textContent = isLiked ? 
-                "찜하기를 해제하시겠습니까?" : 
-                "찜하기 목록에 추가하시겠습니까?";
+            modalText.textContent = isLiked ? "찜하기 해제" : "찜하기 등록";
             
             document.getElementById('likeModalOverlay').style.display = 'block';
             document.getElementById('likeModal').style.display = 'block';
@@ -965,42 +963,58 @@
             closeLikeModal();
         }
 
-        // 페이지 로드시 찜하기 상태 체크
-        function checkLikeStatus() {
-            const likeButtons = document.querySelectorAll('.like-button');
-            likeButtons.forEach(button => {
-                const placeName = button.getAttribute('data-place-name');
-                if (placeName) {
-                    fetch(`/tour/like/check?placeName=${encodeURIComponent(placeName)}`)
-                        .then(response => response.json())
-                        .then(data => {
+        // 찜하기 상태 체크 함수
+        async function checkLikeStatus() {
+            try {
+                const likeButtons = document.querySelectorAll('.like-button');
+                for (const button of likeButtons) {
+                    const placeName = button.getAttribute('data-place-name');
+                    if (placeName) {
+                        try {
+                            const response = await fetch(`/tour/like/check?placeName=${encodeURIComponent(placeName)}`);
+                            if (!response.ok) throw new Error('Network response was not ok');
+                            const data = await response.json();
                             if (data.success && data.liked) {
                                 button.classList.add('active');
                             }
-                        })
-                        .catch(error => console.error('Error:', error));
+                        } catch (error) {
+                            console.warn(`Failed to check like status for ${placeName}:`, error);
+                        }
+                    }
                 }
-            });
+            } catch (error) {
+                console.error('Error in checkLikeStatus:', error);
+            }
         }
-
-        // 페이지 로드 완료 후 찜하기 상태 체크
-        document.addEventListener('DOMContentLoaded', function() {
-            checkLikeStatus();
-        });
 
         // 새로운 아이템이 로드될 때마다 찜하기 상태 체크
         const observer = new MutationObserver(function(mutations) {
             mutations.forEach(function(mutation) {
-                if (mutation.addedNodes.length) {
+                if (mutation.type === 'childList') {
                     checkLikeStatus();
                 }
             });
         });
 
-        // places-list의 변경 감지 시작
-        observer.observe(document.getElementById('places-list'), {
-            childList: true,
-            subtree: true
+        // places-list의 변화 감지 시작
+        const placesList = document.getElementById('places-list');
+        observer.observe(placesList, { childList: true, subtree: true });
+
+        // URL에서 place 파라미터 가져오기
+        const urlParams = new URLSearchParams(window.location.search);
+        const placeToShow = urlParams.get('place');
+        
+        // 페이지 로드 완료 후 실행
+        document.addEventListener('DOMContentLoaded', async function() {
+            await checkLikeStatus();
+            
+            // place 파라미터가 있으면 해당 장소 검색
+            if (placeToShow) {
+                document.getElementById('searchInput').value = placeToShow;
+                setTimeout(() => {
+                    handleSearch();
+                }, 1000);
+            }
         });
     </script>
     <script th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${@environment.getProperty('google.maps.key')} + '&callback=initMap'}" 

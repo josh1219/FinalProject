@@ -20,7 +20,7 @@ public class TourController {
     private static final Logger logger = LoggerFactory.getLogger(TourController.class);
     
     @GetMapping("/map")
-    public String showTourMap() {
+    public String showTourMap(String place) {
         return "tour/tourMain";
     }
     

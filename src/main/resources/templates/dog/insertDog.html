@@ -15,7 +15,7 @@
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Noto Sans KR', sans-serif;
+            font-family: 'Noto+Sans+KR', sans-serif;
         }
 
         body {
@@ -304,7 +304,7 @@
                             <div class="img-preview-area">
                                 <img id="preview" src="/images/dogdefault.png" alt="강아지 사진 미리보기" class="img-preview">
                             </div>
-                            <input type="hidden" id="file-input" name="dogImage">
+                            <input type="file" id="file-input" name="image" style="display: none;" accept="image/*">
                         </div>
                         <div class="img-buttons">
                             <button type="button" class="img-button" onclick="openCamera()">
@@ -403,34 +403,51 @@
                     window.Android.requestGalleryPermission();
                 }
             } else {
-                Swal.fire('알림', '갤러리 기능은 안드로이드 앱에서만 사용 가능합니다.', 'info');
+                // 웹 환경에서는 기존 file input 사용
+                document.getElementById('file-input').click();
             }
         }
 
         function onImageSelected(imagePath) {
-            console.log('Selected image path:', imagePath);
+            // 이미지 미리보기 업데이트
             const previewImg = document.getElementById('preview');
-            const imageInput = document.getElementById('file-input');
             
-            if (previewImg && imageInput) {
-                // content:// 또는 file:// URI를 직접 사용
+            if (previewImg) {
                 previewImg.src = imagePath;
-                previewImg.style.display = 'block';
-                imageInput.value = imagePath;
+            }
+
+            // Base64 이미지를 Blob으로 변환하여 file input에 설정
+            if (imagePath.startsWith('data:image')) {
+                // Base64 데이터 추출
+                const base64Data = imagePath.split(',')[1];
+                const binaryData = atob(base64Data);
+                const bytes = new Uint8Array(binaryData.length);
+                for (let i = 0; i < binaryData.length; i++) {
+                    bytes[i] = binaryData.charCodeAt(i);
+                }
                 
-                // 이미지가 선택되면 견종 식별 실행
-                identifyBreed(imagePath);
+                // Blob 생성
+                const blob = new Blob([bytes], { type: 'image/jpeg' });
+                const file = new File([blob], "camera_image.jpg", { type: 'image/jpeg' });
+                
+                // file input에 파일 설정
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(file);
+                document.getElementById('file-input').files = dataTransfer.files;
+                
+                // 견종 식별 시작
+                identifyBreed(file);
             }
         }
 
-        async function identifyBreed(imagePath) {
+        async function identifyBreed(imageFile) {
             // 로딩 모달 표시
             const loadingModal = document.getElementById('loading-modal');
             loadingModal.style.display = 'block';
             
             try {
                 const formData = new FormData();
-                formData.append('image', imagePath);
+                formData.append('image', imageFile);
                 
                 console.log('이미지 업로드 시작');
                 const response = await fetch('/api/identify-breed', {
@@ -442,11 +459,11 @@
                     throw new Error('견종 식별 실패');
                 }
                 
-                const data = await response.json();
-                console.log('견종 식별 결과:', data);
+                const breed = await response.text();
+                console.log('견종 식별 결과:', breed);
                 
                 // 견종 정보 업데이트
-                document.getElementById('dType').value = data.breed;
+                document.getElementById('dType').value = breed;
                 
             } catch (error) {
                 console.error('견종 식별 중 오류 발생:', error);
@@ -459,11 +476,10 @@
 
         function removeImage() {
             const previewImg = document.getElementById('preview');
-            const imageInput = document.getElementById('file-input');
             
-            if (previewImg && imageInput) {
+            if (previewImg) {
                 previewImg.src = '/images/dogdefault.png';  // 기본 이미지로 변경
-                imageInput.value = '';  // 이미지 경로 초기화
+                previewImg.style.display = 'block';
             }
         }
 
@@ -509,6 +525,18 @@
             }
             return true;
         }
+
+        // file input change 이벤트 핸들러 추가
+        document.getElementById('file-input').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    onImageSelected(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
     </script>
 </body>
 </html>

@@ -17,6 +17,10 @@ import java.util.Collections;
 import java.util.Map;
 import javax.transaction.Transactional;
 
+/**
+ * OAuth2 소셜 로그인 처리를 위한 커스텀 서비스 클래스
+ * 각 소셜 로그인 제공자(구글, 네이버, 카카오)로부터 받은 유저 정보를 처리
+ */
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
@@ -24,21 +28,25 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     private final MemberRepository memberRepository;
     private final HttpSession httpSession;
 
+    /**
+     * OAuth2 로그인 인증 정보를 기반으로 유저 정보를 로드하고 처리하는 메소드
+     * 
+     * @param userRequest OAuth2 인증 요청 정보
+     * @return 처리된 OAuth2User 객체
+     * @throws OAuth2AuthenticationException 인증 처리 중 발생하는 예외
+     */
     @Override
     @Transactional
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        // DefaultOAuth2UserService를 통해 OAuth2User 정보를 가져옴
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
+        // 현재 로그인 진행 중인 서비스를 구분하는 코드 (구글, 네이버, 카카오)
         String registrationId = userRequest.getClientRegistration().getRegistrationId();
+        // OAuth2 로그인 진행 시 키가 되는 필드값 (PK)
         String userNameAttributeName = userRequest.getClientRegistration()
                 .getProviderDetails().getUserInfoEndpoint().getUserNameAttributeName();
-
-        // 디버깅을 위한 로그 추가
-        System.out.println("\n=== OAuth2 Login Debug Start ===");
-        System.out.println("Registration ID (Provider): " + registrationId);
-        System.out.println("UserNameAttributeName: " + userNameAttributeName);
-        System.out.println("OAuth2 Raw Attributes: " + oAuth2User.getAttributes());
 
         // 네이버 로그인의 경우 response 내부에 실제 사용자 정보가 있음
         Map<String, Object> attributes = oAuth2User.getAttributes();
@@ -49,8 +57,9 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
             }
         }
 
+        // OAuth2UserService를 통해 가져온 OAuth2User의 attribute를 담을 클래스
         OAuthAttributes extractedAttributes = OAuthAttributes.of(registrationId, userNameAttributeName, attributes);
-        
+
         // 디버깅을 위한 로그 추가
         System.out.println("\n=== Processed OAuth2 Attributes ===");
         System.out.println("Email: " + extractedAttributes.getEmail());
@@ -110,12 +119,6 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                     .socialId(extractedAttributes.getSocialId())
                     .enabled(true)
                     .build();
-            
-            System.out.println("\n=== Creating Temporary Member ===");
-            System.out.println("Name: " + tempMember.getName());
-            System.out.println("Email: " + tempMember.getMEmail());
-            System.out.println("Provider: " + tempMember.getProvider());
-            System.out.println("SocialId: " + tempMember.getSocialId());
             
             httpSession.setAttribute("socialMember", tempMember);
             httpSession.setAttribute("requireRegistration", true);

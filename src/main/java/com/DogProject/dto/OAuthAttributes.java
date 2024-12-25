@@ -51,29 +51,18 @@ public class OAuthAttributes {
                 .build();
     }
 
-    private static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes) {
-        // 디버깅 로그 추가
-        System.out.println("\n=== Naver OAuth Debug ===");
-        System.out.println("Raw attributes: " + attributes);
-        
-        // response가 없는 경우 attributes 자체가 이미 response 내부일 수 있음
+    private static OAuthAttributes ofNaver(String userNameAttributeName, Map<String, Object> attributes) {    
         Map<String, Object> response = attributes;
         if (attributes.containsKey("response")) {
             response = (Map<String, Object>) attributes.get("response");
-            System.out.println("Found 'response' key, using inner response: " + response);
         }
-        
         if (response == null) {
             throw new IllegalArgumentException("Naver attributes are invalid: " + attributes);
         }
-
         String socialId = String.valueOf(response.get("id"));
         String name = (String) response.get("name");
         String email = (String) response.get("email");
-        String picture = (String) response.get("profile_image");
-
-        System.out.println("Extracted values - id: " + socialId + ", name: " + name + ", email: " + email);
-    
+        String picture = (String) response.get("profile_image");   
         return OAuthAttributes.builder()
                 .name(name)
                 .email(email)
@@ -86,19 +75,13 @@ public class OAuthAttributes {
     }
 
     private static OAuthAttributes ofKakao(String userNameAttributeName, Map<String, Object> attributes) {
-        System.out.println("Kakao Raw Attributes: " + attributes);
-        
         Map<String, Object> kakaoAccount = (Map<String, Object>) attributes.get("kakao_account");
         Map<String, Object> profile = (Map<String, Object>) kakaoAccount.get("profile");
-
         String socialId = attributes.get("id").toString();
         String profileImageUrl = (String) profile.get("profile_image_url");
-        
-        // 프로필 이미지 URL에 크기 파라미터 추가 (width=200)
         if (profileImageUrl != null && !profileImageUrl.isEmpty()) {
             profileImageUrl = profileImageUrl.replace("/img/", "/img/w/200/");
         }
-
         return OAuthAttributes.builder()
                 .name((String) profile.get("nickname"))
                 .email(null)

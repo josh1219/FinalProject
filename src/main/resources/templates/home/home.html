@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${isAdmin != null and isAdmin ? 'PETOPIA - 관리자 로그인' : 'PETOPIA'}">PETOPIA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="/css/footer.css">
     <link rel="stylesheet" href="/css/home.css">
@@ -20,25 +23,25 @@
             <div class="withDogWalkButton">
                 <button onclick="location.href='/walk'" class="walk-button">
                     <img th:src="@{/images/withDogWalk_resized.gif}" alt="산책하기">
-                    <div class="walk-overlay">산책하러 가기</div>
+                    <div class="button-overlay">산책하러 가기</div>
                 </button>
             </div>
             <div class="insertDogButton">
                 <button onclick="location.href='/dog/insert'" class="insertDog-button">
                     <img th:src="@{/images/doginsert.png}" alt="강아지 등록하기">
-                    <div class="insert-overlay">강아지 등록하기</div>
+                    <div class="button-overlay">강아지 등록하기</div>
+                </button>
+            </div>
+            <div class="dogShopButton">
+                <button onclick="location.href='/shop/shop'" class="dogShop-button">
+                    <img th:src="@{/images/Dshopping.png}" alt="쇼핑하기">
+                    <div class="button-overlay">쇼핑하러 가기</div>
                 </button>
             </div>
             <div class="dogListButton">
                 <button onclick="location.href='/dog/list'" class="dogList-button">
                     <img th:src="@{/images/doglist.png}" alt="강아지 목록">
-                    <div class="list-overlay">강아지 목록</div>
-                </button>
-            </div>
-            <div class="dogShopButton">
-                <button onclick="location.href='/shop/shop'" class="dogShop-button">
-                    <img th:src="@{/images/dogWithShop_resized.gif}" alt="쇼핑하기">
-                    <div class="walk-overlay">쇼핑하러 가기</div>
+                    <div class="button-overlay">강아지 목록</div>
                 </button>
             </div>
         </div>
@@ -78,57 +81,56 @@
                 </div>
             </div>
         </div>
-      
-    </div>
+        <!-- 회사 정보 -->
+        <div class="company-info">
+            <table class="company-info-table">
+                <tr>
+                    <th>회사명</th>
+                    <td>(주)펫토피아</td>
+                </tr>
+                <tr>
+                    <th>주소</th>
+                    <td>서울특별시 마포구 백범로 23 2강의실</td>
+                </tr>
+                <tr>
+                    <th>대표이사</th>
+                    <td>까치</td>
+                </tr>
+                <tr>
+                    <th>사업자등록번호</th>
+                    <td>123-45-6789</td>
+                </tr>
+                <tr>
+                    <th>통신판매업신고</th>
+                    <td>제2024-서울마포-1234호</td>
+                </tr>
+                <tr>
+                    <th>이메일</th>
+                    <td>seokun1229@gmail.com</td>
+                </tr>
+                <tr>
+                    <th>전화번호</th>
+                    <td>
+                        문의 • 1234-5678
+                    </td>
+                </tr>
+                <tr>
+                    <th>PETOPIA</th>
+                    <td class="terms">
+                        <a th:href="@{/terms/terms}">이용약관 <i class="fas fa-chevron-right"></i></a>
+                        <a th:href="@{/terms/privacy}">개인정보처리방침 <i class="fas fa-chevron-right"></i></a>
+                        <a th:href="@{/terms/location}">위치정보이용약관 <i class="fas fa-chevron-right"></i></a>
+                    </td>
+                </tr>
+            </table>
+        </div>
 
-    <!-- 회사 정보 -->
-    <div class="company-info">
-        <table class="company-info-table">
-            <tr>
-                <th>회사명</th>
-                <td>(주)펫토피아</td>
-            </tr>
-            <tr>
-                <th>주소</th>
-                <td>서울특별시 마포구 백범로 23</td>
-            </tr>
-            <tr>
-                <th>대표이사</th>
-                <td>도베르</td>
-            </tr>
-            <tr>
-                <th>사업자등록번호</th>
-                <td>123-45-6789</td>
-            </tr>
-            <tr>
-                <th>통신판매업신고</th>
-                <td>제2024-서울마포-0000호</td>
-            </tr>
-            <tr>
-                <th>이메일</th>
-                <td>cs@petopia.co.kr</td>
-            </tr>
-            <tr>
-                <th>전화번호</th>
-                <td>
-                    문의 • 1234-5678
-                </td>
-            </tr>
-            <tr>
-                <th>PETOPIA</th>
-                <td class="terms">
-                    <a th:href="@{/terms/terms}">이용약관 <i class="fas fa-chevron-right"></i></a>
-                    <a th:href="@{/terms/privacy}">개인정보처리방침 <i class="fas fa-chevron-right"></i></a>
-                    <a th:href="@{/terms/location}">위치정보이용약관 <i class="fas fa-chevron-right"></i></a>
-                </td>
-            </tr>
-        </table>
-    </div>
+        <!-- footer -->
+        <div th:replace="common/footer :: footer"></div>
+        <!-- /footer -->      
+        </div>
 
-    <!-- footer -->
-    <div th:replace="common/footer :: footer"></div>
-    <!-- /footer -->
-
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const slider = document.querySelector('.slider');

@@ -8,9 +8,8 @@
         }
         
         .map-container {
-            max-width: 425px;
+            max-width: 600px;
             margin: 0 auto;
-            height: 100vh;
             height: -webkit-fill-available;
             width: 100%;
             position: relative;

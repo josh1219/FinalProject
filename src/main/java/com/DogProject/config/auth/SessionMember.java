@@ -21,3 +21,5 @@ public class SessionMember implements Serializable {
         this.provider = member.getProvider();
     }
 }
+
+

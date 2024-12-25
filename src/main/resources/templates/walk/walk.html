@@ -240,7 +240,7 @@
             width: 90%;
             max-width: 400px;
         }
-        
+
         .modal-overlay {
             display: none;
             position: fixed;
@@ -297,625 +297,402 @@
     </style>
 </head>
 <body>
-    <!-- header -->
-    <div th:replace="~{common/header :: header}"></div>
+<!-- header -->
+<div th:replace="~{common/header :: header}"></div>
 
-    <div class="container">
-        <div class="walk-info">
-            <div class="walk-header">
-                <img src="/images/walk1.svg" alt="산책" class="walk-icon">
-                <div class="walk-title">
-                    내 마일리지
-                    <div>0 mile <span class="plusMile" style="color: #666; font-size: 0.9rem;">( + 0 mile)</span></div>
-                </div>
-            </div>
-            <div class="walk-stats">
-                <div class="stat-box time">
-                    <div class="stat-label">누적 산책 시간</div>
-                    <div class="stat-value" id="timer">00:00:00</div>
-                </div>
-                <div class="stat-box distance">
-                    <div class="stat-label">누적 산책 거리</div>
-                    <div class="stat-value" id="distance">0m</div>
-                </div>
+<div class="container">
+    <div class="walk-info">
+        <div class="walk-header">
+            <img src="/images/walk1.svg" alt="산책" class="walk-icon">
+            <div class="walk-title">
+                내 마일리지
+                <div>0 mile <span class="plusMile" style="color: #666; font-size: 0.9rem;">( + 0 mile)</span></div>
             </div>
         </div>
-
-        <div class="walkmap">
-            <div class="map" id="map"></div>
-        </div>
-
-        <div id="warningMessage" class="warning-message"></div>
-
-        <!-- footer -->
-        <div th:replace="~{common/footer :: footer}"></div>
-        <!-- /footer -->
-
-        <!-- 커스텀 모달 -->
-        <div class="modal-overlay" id="modalOverlay"></div>
-        <div class="custom-modal" id="noDogModal">
-            <h3>알림</h3>
-            <p>등록된 강아지가 없어 산책 기능이 제한됩니다.</p>
-            <div class="modal-buttons">
-                <button class="modal-button primary-button" onclick="location.href='/dog/insert'">지금 강아지 등록</button>
-                <button class="modal-button secondary-button" onclick="laterRegister()">나중에 등록</button>
+        <div class="walk-stats">
+            <div class="stat-box time">
+                <div class="stat-label">누적 산책 시간</div>
+                <div class="stat-value" id="timer">00:00:00</div>
+            </div>
+            <div class="stat-box distance">
+                <div class="stat-label">누적 산책 거리</div>
+                <div class="stat-value" id="distance">0m</div>
             </div>
         </div>
-
-        <script th:inline="javascript">
-            // 모바일 기기 체크
-            function isMobileDevice() {
-                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            }
-
-            // 앱 체크
-            function isInApp() {
-                return window.Android !== undefined;
-            }
-
-            // 페이지 로드 시 모바일 체크
-            window.onload = function() {
-                if (!isMobileDevice()) {
-                    showWarningMessage('펫토피아 앱에서만 사용이 가능합니다.');
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 2000);
-                    return;
-                }
-                
-                if (isMobileDevice() && !isInApp()) {
-                    showWarningMessage('펫토피아 앱에서만 사용이 가능합니다.');
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 2000);
-                    return;
-                }
-
-                // 강아지 등록 여부 체크
-                const m_idx = [[${session.mIdx}]];
-                $.ajax({
-                    url: '/dog/check',
-                    type: 'GET',
-                    data: { m_idx: m_idx },
-                    dataType: 'json',
-                    beforeSend: function(xhr) {
-                        xhr.setRequestHeader(csrfHeader, csrfToken);
-                    },
-                    success: function(response) {
-                        console.log('서버 응답:', response);
-                        if (!response || response.length === 0) {
-                            document.getElementById('modalOverlay').style.display = 'block';
-                            document.getElementById('noDogModal').style.display = 'block';
-                            return;
-                        }
-                        console.log('강아지 확인 성공, 지도 초기화');
-                        initMap();
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('강아지 체크 실패:', error);
-                        console.error('상태:', status);
-                        console.error('응답:', xhr.responseText);
-                        showWarningMessage('강아지 정보를 확인하는 중 오류가 발생했습니다.');
-                        setTimeout(() => {
-                            window.location.href = '/';
-                        }, 2000);
-                    }
-                });
-            };
-
-            var map, directionsService, directionsRenderer, currentLocationMarker, polyline = null, pathCoordinates = [], totalDistance = 0, lastValidLocation = null, currentLocation = null, MIN_DISTANCE = 2;
-            var mIdx = [[${session.mIdx}]];
-            var csrfToken = [[${_csrf.token}]];
-            var csrfHeader = [[${_csrf.headerName}]];
-            var wsIdx = null;
-            var lastMovementTime = null;
-            var isMoving = true;
-            var locationUpdateInterval;
-            var MAX_SPEED = 10; // 최대 허용 속도 (m/s)
-            var warningTimeout = null;  // 경고 메시지 타이머
-            var isTracking = false;  // 산책 트래킹 상태
-            var totalSeconds = 0;
-            var timerInterval = null;
-            var pendingStartWalk = false;
-
-            // AJAX 전역 설정
-            $.ajaxSetup({
-                beforeSend: function(xhr) {
-                    if (csrfHeader && csrfToken) {
-                        xhr.setRequestHeader(csrfHeader, csrfToken);
-                    }
-                }
-            });
-
-            // 위치 권한 체크 및 요청
-            function checkLocationPermission() {
-                if (!window.Android) {
-                    showWarningMessage('펫토피아 앱에서만 사용 가능합니다.');
-                    setTimeout(() => {
-                        window.location.href = '/';
-                    }, 2000);
-                    return false;
-                }
-                return window.Android.checkLocationPermission();
-            }
-
-            // 위치 권한 허용됨
-            function onLocationPermissionGranted() {
-                console.log('Location permission granted');
-                if (pendingStartWalk) {
-                    startWalk();
-                }
-            }
-
-            // 위치 권한 거부됨
-            function onLocationPermissionDenied() {
-                console.log('Location permission denied');
-                isTracking = false;
-                pendingStartWalk = false;
-                showWarningMessage('위치 권한이 필요합니다.');
-                document.querySelector('.Go-button-site').textContent = 'GO!';
-                document.querySelector('.Go-button-site').classList.remove('stop');
-            }
-
-            function startWalk() {
-                if (isTracking) {
-                    stopWalk();
-                    return;
-                }
-
-                // 위치 권한 체크
-                if (!checkLocationPermission()) {
-                    pendingStartWalk = true;
-                    return;
-                }
-
-                // 새로운 산책 시작 시 변수 초기화
-                isTracking = true;
-                isMoving = true;
-                totalDistance = 0;
-                totalSeconds = 0;
-                pathCoordinates = [];
-                lastValidLocation = null;
-                currentLocation = null;
-                wsIdx = null;
-                lastMovementTime = new Date().getTime();
-
-                // 서버에 산책 시작 요청
-                $.ajax({
-                    url: '/walk/start',
-                    type: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': csrfToken
-                    },
-                    data: {
-                        mIdx: mIdx
-                    },
-                    success: function(response) {
-                        wsIdx = response;
-                        console.log('산책 시작 성공, wsIdx:', wsIdx);
-                        
-                        // 위치 업데이트 시작
-                        locationUpdateInterval = setInterval(function() {
-                            if (currentLocation && isMoving) {
-                                recordLocation(currentLocation);
-                            }
-                        }, 2000);
-
-                        // 타이머 시작
-                        startTimer();
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('산책 시작 실패:', error);
-                        showWarningMessage('산책 시작 중 오류가 발생했습니다.');
-                        stopWalk();
-                    }
-                });
-
-                // polyline 초기화
-                if (polyline) {
-                    polyline.setMap(null);
-                }
-                polyline = new google.maps.Polyline({
-                    path: [],
-                    geodesic: true,
-                    strokeColor: '#FF0000',
-                    strokeOpacity: 1.0,
-                    strokeWeight: 2,
-                    map: map
-                });
-
-                // UI 업데이트
-                $('#distance').text('0m');
-                $('#timer').text('00:00:00');
-                $('.plusMile').text('( + 0 mile)');
-
-                // 네이티브 위치 추적 시작
-                if (window.Android) {
-                    window.Android.startTracking();
-                }
-
-                document.querySelector('.Go-button-site').textContent = 'STOP';
-                document.querySelector('.Go-button-site').classList.add('stop');
-            }
-
-            function stopWalk() {
-                if (!isTracking) return;
-
-                clearInterval(locationUpdateInterval);
-
-                if (window.Android) {
-                    window.Android.stopTracking();
-                }
-
-                isTracking = false;
-                isMoving = false;
-                pendingStartWalk = false;
-                stopTimer();
-
-                // UI 업데이트
-                document.querySelector('.Go-button-site').textContent = 'GO!';
-                document.querySelector('.Go-button-site').classList.remove('stop');
-
-                // 서버에 산책 종료 요청
-                if (wsIdx) {
-                    $.ajax({
-                        url: '/walk/end',
-                        type: 'POST',
-                        data: {
-                            wsIdx: wsIdx,
-                            totalDistance: totalDistance
-                        },
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken
-                        },
-                        success: function(response) {
-                            showWarningMessage('산책이 종료되었습니다.\n총 거리: ' + totalDistance.toFixed(2) + 'm\n소요 시간: ' + formatTime(totalSeconds));
-                            window.location.href = '/walk/result/' + wsIdx;
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('산책 종료 실패:', error);
-                            showWarningMessage('산책 종료 중 오류가 발생했습니다.');
-                        }
-                    });
-                }
-            }
-
-            // 네이티브에서 전달받은 초기 위치로 지도 중심 설정
-            function initializeLocation(location) {
-                const pos = {
-                    lat: location.latitude,
-                    lng: location.longitude
-                };
-                currentLocation = pos;
-                map.setCenter(pos);
-            }
-
-            // 네이티브에서 전달받은 위치 정보 처리
-            function handleNativeLocation(location) {
-                console.log('Received location:', location);
-
-                if (!isTracking) return;
-
-                const pos = {
-                    lat: location.latitude,
-                    lng: location.longitude
-                };
-
-                // 현재 위치 업데이트
-                currentLocation = pos;
-
-                // 지도 중심 이동
-                map.setCenter(pos);
-
-                // 경로에 위치 추가 및 거리 계산
-                updatePathWithDistance(pos);
-            }
-
-            function handleLocationUpdate(position) {
-                if (!isTracking) return;
-
-                const location = {
-                    lat: position.coords.latitude,
-                    lng: position.coords.longitude
-                };
-
-                // GPS 정확도 체크 (20미터 이상이면 무시)
-                if (position.coords.accuracy > 20) {
-                    console.log('Low accuracy location data ignored:', position.coords.accuracy);
-                    return;
-                }
-
-                // 이전 위치가 있는 경우 거리 체크
-                if (lastValidLocation) {
-                    const distance = calculateDistance(
-                        lastValidLocation.lat, lastValidLocation.lng,
-                        location.lat, location.lng
-                    );
-
-                    // 순간이동처럼 너무 큰 거리 변화가 있는 경우 무시 (30미터 이상)
-                    if (distance > 30) {
-                        console.log('Abnormal distance change ignored:', distance);
-                        return;
-                    }
-                }
-
-                // 현재 위치 업데이트
-                currentLocation = location;
-
-                // 유효한 위치인 경우에만 lastValidLocation 업데이트
-                lastValidLocation = location;
-
-                // 지도 중심 이동
-                map.setCenter(location);
-
-                // 경로에 위치 추가 및 거리 계산
-                updatePathWithDistance(location);
-            }
-
-            function updatePathWithDistance(location) {
-                // 경로에 새 위치 추가
-                pathCoordinates.push(location);
-
-                // Polyline 업데이트
-                if (polyline) {
-                    polyline.setPath(pathCoordinates);
-                }
-
-                // 거리 계산 및 표시
-                if (pathCoordinates.length > 1) {
-                    const lastPoint = pathCoordinates[pathCoordinates.length - 2];
-                    const newDistance = calculateDistance(
-                        lastPoint.lat, lastPoint.lng,
-                        location.lat, location.lng
-                    );
-
-                    totalDistance += newDistance;
-                    $('#distance').text(Math.round(totalDistance) + 'm');
-
-                    // 마일리지 계산 (100m = 1mile)
-                    const earnedMiles = Math.floor(totalDistance / 100);
-                    $('.plusMile').text('( + ' + earnedMiles + ' mile)');
-                }
-
-                // 실시간으로 위치 데이터 저장
-                if (wsIdx) {
-                    $.ajax({
-                        url: '/api/walk/record',
-                        type: 'POST',
-                        data: {
-                            wsIdx: wsIdx,
-                            latitude: location.lat,
-                            longitude: location.lng,
-                            distance: totalDistance
-                        },
-                        headers: {
-                            'X-CSRF-TOKEN': csrfToken
-                        },
-                        success: function(response) {
-                            console.log('Location recorded successfully');
-                        },
-                        error: function(xhr, status, error) {
-                            console.error('Error recording location:', error);
-                        }
-                    });
-                }
-            }
-
-            function calculateDistance(lat1, lng1, lat2, lng2) {
-                const R = 6371000; // 지구 반지름 (미터 단위)
-                const rad = (x) => (x * Math.PI) / 180; // 각도를 라디안으로 변환
-                const dLat = rad(lat2 - lat1);
-                const dLng = rad(lng2 - lng1);
-                const a =
-                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                    Math.cos(rad(lat1)) * Math.cos(rad(lat2)) *
-                    Math.sin(dLng / 2) * Math.sin(dLng / 2);
-                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                const distance = R * c;
-
-                return Math.round(distance); // 소수점 제거
-            }
-
-            function showWarningMessage(message) {
-                // 기존 타이머가 있다면 제거
-                if (warningTimeout) {
-                    clearTimeout(warningTimeout);
-                }
-
-                var warningElement = document.querySelector('.warning-message');
-                if (!warningElement) {
-                    warningElement = document.createElement('div');
-                    warningElement.className = 'warning-message';
-                    document.body.appendChild(warningElement);
-                }
-
-                warningElement.textContent = message;
-                warningElement.style.display = 'block';
-
-                warningTimeout = setTimeout(function() {
-                    warningElement.style.display = 'none';
-                }, 2000);
-            }
-
-            function hideWarningMessage() {
-                if (warningTimeout) {
-                    clearTimeout(warningTimeout);
-                }
-                var warningElement = document.querySelector('.warning-message');
-                if (warningElement) {
-                    warningElement.style.display = 'none';
-                }
-            }
-
-            function startTimer() {
-                if (timerInterval) {
-                    clearInterval(timerInterval);
-                }
-                
-                totalSeconds = 0;
-                updateTimerDisplay();
-                
-                timerInterval = setInterval(function() {
-                    totalSeconds++;
-                    updateTimerDisplay();
-                }, 1000);
-            }
-
-            function stopTimer() {
-                if (timerInterval) {
-                    clearInterval(timerInterval);
-                    timerInterval = null;
-                }
-            }
-
-            function updateTimerDisplay() {
-                const hours = Math.floor(totalSeconds / 3600);
-                const minutes = Math.floor((totalSeconds % 3600) / 60);
-                const seconds = totalSeconds % 60;
-
-                document.getElementById('timer').textContent = 
-                    `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            }
-
-            function formatTime(seconds) {
-                const hours = Math.floor(seconds / 3600);
-                const minutes = Math.floor((seconds % 3600) / 60);
-                const remainingSeconds = seconds % 60;
-                
-                let timeString = '';
-                if (hours > 0) timeString += hours + '시간 ';
-                if (minutes > 0) timeString += minutes + '분 ';
-                if (remainingSeconds > 0) timeString += remainingSeconds + '초';
-                
-                return timeString;
-            }
-
-            function initMap() {
-                const defaultLocation = { lat: 37.5665, lng: 126.9780 }; // 서울시청 좌표
-
-                map = new google.maps.Map(document.getElementById('map'), {
-                    center: defaultLocation,
-                    zoom: 17,
-                    disableDefaultUI: true,
-                    styles: [
-                        {
-                            featureType: "poi",
-                            elementType: "labels",
-                            stylers: [{ visibility: "off" }]
-                        }
-                    ]
-                });
-
-                // 현재 위치로 이동하는 버튼 추가
-                const locationButton = document.createElement("button");
-                locationButton.classList.add("custom-map-control-button");
-                locationButton.innerHTML = '<i class="fas fa-crosshairs"></i>';
-                map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(locationButton);
-
-                locationButton.addEventListener("click", () => {
-                    if (currentLocation) {
-                        map.setCenter(currentLocation);
-                    } else if (window.Android && window.Android.hasLocationPermission()) {
-                        // 네이티브에서 위치 권한이 있는 경우에만 위치 요청
-                        window.Android.requestSingleLocation();
-                    }
-                });
-
-                // polyline 초기화
-                polyline = new google.maps.Polyline({
-                    path: [],
-                    geodesic: true,
-                    strokeColor: '#FF0000',
-                    strokeOpacity: 1.0,
-                    strokeWeight: 2,
-                    map: map
-                });
-
-                // GO 버튼 동적 생성
-                var html = [];
-                html.push('<div class="Go-button-site">');
-                html.push('GO!');
-                html.push('</div>');
-                $('#map').append(html.join(''));
-
-                // GO 버튼 클릭 이벤트
-                document.querySelector('.Go-button-site').addEventListener('click', function() {
-                    if (!isTracking) {
-                        startWalk();
-                    } else {
-                        stopWalk();
-                    }
-                });
-            }
-
-            function laterRegister() {
-                document.getElementById('modalOverlay').style.display = 'none';
-                document.getElementById('noDogModal').style.display = 'none';
-                showWarningMessage('등록된 강아지가 없어 산책 기능이 제한됩니다.');
+    </div>
+
+    <div class="walkmap">
+        <div class="map" id="map"></div>
+    </div>
+
+    <div id="warningMessage" class="warning-message"></div>
+
+    <!-- footer -->
+    <div th:replace="~{common/footer :: footer}"></div>
+    <!-- /footer -->
+
+    <!-- 커스텀 모달 -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="custom-modal" id="noDogModal">
+        <h3>알림</h3>
+        <p>등록된 강아지가 없어 산책 기능이 제한됩니다.</p>
+        <div class="modal-buttons">
+            <button class="modal-button primary-button" onclick="location.href='/dog/insert'">지금 강아지 등록</button>
+            <button class="modal-button secondary-button" onclick="laterRegister()">나중에 등록</button>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // 모바일 기기 체크
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // 앱 체크
+        function isInApp() {
+            return window.Android !== undefined;
+        }
+
+        // 페이지 로드 시 모바일 체크
+        window.onload = function() {
+            if (!isMobileDevice()) {
+                showWarningMessage('펫토피아 앱에서만 사용이 가능합니다.');
                 setTimeout(() => {
                     window.location.href = '/';
                 }, 2000);
+                return;
             }
 
-            function recordLocation(location) {
-                if (!wsIdx || !isTracking || !isMoving) return;
+            if (isMobileDevice() && !isInApp()) {
+                showWarningMessage('펫토피아 앱에서만 사용이 가능합니다.');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+                return;
+            }
 
-                var speed = 0;
-                if (lastValidLocation) {
-                    var timeDiff = (new Date().getTime() - lastValidLocation.timestamp) / 1000; // 초 단위
-                    var distance = calculateDistance(
-                        lastValidLocation.lat,
-                        lastValidLocation.lng,
-                        location.lat,
-                        location.lng
-                    );
-                    speed = distance / timeDiff; // m/s
-                }
-
-                // 비정상적인 속도 체크
-                if (speed > MAX_SPEED) {
-                    console.log('비정상적인 속도 감지:', speed.toFixed(2) + 'm/s');
-                    showWarningMessage('비정상적인 속도가 감지되었습니다.\n산책이 기록되지 않습니다.');
+            // 강아지 등록 여부 체크
+            const m_idx = [[${session.mIdx}]];
+            $.ajax({
+                url: '/dog/check',
+                type: 'GET',
+                data: { m_idx: m_idx },
+                dataType: 'json',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader(csrfHeader, csrfToken);
+                },
+                success: function(response) {
+                    console.log('서버 응답:', response);
+                    if (!response || response.length === 0) {
+                        document.getElementById('modalOverlay').style.display = 'block';
+                        document.getElementById('noDogModal').style.display = 'block';
+                        return;
+                    }
+                    console.log('강아지 확인 성공, 지도 초기화');
+                    initMap();
+                },
+                error: function(xhr, status, error) {
+                    console.error('강아지 체크 실패:', error);
+                    console.error('상태:', status);
+                    console.error('응답:', xhr.responseText);
+                    showWarningMessage('강아지 정보를 확인하는 중 오류가 발생했습니다.');
                     setTimeout(() => {
-                        hideWarningMessage();
+                        window.location.href = '/';
                     }, 2000);
+                }
+            });
+        };
+
+        var map, directionsService, directionsRenderer, currentLocationMarker, polyline = null, pathCoordinates = [], totalDistance = 0, lastValidLocation = null, currentLocation = null, MIN_DISTANCE = 2;
+        var mIdx = [[${session.mIdx}]];
+        var csrfToken = [[${_csrf.token}]];
+        var csrfHeader = [[${_csrf.headerName}]];
+        var wsIdx = null;
+        var lastMovementTime = null;
+        var isMoving = true;
+        var locationUpdateInterval;
+        var MAX_SPEED = 10; // 최대 허용 속도 (m/s)
+        var warningTimeout = null;  // 경고 메시지 타이머
+        var isTracking = false;  // 산책 트래킹 상태
+        var totalSeconds = 0;
+        var timerInterval = null;
+        var pendingStartWalk = false;
+
+        // AJAX 전역 설정
+        $.ajaxSetup({
+            beforeSend: function(xhr) {
+                if (csrfHeader && csrfToken) {
+                    xhr.setRequestHeader(csrfHeader, csrfToken);
+                }
+            }
+        });
+
+        // 위치 권한 체크 및 요청
+        function checkLocationPermission() {
+            if (!window.Android) {
+                showWarningMessage('펫토피아 앱에서만 사용 가능합니다.');
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 2000);
+                return false;
+            }
+            return window.Android.checkLocationPermission();
+        }
+
+        // 위치 권한 허용됨
+        function onLocationPermissionGranted() {
+            console.log('Location permission granted');
+            if (pendingStartWalk) {
+                startWalk();
+            }
+        }
+
+        // 위치 권한 거부됨
+        function onLocationPermissionDenied() {
+            console.log('Location permission denied');
+            isTracking = false;
+            pendingStartWalk = false;
+            showWarningMessage('위치 권한이 필요합니다.');
+            document.querySelector('.Go-button-site').textContent = 'GO!';
+            document.querySelector('.Go-button-site').classList.remove('stop');
+        }
+
+        function startWalk() {
+            if (isTracking) {
+                stopWalk();
+                return;
+            }
+
+            // 위치 권한 체크
+            if (!checkLocationPermission()) {
+                pendingStartWalk = true;
+                return;
+            }
+
+            // 새로운 산책 시작 시 변수 초기화
+            isTracking = true;
+            isMoving = true;
+            totalDistance = 0;
+            totalSeconds = 0;
+            pathCoordinates = [];
+            lastValidLocation = null;
+            currentLocation = null;
+            wsIdx = null;
+            lastMovementTime = new Date().getTime();
+
+            // 서버에 산책 시작 요청
+            $.ajax({
+                url: '/api/walk/start',
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                data: {
+                    mIdx: mIdx
+                },
+                success: function(response) {
+                    console.log('서버 응답:', response);  // 응답 로깅
+                    wsIdx = parseInt(response.wsIdx);  // response 직접 사용
+                    console.log(response.wsIdx);
+                    console.log('산책 시작 성공, wsIdx:', wsIdx);
+
+                    // 위치 업데이트 시작
+                    locationUpdateInterval = setInterval(function() {
+                        if (currentLocation && isMoving) {
+                            recordLocation(currentLocation);
+                        }
+                    }, 2000);
+
+                    // 타이머 시작
+                    startTimer();
+                },
+                error: function(xhr, status, error) {
+                    console.error('산책 시작 실패:', error);
+                    showWarningMessage('산책 시작 중 오류가 발생했습니다.');
+                    stopWalk();
+                }
+            });
+
+            // polyline 초기화
+            if (polyline) {
+                polyline.setMap(null);
+            }
+            polyline = new google.maps.Polyline({
+                path: [],
+                geodesic: true,
+                strokeColor: '#FF0000',
+                strokeOpacity: 1.0,
+                strokeWeight: 2,
+                map: map
+            });
+
+            // UI 업데이트
+            $('#distance').text('0m');
+            $('#timer').text('00:00:00');
+            $('.plusMile').text('( + 0 mile)');
+
+            // 네이티브 위치 추적 시작
+            if (window.Android) {
+                window.Android.startTracking();
+            }
+
+            document.querySelector('.Go-button-site').textContent = 'STOP';
+            document.querySelector('.Go-button-site').classList.add('stop');
+        }
+
+        function stopWalk() {
+            if (!isTracking) return;
+
+            clearInterval(locationUpdateInterval);
+
+            if (window.Android) {
+                window.Android.stopTracking();
+            }
+
+            isTracking = false;
+            isMoving = false;
+            pendingStartWalk = false;
+            stopTimer();
+
+            // UI 업데이트
+            document.querySelector('.Go-button-site').textContent = 'GO!';
+            document.querySelector('.Go-button-site').classList.remove('stop');
+
+            // 서버에 산책 종료 요청
+            if (wsIdx > 0 ) {  // wsIdx 체크 추가
+                console.log('wsIdx 종료 값:', wsIdx);
+                var data = new URLSearchParams();
+                data.append('wsIdx', wsIdx);
+                data.append('totalDistance', totalDistance);
+
+                $.ajax({
+                    url: '/api/walk/stop',
+                    type: 'POST',
+                    data: {
+                        wsIdx: wsIdx,
+                        totalDistance: totalDistance
+                    },
+                    contentType: 'application/x-www-form-urlencoded',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    success: function(response) {
+                        showWarningMessage('산책이 종료되었습니다.\n총 거리: ' + totalDistance.toFixed(2) + 'm\n소요 시간: ' + formatTime(totalSeconds));
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('산책 종료 실패:', error);
+                        console.error('상태:', xhr.status);
+                        console.error('응답:', xhr.responseText);
+                        showWarningMessage('산책 종료 중 오류가 발생했습니다.');
+                    }
+                });
+            } else {
+                console.error('유효하지 않은 wsIdx:', wsIdx);
+                showWarningMessage('산책 세션 정보가 유효하지 않습니다.');
+            }
+        }
+
+        // 네이티브에서 전달받은 초기 위치로 지도 중심 설정
+        function initializeLocation(location) {
+            const pos = {
+                lat: location.latitude,
+                lng: location.longitude
+            };
+            currentLocation = pos;
+            map.setCenter(pos);
+        }
+
+        // 네이티브에서 전달받은 위치 정보 처리
+        function handleNativeLocation(location) {
+            console.log('Received location:', location);
+
+            if (!isTracking) return;
+
+            const pos = {
+                lat: location.latitude,
+                lng: location.longitude
+            };
+
+            // 현재 위치 업데이트
+            currentLocation = pos;
+
+            // 지도 중심 이동
+            map.setCenter(pos);
+
+            // 경로에 위치 추가 및 거리 계산
+            updatePathWithDistance(pos);
+        }
+
+        function handleLocationUpdate(position) {
+            if (!isTracking) return;
+
+            const location = {
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
+            };
+
+            // GPS 정확도 체크 (20미터 이상이면 무시)
+            if (position.coords.accuracy > 20) {
+                console.log('Low accuracy location data ignored:', position.coords.accuracy);
+                return;
+            }
+
+            // 이전 위치가 있는 경우 거리 체크
+            if (lastValidLocation) {
+                const distance = calculateDistance(
+                    lastValidLocation.lat, lastValidLocation.lng,
+                    location.lat, location.lng
+                );
+
+                // 순간이동처럼 너무 큰 거리 변화가 있는 경우 무시 (30미터 이상)
+                if (distance > 30) {
+                    console.log('Abnormal distance change ignored:', distance);
                     return;
                 }
+            }
 
-                // 움직임 감지
-                if (lastValidLocation) {
-                    var distance = calculateDistance(
-                        lastValidLocation.lat,
-                        lastValidLocation.lng,
-                        location.lat,
-                        location.lng
-                    );
+            // 현재 위치 업데이트
+            currentLocation = location;
 
-                    if (distance < 2) { // 2m 미만의 움직임은 정지로 간주
-                        var currentTime = new Date().getTime();
-                        if (currentTime - lastMovementTime > 15000) { // 15초 이상 정지
-                            if (isMoving) {
-                                isMoving = false;
-                                stopTimer();
-                                console.log('움직임 정지 감지');
-                                showWarningMessage('움직임이 없어서 산책이 일시정지 되었습니다.');
-                            }
-                            return;
-                        }
-                    } else {
-                        lastMovementTime = new Date().getTime();
-                        if (!isMoving) {
-                            isMoving = true;
-                            startTimer();
-                            console.log('움직임 재개 감지');
-                            hideWarningMessage();
-                        }
-                    }
-                }
+            // 유효한 위치인 경우에만 lastValidLocation 업데이트
+            lastValidLocation = location;
 
-                // 위치 기록
+            // 지도 중심 이동
+            map.setCenter(location);
+
+            // 경로에 위치 추가 및 거리 계산
+            updatePathWithDistance(location);
+        }
+
+        function updatePathWithDistance(location) {
+            // 경로에 새 위치 추가
+            pathCoordinates.push(location);
+
+            // Polyline 업데이트
+            if (polyline) {
+                polyline.setPath(pathCoordinates);
+            }
+
+            // 거리 계산 및 표시
+            if (pathCoordinates.length > 1) {
+                const lastPoint = pathCoordinates[pathCoordinates.length - 2];
+                const newDistance = calculateDistance(
+                    lastPoint.lat, lastPoint.lng,
+                    location.lat, location.lng
+                );
+
+                totalDistance += newDistance;
+                $('#distance').text(Math.round(totalDistance) + 'm');
+
+                // 마일리지 계산 (100m = 1mile)
+                const earnedMiles = Math.floor(totalDistance / 100);
+                $('.plusMile').text('( + ' + earnedMiles + ' mile)');
+            }
+
+            // 실시간으로 위치 데이터 저장
+            if (wsIdx) {
                 $.ajax({
-                    url: '/walk/record',
+                    url: '/api/walk/record',
                     type: 'POST',
                     data: {
                         wsIdx: wsIdx,
@@ -927,20 +704,255 @@
                         'X-CSRF-TOKEN': csrfToken
                     },
                     success: function(response) {
-                        console.log('위치 기록 성공');
+                        console.log('Location recorded successfully');
                     },
                     error: function(xhr, status, error) {
-                        console.error('위치 기록 실패:', error);
+                        console.error('Error recording location:', error);
                     }
                 });
-
-                // 위치 업데이트
-                lastValidLocation = {
-                    lat: location.lat,
-                    lng: location.lng,
-                    timestamp: new Date().getTime()
-                };
             }
-        </script>
-    </body>
+        }
+
+        function calculateDistance(lat1, lng1, lat2, lng2) {
+            const R = 6371000; // 지구 반지름 (미터 단위)
+            const rad = (x) => (x * Math.PI) / 180; // 각도를 라디안으로 변환
+            const dLat = rad(lat2 - lat1);
+            const dLng = rad(lng2 - lng1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(rad(lat1)) * Math.cos(rad(lat2)) *
+                Math.sin(dLng / 2) * Math.sin(dLng / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            const distance = R * c;
+
+            return Math.round(distance); // 소수점 제거
+        }
+
+        function showWarningMessage(message) {
+            // 기존 타이머가 있다면 제거
+            if (warningTimeout) {
+                clearTimeout(warningTimeout);
+            }
+
+            var warningElement = document.querySelector('.warning-message');
+            if (!warningElement) {
+                warningElement = document.createElement('div');
+                warningElement.className = 'warning-message';
+                document.body.appendChild(warningElement);
+            }
+
+            warningElement.textContent = message;
+            warningElement.style.display = 'block';
+
+            warningTimeout = setTimeout(function() {
+                warningElement.style.display = 'none';
+            }, 2000);
+        }
+
+        function hideWarningMessage() {
+            if (warningTimeout) {
+                clearTimeout(warningTimeout);
+            }
+            var warningElement = document.querySelector('.warning-message');
+            if (warningElement) {
+                warningElement.style.display = 'none';
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+
+            totalSeconds = 0;
+            updateTimerDisplay();
+
+            timerInterval = setInterval(function() {
+                totalSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function updateTimerDisplay() {
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            document.getElementById('timer').textContent =
+                `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function formatTime(seconds) {
+            const hours = Math.floor(seconds / 3600);
+            const minutes = Math.floor((seconds % 3600) / 60);
+            const remainingSeconds = seconds % 60;
+
+            let timeString = '';
+            if (hours > 0) timeString += hours + '시간 ';
+            if (minutes > 0) timeString += minutes + '분 ';
+            if (remainingSeconds > 0) timeString += remainingSeconds + '초';
+
+            return timeString;
+        }
+
+        function initMap() {
+            const defaultLocation = { lat: 37.5665, lng: 126.9780 }; // 서울시청 좌표
+
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: defaultLocation,
+                zoom: 17,
+                disableDefaultUI: true,
+                styles: [
+                    {
+                        featureType: "poi",
+                        elementType: "labels",
+                        stylers: [{ visibility: "off" }]
+                    }
+                ]
+            });
+
+            // 현재 위치로 이동하는 버튼 추가
+            const locationButton = document.createElement("button");
+            locationButton.classList.add("custom-map-control-button");
+            locationButton.innerHTML = '<i class="fas fa-crosshairs"></i>';
+            map.controls[google.maps.ControlPosition.RIGHT_BOTTOM].push(locationButton);
+
+            locationButton.addEventListener("click", () => {
+                if (currentLocation) {
+                    map.setCenter(currentLocation);
+                } else if (window.Android && window.Android.hasLocationPermission()) {
+                    // 네이티브에서 위치 권한이 있는 경우에만 위치 요청
+                    window.Android.requestSingleLocation();
+                }
+            });
+
+            // polyline 초기화
+            polyline = new google.maps.Polyline({
+                path: [],
+                geodesic: true,
+                strokeColor: '#FF0000',
+                strokeOpacity: 1.0,
+                strokeWeight: 2,
+                map: map
+            });
+
+            // GO 버튼 동적 생성
+            var html = [];
+            html.push('<div class="Go-button-site">');
+            html.push('GO!');
+            html.push('</div>');
+            $('#map').append(html.join(''));
+
+            // GO 버튼 클릭 이벤트
+            document.querySelector('.Go-button-site').addEventListener('click', function() {
+                if (!isTracking) {
+                    startWalk();
+                } else {
+                    stopWalk();
+                }
+            });
+        }
+
+        function laterRegister() {
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('noDogModal').style.display = 'none';
+            showWarningMessage('등록된 강아지가 없어 산책 기능이 제한됩니다.');
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+        }
+
+        function recordLocation(location) {
+            if (!wsIdx || !isTracking || !isMoving) return;
+
+            var speed = 0;
+            if (lastValidLocation) {
+                var timeDiff = (new Date().getTime() - lastValidLocation.timestamp) / 1000; // 초 단위
+                var distance = calculateDistance(
+                    lastValidLocation.lat,
+                    lastValidLocation.lng,
+                    location.lat,
+                    location.lng
+                );
+                speed = distance / timeDiff; // m/s
+            }
+
+            // 비정상적인 속도 체크
+            if (speed > MAX_SPEED) {
+                console.log('비정상적인 속도 감지:', speed.toFixed(2) + 'm/s');
+                showWarningMessage('비정상적인 속도가 감지되었습니다.\n산책이 기록되지 않습니다.');
+                setTimeout(() => {
+                    hideWarningMessage();
+                }, 2000);
+                return;
+            }
+
+            // 움직임 감지
+            if (lastValidLocation) {
+                var distance = calculateDistance(
+                    lastValidLocation.lat,
+                    lastValidLocation.lng,
+                    location.lat,
+                    location.lng
+                );
+
+                if (distance < 2) { // 2m 미만의 움직임은 정지로 간주
+                    var currentTime = new Date().getTime();
+                    if (currentTime - lastMovementTime > 15000) { // 15초 이상 정지
+                        if (isMoving) {
+                            isMoving = false;
+                            stopTimer();
+                            console.log('움직임 정지 감지');
+                            showWarningMessage('움직임이 없어서 산책이 일시정지 되었습니다.');
+                        }
+                        return;
+                    }
+                } else {
+                    lastMovementTime = new Date().getTime();
+                    if (!isMoving) {
+                        isMoving = true;
+                        startTimer();
+                        console.log('움직임 재개 감지');
+                        hideWarningMessage();
+                    }
+                }
+            }
+
+            // 위치 기록
+            $.ajax({
+                url: '/walk/record',
+                type: 'POST',
+                data: {
+                    wsIdx: wsIdx,
+                    latitude: location.lat,
+                    longitude: location.lng,
+                    distance: totalDistance
+                },
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken
+                },
+                success: function(response) {
+                    console.log('위치 기록 성공');
+                },
+                error: function(xhr, status, error) {
+                    console.error('위치 기록 실패:', error);
+                }
+            });
+
+            // 위치 업데이트
+            lastValidLocation = {
+                lat: location.lat,
+                lng: location.lng,
+                timestamp: new Date().getTime()
+            };
+        }
+    </script>
+</body>
 </html>

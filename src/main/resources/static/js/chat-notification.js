@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // WebSocket 연결 (사용자 ID를 쿼리 파라미터로 전달)
-    const socket = new WebSocket(`ws://localhost:8989/ws/notification?userId=${userId}`);
+    const socket = new WebSocket(`ws://edu.e-tops.co.kr/ws/notification?userId=${userId}`);
     
     socket.onopen = function() {
         console.log('알림 웹소켓 연결됨 (사용자 ID:', userId, ')');

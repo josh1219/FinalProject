@@ -587,7 +587,7 @@
         
         // 모든 주소 정보를 조합
         const fullAddressValue = postcode && address ? 
-            `${postcode} ${address} ${detailAddress}`.trim() : '';
+            `${postcode}` + `|` + `${address}` + `|` + `${detailAddress}`.trim() : '';
         
         // hidden input에 설정
         document.getElementById('fullAddress').value = fullAddressValue;

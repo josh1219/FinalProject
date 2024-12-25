@@ -137,6 +137,14 @@ public class MemberController {
             Member member = memberService.findBymEmail(userEmail);
             if (member != null) {
                 MemberDTO memberDTO = MemberDTO.fromEntity(member);
+                String[] address = member.getAddress().split("|");
+                String zipCode = address[0];
+                String address1 = address[1];
+                String address2 = address[2];
+
+                model.addAttribute("memberZipCode", zipCode);
+                model.addAttribute("memberAddress1", address1);
+                model.addAttribute("memberAddress2", address2);
                 model.addAttribute("memberDTO", memberDTO);
                 return "member/updateMember";
             }

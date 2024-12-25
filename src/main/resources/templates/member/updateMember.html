@@ -186,12 +186,12 @@
           </label>
           <div class="address-group">
             <div class="postcode-group">
-              <input type="text" id="sample6_postcode" placeholder="우편번호" class="input-box postcode" readonly>
+              <input type="text" id="sample6_postcode" placeholder="우편번호" class="input-box postcode" th:value="${memberZipCode}" readonly>
               <button type="button" onclick="sample6_execDaumPostcode()" class="address-search-btn">주소 검색</button>
             </div>
-            <input type="text" id="sample6_address" placeholder="주소" class="input-box" readonly>
-            <input type="text" id="sample6_detailAddress" placeholder="상세주소" class="input-box">
-            <input type="hidden" name="address" id="fullAddress" th:value="${memberDTO.address}">
+            <input type="text" id="sample6_address" placeholder="주소" class="input-box" th:value="${memberAddress1}" readonly>
+            <input type="text" id="sample6_detailAddress" placeholder="상세주소" class="input-box" th:value="${memberAddress2}">
+            <input type="hidden" name="address" id="fullAddress" th:value="${memberDTO.address}" >
             <div class="error-message" id="addressError"></div>
           </div>
         </div>
@@ -228,9 +228,9 @@
       const detailAddress = document.getElementById('sample6_detailAddress').value;
       
       let fullAddress = '';
-      if (postcode) fullAddress += `[${postcode}] `;
-      if (address) fullAddress += address;
-      if (detailAddress) fullAddress += ` ${detailAddress}`;
+      if (postcode) fullAddress += `${postcode}` + `|`;
+      if (address) fullAddress += `${address}` + `|`;
+      if (detailAddress) fullAddress += `${detailAddress}`;
       
       document.getElementById('fullAddress').value = fullAddress.trim();
     }

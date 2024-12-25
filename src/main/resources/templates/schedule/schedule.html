@@ -9,8 +9,13 @@
     <link rel="stylesheet" href="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.css" />
     <link rel="stylesheet" href="/css/header.css">
     <link rel="stylesheet" href="/css/footer.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.5/dist/sweetalert2.min.css" rel="stylesheet">
     <div th:replace="common/header :: header-resources"></div>
     <style>
+        * {
+            font-family: 'Noto Sans KR', sans-serif;
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
@@ -881,6 +886,7 @@
 
     <!-- TOAST UI Calendar JS -->
     <script src="https://uicdn.toast.com/calendar/latest/toastui-calendar.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.7.5/dist/sweetalert2.all.min.js"></script>
     <script>
         const Calendar = tui.Calendar;
         let map;

@@ -291,10 +291,10 @@
             <div class="shipping-field">
                 <label>배송지</label>
                 <div class="address-group">
-                    <input type="text" id="postcode" placeholder="우편번호" class="input-field" readonly>
+                    <input type="text" id="sample6_postcode" placeholder="우편번호" class="input-field" readonly>
                     <button type="button" onclick="searchAddress()" class="address-search-btn">주소 검색</button>
-                    <input type="text" id="address" placeholder="주소" class="input-field" readonly>
-                    <input type="text" id="detailAddress" placeholder="상세주소" class="input-field">
+                    <input type="text" id="sample6_address" placeholder="주소" class="input-field" readonly>
+                    <input type="text" id="sample6_detailAddress" placeholder="상세주소" class="input-field">
                 </div>
                 <div class="error-message" id="addressError"></div>
             </div>
@@ -435,9 +435,9 @@
                             addr = data.jibunAddress;
                         }
 
-                        document.getElementById('postcode').value = data.zonecode;
-                        document.getElementById('address').value = addr;
-                        document.getElementById('detailAddress').focus();
+                        document.getElementById('sample6_postcode').value = data.zonecode;
+                        document.getElementById('sample6_address').value = addr;
+                        document.getElementById('sample6_detailAddress').focus();
                     }
                 }).open();
             }
@@ -445,10 +445,10 @@
 
         // 안드로이드에서 주소 선택 후 호출되는 함수
         function onAddressSelected(postcode, address) {
-            document.getElementById('postcode').value = postcode;
-            document.getElementById('address').value = address;
-            document.getElementById('detailAddress').value = '';
-            document.getElementById('detailAddress').focus();
+            document.getElementById('sample6_postcode').value = postcode;
+            document.getElementById('sample6_address').value = address;
+            document.getElementById('sample6_detailAddress').value = '';
+            document.getElementById('sample6_detailAddress').focus();
         }
 
         // 배송정보 유효성 검사
@@ -499,8 +499,8 @@
         function processPurchase() {
             const recipientName = document.getElementById('recipientName').value;
             const recipientPhone = document.getElementById('recipientPhone').value;
-            const address = document.getElementById('address').value;
-            const addressDetail = document.getElementById('detailAddress').value;
+            const address = document.getElementById('sample6_address').value;
+            const addressDetail = document.getElementById('sample6_detailAddress').value;
             const fullAddress = addressDetail ? `${address} ${addressDetail}` : address;
             const shippingRequestSelect = document.getElementById('shippingRequest');
             const customShippingRequest = document.getElementById('customShippingRequest');

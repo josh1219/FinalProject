@@ -212,7 +212,7 @@
                 center: { lat: 37.5665, lng: 126.9780 },
                 zoom: 14,
                 zoomControl: false,  // 확대/축소 컨트롤 제거
-                streetViewControl: true,  // 스트리트뷰 컨트롤 제거
+                streetViewControl: false,  // 스트리트뷰 컨트롤 제거
                 mapTypeControl: false,  // 지도 타입 컨트롤 제거
                 fullscreenControl: false,  // 전체화면 컨트롤 제거
                 styles: [
@@ -362,16 +362,12 @@
 
             // 데이터 로드
             try {
-                console.log('Fetching tour data...');
                 const response = await fetch('/tour/data');
-                console.log('Response status:', response.status);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
                 const text = await response.text();
-                console.log('Response text:', text.substring(0, 200) + '...'); // 처음 200자만 로그
                 tourData = JSON.parse(text);
-                console.log('Parsed tour data:', tourData.length, 'items');
                 showMarkers();
             } catch (error) {
                 console.error('Error loading tour data:', error);
@@ -381,10 +377,7 @@
             togglePlaceList();
         }
 
-        function getCategoryMapping(category1, category2, category3) {
-            // 디버깅을 위한 로그 추가
-            console.log('Mapping categories:', { category1, category2, category3 });
-            
+        function getCategoryMapping(category1, category2, category3) {            
             // 카테고리 매핑
             if (category1 === "동물병원" || category2 === "동물병원" || category3 === "동물병원") return "동물병원";
             if (category1 === "동물약국" || category2 === "동물약국" || category3 === "동물약국") return "동물약국";
@@ -415,7 +408,7 @@
         function toggleCategory(button) {
             document.getElementById('loadingModal').style.display = 'flex';
             button.classList.toggle('active');
-            searchInCurrentMap(); // 현재 지도 영역 내에서 검색
+            searchInCurrentMap(); // 현재 지도 영역 내 검색
             setTimeout(() => {
                 document.getElementById('loadingModal').style.display = 'none';
             }, 500);
@@ -787,9 +780,7 @@
         }
 
         function showPlaceInfo(place) {
-            console.log("*************************");
-            console.log(place);
-            console.log("*************************");
+            // 상세보기 패널 표시
             const detailPanel = document.getElementById('placeDetailPanel');
             
             // 기본 정보 업데이트
@@ -1029,7 +1020,9 @@
             }
         });
     </script>
-    <script th:src="@{'https://maps.googleapis.com/maps/api/js?key=' + ${@environment.getProperty('google.maps.key')} + '&callback=initMap'}" 
+    <script th:src="@{'https://maps.googleapis.com/maps/api/js?key='
+                    + ${@environment.getProperty('google.maps.key')} 
+                    + '&callback=initMap'}" ㄴ
             async defer></script>
 </body>
 </html>

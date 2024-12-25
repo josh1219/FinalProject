@@ -8,18 +8,14 @@ import com.DogProject.entity.BoardLike;
 import com.DogProject.repository.BoardRepository;
 import com.DogProject.repository.BoardViewRepository;
 import com.DogProject.repository.BoardLikeRepository;
-import com.DogProject.service.FileService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;

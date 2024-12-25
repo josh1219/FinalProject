@@ -15,9 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,8 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpSession;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
@@ -34,26 +30,28 @@ import lombok.RequiredArgsConstructor;
 @Controller
 @RequiredArgsConstructor
 public class ChatController {
-    private final SimpMessagingTemplate messagingTemplate;
     private final ChatService chatService;
     private final FileService fileService;
     private final MemberRepository memberRepository;
     private final ChatRepository chatRepository;
     private static final Logger log = LoggerFactory.getLogger(ChatController.class);
 
-    @MessageMapping("/chat/{roomId}")
-    @SendTo("/topic/messages/{roomId}")
+    // 3. 클라이언트로부터 메시지를 받고 처리하는 메소드
+    @MessageMapping("/chat/{roomId}")  // /app/chat/{roomId} 로 메시지가 전송됨
+    @SendTo("/topic/messages/{roomId}")  // 구독자들에게 메시지를 브로드캐스트
     public ChatMessage handleMessage(@DestinationVariable String roomId, ChatMessage message) {
         try {
-            // DB에 저장
+            // 4. 채팅 메시지 처리를 위한 발신자, 수신자 ID 추출
             String[] ids = roomId.split("_");
             int senderId = message.getSenderId().intValue();
             int receiverId = Integer.parseInt(ids[0].equals(String.valueOf(message.getSenderId())) ? ids[1] : ids[0]);
             
+            // 5. 디버깅 및 메시지 저장
             System.out.println("Saving chat message - sender: " + senderId + ", receiver: " + receiverId); // 디버깅
             Chat savedChat = chatService.saveChat(message.getContent(), senderId, receiverId);
             System.out.println("Chat saved with ID: " + savedChat.getCIdx() + ", read status: " + savedChat.isRead()); // 디버깅
             
+            // 6. 처리된 메시지를 구독자들에게 반환
             return message;
         } catch (Exception e) {
             System.err.println("Error saving chat message: " + e.getMessage()); // 디버깅

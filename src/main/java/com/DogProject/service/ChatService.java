@@ -4,7 +4,6 @@ import com.DogProject.entity.Chat;
 import com.DogProject.entity.Member;
 import com.DogProject.repository.ChatRepository;
 import com.DogProject.repository.MemberRepository;
-import com.DogProject.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

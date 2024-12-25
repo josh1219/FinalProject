@@ -53,7 +53,7 @@
     </div>
 
     <div class="file-upload">
-      <label class="file-upload-btn">
+      <label class="file-upload-btn" onclick="openGallery()">
         <img src="/images/image-upload-icon.svg" alt="파일 업로드">
         <input type="file" id="file-input" accept="image/*,video/*" multiple style="display: none;">
         <span>이미지/동영상 추가</span>
@@ -198,92 +198,100 @@
         });
       }
 
-      document.getElementById('file-input').addEventListener('change', function(e) {
-        const preview = document.getElementById('file-preview');
-        const maxFiles = 9;
-        const currentFiles = preview.querySelectorAll('.file-preview-container').length;
-        const newFiles = [...e.target.files];
-        
-        if (currentFiles + newFiles.length > maxFiles) {
-          Swal.fire({
-            title: '파일 개수 초과',
-            text: `파일은 최대 ${maxFiles}개까지만 업로드할 수 있습니다.`,
-            icon: 'warning',
-            customClass: {
-              popup: 'small-swal'
+      // 갤러리 열기 함수
+      function openGallery() {
+        if (window.Android) {
+          // 갤러리 권한 체크
+          if (window.Android.checkGalleryPermission()) {
+            window.Android.openGallery();
+          } else {
+            window.Android.requestGalleryPermission();
+          }
+        } else {
+          // 웹 환경에서는 기존 file input 사용
+          document.getElementById('file-input').click();
+        }
+      }
+
+      // 안드로이드에서 이미지 선택 시 호출되는 함수
+      function onImageSelected(imagePath) {
+        if (imagePath.startsWith('data:image')) {
+          // Base64 데이터 추출
+          const base64Data = imagePath.split(',')[1];
+          const binaryData = atob(base64Data);
+          const bytes = new Uint8Array(binaryData.length);
+          for (let i = 0; i < binaryData.length; i++) {
+              bytes[i] = binaryData.charCodeAt(i);
+          }
+          
+          // Blob 생성
+          const blob = new Blob([bytes], { type: 'image/jpeg' });
+          const file = new File([blob], "camera_image.jpg", { type: 'image/jpeg' });
+          
+          // file input에 파일 추가
+          const dataTransfer = new DataTransfer();
+          
+          // 기존 파일들 유지
+          const fileInput = document.getElementById('file-input');
+          if (fileInput.files) {
+            for (let i = 0; i < fileInput.files.length; i++) {
+              dataTransfer.items.add(fileInput.files[i]);
             }
-          });
-          this.value = '';
-          return;
+          }
+          
+          // 새 파일 추가
+          dataTransfer.items.add(file);
+          fileInput.files = dataTransfer.files;
+          
+          // 미리보기 업데이트
+          updatePreview(file);
+        }
+      }
+
+      // 파일 미리보기 업데이트 함수
+      function updatePreview(file) {
+        const previewContainer = document.getElementById('file-preview');
+        const previewWrapper = document.createElement('div');
+        previewWrapper.className = 'preview-wrapper';
+
+        if (file.type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const img = document.createElement('img');
+            img.src = e.target.result;
+            img.className = 'preview-image';
+            previewWrapper.appendChild(img);
+          };
+          reader.readAsDataURL(file);
+        } else if (file.type.startsWith('video/')) {
+          const video = document.createElement('video');
+          video.src = URL.createObjectURL(file);
+          video.className = 'preview-video';
+          video.controls = true;
+          previewWrapper.appendChild(video);
         }
 
-        // 기존 DataTransfer 객체 생성 및 현재 파일 복사
-        const dt = new DataTransfer();
-        const existingContainers = preview.querySelectorAll('.file-preview-container');
-        existingContainers.forEach(container => {
-          if (container.file) {
-            dt.items.add(container.file);
-          }
-        });
-
-        // 새로운 파일 추가
-        newFiles.forEach((file) => {
-          dt.items.add(file);
-          
-          const container = document.createElement('div');
-          container.className = 'file-preview-container';
-
-          const deleteBtn = document.createElement('img');
-          deleteBtn.src = '/images/deleteIcon.png';
-          deleteBtn.className = 'delete-button';
-          deleteBtn.onclick = function() {
-            container.remove();
-            updateFileInput();
-          };
-
-          if (file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              const img = document.createElement('img');
-              img.src = e.target.result;
-              img.className = 'preview-image';
-              container.appendChild(img);
-            };
-            reader.readAsDataURL(file);
-          } else if (file.type.startsWith('video/')) {
-            const video = document.createElement('video');
-            video.src = URL.createObjectURL(file);
-            video.className = 'preview-video';
-            video.style.width = '80px';
-            video.style.height = '80px';
-            video.style.objectFit = 'cover';
-            container.appendChild(video);
-          }
-
-          container.appendChild(deleteBtn);
-          container.file = file;  // 파일 객체를 컨테이너에 저장
-          preview.appendChild(container);
-        });
-
-        // 파일 입력 업데이트
-        this.files = dt.files;
-      });
-
-      // 파일 입력 업데이트 함수
-      function updateFileInput() {
-        const preview = document.getElementById('file-preview');
-        const input = document.getElementById('file-input');
-        const dt = new DataTransfer();
-        
-        // 현재 미리보기에 있는 모든 파일을 DataTransfer에 추가
-        preview.querySelectorAll('.file-preview-container').forEach(container => {
-          if (container.file) {
-            dt.items.add(container.file);
-          }
-        });
-        
-        input.files = dt.files;
+        // 삭제 버튼 추가
+        const deleteButton = document.createElement('button');
+        deleteButton.className = 'delete-button';
+        deleteButton.innerHTML = '×';
+        deleteButton.onclick = function() {
+          previewWrapper.remove();
+          updateFileInput();
+        };
+        previewWrapper.appendChild(deleteButton);
+        previewContainer.appendChild(previewWrapper);
       }
+
+      // file input change 이벤트 핸들러
+      document.getElementById('file-input').addEventListener('change', function(e) {
+        const files = e.target.files;
+        if (files) {
+          for (let i = 0; i < files.length; i++) {
+            updatePreview(files[i]);
+          }
+        }
+      });
 
       function handleBackButton() {
         Swal.fire({

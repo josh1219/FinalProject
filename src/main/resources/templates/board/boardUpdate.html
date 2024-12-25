@@ -50,7 +50,7 @@
             <div class="form-group">
                 <label for="files">파일 첨부</label>
                 <input type="file" id="files" name="files" multiple style="display: none;" accept="image/*, video/*">
-                <label for="files" class="file-upload-btn">
+                <label class="file-upload-btn" onclick="openGallery()">
                     <img src="/images/image-upload-icon.svg" alt="파일 업로드" style="width: 20px; height: 20px;">
                     <span>이미지/동영상 추가</span>
                 </label>
@@ -114,53 +114,99 @@
             });
         });
 
-        document.getElementById('files').addEventListener('change', function(e) {
-            const files = Array.from(e.target.files);
-            const preview = document.getElementById('file-preview');
-            const maxFiles = 4;
-            const currentFiles = preview.querySelectorAll('.file-preview-container').length;
-    
-            if (currentFiles + files.length > maxFiles) {
-                document.getElementById('file-error').style.display = 'block';
-                document.getElementById('file-error').textContent = `파일은 최대 ${maxFiles}개까지만 업로드할 수 있습니다.`;
-                return;
-            }
-    
-            for (const file of files) {
-                const container = document.createElement('div');
-                container.className = 'file-preview-container';
-    
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        const img = document.createElement('img');
-                        img.src = e.target.result;
-                        img.className = 'preview-image';
-                        container.appendChild(img);
-                    };
-                    reader.readAsDataURL(file);
-                } else if (file.type.startsWith('video/')) {
-                    const video = document.createElement('video');
-                    video.src = URL.createObjectURL(file);
-                    video.className = 'preview-video';
-                    video.controls = true;
-                    container.appendChild(video);
+        // 갤러리 열기 함수
+        function openGallery() {
+            if (window.Android) {
+                // 갤러리 권한 체크
+                if (window.Android.checkGalleryPermission()) {
+                    window.Android.openGallery();
+                } else {
+                    window.Android.requestGalleryPermission();
                 }
-    
-                const deleteButton = document.createElement('img');
-                deleteButton.src = '/images/deleteIcon.png';
-                deleteButton.className = 'delete-button';
-                deleteButton.alt = '삭제';
-                deleteButton.onclick = function() {
-                    container.remove();
-                    updateFileInput();
-                };
-    
-                container.appendChild(deleteButton);
-                preview.appendChild(container);
+            } else {
+                // 웹 환경에서는 기존 file input 사용
+                document.getElementById('files').click();
             }
-    
-            document.getElementById('file-error').style.display = 'none';
+        }
+
+        // 안드로이드에서 이미지 선택 시 호출되는 함수
+        function onImageSelected(imagePath) {
+            if (imagePath.startsWith('data:image')) {
+                // Base64 데이터 추출
+                const base64Data = imagePath.split(',')[1];
+                const binaryData = atob(base64Data);
+                const bytes = new Uint8Array(binaryData.length);
+                for (let i = 0; i < binaryData.length; i++) {
+                    bytes[i] = binaryData.charCodeAt(i);
+                }
+                
+                // Blob 생성
+                const blob = new Blob([bytes], { type: 'image/jpeg' });
+                const file = new File([blob], "camera_image.jpg", { type: 'image/jpeg' });
+                
+                // file input에 파일 추가
+                const dataTransfer = new DataTransfer();
+                
+                // 기존 파일들 유지
+                const fileInput = document.getElementById('files');
+                if (fileInput.files) {
+                    for (let i = 0; i < fileInput.files.length; i++) {
+                        dataTransfer.items.add(fileInput.files[i]);
+                    }
+                }
+                
+                // 새 파일 추가
+                dataTransfer.items.add(file);
+                fileInput.files = dataTransfer.files;
+                
+                // 미리보기 추가
+                addPreview(file);
+            }
+        }
+
+        // 파일 미리보기 추가 함수
+        function addPreview(file) {
+            const preview = document.getElementById('file-preview');
+            const container = document.createElement('div');
+            container.className = 'file-preview-container';
+            
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = 'preview-image';
+                    container.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            } else if (file.type.startsWith('video/')) {
+                const video = document.createElement('video');
+                video.src = URL.createObjectURL(file);
+                video.className = 'preview-video';
+                video.controls = true;
+                container.appendChild(video);
+            }
+
+            const deleteButton = document.createElement('img');
+            deleteButton.src = '/images/deleteIcon.png';
+            deleteButton.className = 'delete-button';
+            deleteButton.onclick = function() {
+                container.remove();
+                updateFileInput();
+            };
+            
+            container.appendChild(deleteButton);
+            preview.appendChild(container);
+        }
+
+        // 파일 input change 이벤트 핸들러
+        document.getElementById('files').addEventListener('change', function(e) {
+            const files = e.target.files;
+            if (files) {
+                for (let i = 0; i < files.length; i++) {
+                    addPreview(files[i]);
+                }
+            }
         });
 
         function removePreview(button) {

@@ -157,7 +157,7 @@
           <div class="address-group">
             <div class="postcode-group">
               <input type="text" id="sample6_postcode" placeholder="우편번호" class="input-box postcode" readonly>
-              <button type="button" onclick="sample6_execDaumPostcode()" class="address-search-btn">주소 검색</button>
+              <button type="button" onclick="searchAddress()" class="address-search-btn">주소 검색</button>
             </div>
             <input type="text" id="sample6_address" placeholder="주소" class="input-box" readonly>
             <input type="text" id="sample6_detailAddress" placeholder="상세주소" class="input-box">
@@ -482,138 +482,56 @@
     });
   </script>
 
-  <script>
-    // 이메일 입력창 이벤트 리스너
-    function validateEmail(input) {
-        const email = input.value;
-        const errorDiv = document.getElementById('emailError');
-        const isKakaoEmail = email.endsWith('@kakao.com');
-        
-        // 모든 상태에서 우선 메시지를 숨김
-        errorDiv.style.display = 'none';
-        errorDiv.classList.remove('valid-email');
-        input.classList.remove('is-valid', 'is-invalid');
-        
-        if (!email) {
-            input.classList.add('is-invalid');
-            errorDiv.textContent = '이메일을 입력해주세요.';
-            errorDiv.style.display = 'block';
-            errorDiv.style.color = '#e01013';
-            return;
-        }
-        
-        // 이메일 형식 검사
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-            input.classList.add('is-invalid');
-            errorDiv.textContent = '올바른 이메일 형식이 아닙니다.';
-            errorDiv.style.display = 'block';
-            errorDiv.style.color = '#e01013';
-            return;
-        }
-        
-        // CSRF 토큰 가져오기
-        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-        
-        // 서버에 이메일 중복 체크 요청
-        fetch('/member/checkEmail?email=' + encodeURIComponent(email), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                [csrfHeader]: csrfToken
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.exists) {  // 이메일이 존재하면 (중복이면)
-                input.classList.add('is-invalid');
-                input.style.borderColor = '#e01013';
-                errorDiv.classList.remove('valid-email');
-                errorDiv.textContent = '이미 사용중인 이메일입니다.';
-                errorDiv.style.color = '#e01013';
-            } else {  // 이메일이 존재하지 않으면 (사용 가능하면)
-                input.classList.remove('is-invalid');
-                input.classList.add('is-valid');
-                input.style.borderColor = '#28a745';
-                errorDiv.classList.add('valid-email');
-                errorDiv.textContent = '사용 가능한 이메일입니다.';
-                errorDiv.style.color = '#28a745';
-            }
-            errorDiv.style.display = 'block';
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            input.classList.add('is-invalid');
-            input.style.borderColor = '#e01013';
-            errorDiv.classList.remove('valid-email');
-            errorDiv.textContent = '이메일 확인 중 오류가 발생했습니다.';
-            errorDiv.style.display = 'block';
-            errorDiv.style.color = '#e01013';
-        });
-    }
-  </script>
-
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script>
     // 주소 검색 함수
-    function sample6_execDaumPostcode() {
-        // 안드로이드 환경인지 확인
+    function searchAddress() {
         if (window.Android) {
-            // 안드로이드의 주소 검색 액티비티 호출
+            // 안드로이드 앱에서 실행
             window.Android.searchAddress();
         } else {
-            // 웹 환경에서는 다음 주소 검색 API 사용
-            new daum.Postcode({
-                oncomplete: function(data) {
-                    document.getElementById('sample6_postcode').value = data.zonecode;
-                    document.getElementById('sample6_address').value = data.address;
-                    document.getElementById('sample6_detailAddress').focus();
-                    updateFullAddress();
-                }
-            }).open();
+            // 웹에서 실행
+            sample6_execDaumPostcode();
         }
     }
 
-    function updateFullAddress() {
-        const postcode = document.getElementById('sample6_postcode').value;
-        const address = document.getElementById('sample6_address').value;
-        const detailAddress = document.getElementById('sample6_detailAddress').value;
-        
-        // 모든 주소 정보를 조합
-        const fullAddressValue = postcode && address ? 
-            `${postcode}` + `|` + `${address}` + `|` + `${detailAddress}`.trim() : '';
-        
-        // hidden input에 설정
-        document.getElementById('fullAddress').value = fullAddressValue;
-        
-        // 에러 메시지 처리
-        const addressError = document.getElementById('addressError');
-        if (addressError) {
-            if (!fullAddressValue) {
-                addressError.textContent = '주소를 입력해주세요.';
-                addressError.style.display = 'block';
-            } else {
-                addressError.style.display = 'none';
-            }
-        }
+    // 안드로이드에서 주소 선택 후 호출되는 함수
+    function onAddressSelected(postcode, address) {
+        document.getElementById('sample6_postcode').value = postcode;
+        document.getElementById('sample6_address').value = address;
+        document.getElementById('sample6_detailAddress').value = '';
+        updateFullAddress();
     }
 
-    // 주소 검색 API 호출 후에도 updateFullAddress 실행
     function sample6_execDaumPostcode() {
         new daum.Postcode({
             oncomplete: function(data) {
+                var addr = '';
+                if (data.userSelectedType === 'R') {
+                    addr = data.roadAddress;
+                } else {
+                    addr = data.jibunAddress;
+                }
+
                 document.getElementById('sample6_postcode').value = data.zonecode;
-                document.getElementById('sample6_address').value = data.address;
+                document.getElementById('sample6_address').value = addr;
                 document.getElementById('sample6_detailAddress').focus();
-                updateFullAddress(); // 주소 선택 후 바로 업데이트
+                updateFullAddress();
             }
         }).open();
+    }
+
+    function updateFullAddress() {
+        var postcode = document.getElementById('sample6_postcode').value;
+        var address = document.getElementById('sample6_address').value;
+        var detailAddress = document.getElementById('sample6_detailAddress').value;
+        
+        var fullAddress = '';
+        if (postcode) fullAddress += '(' + postcode + ') ';
+        if (address) fullAddress += address + ' ';
+        if (detailAddress) fullAddress += detailAddress;
+        
+        document.getElementById('fullAddress').value = fullAddress.trim();
     }
 
     // 상세주소 입력 시에도 전체 주소 업데이트

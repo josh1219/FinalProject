@@ -279,48 +279,28 @@
         <div class="shipping-info">
             <h3>배송 정보</h3>
             <div class="shipping-field">
-                <label>수령인 (필수)</label>
-                <input type="text" id="recipientName" placeholder="받으실 분의 이름을 입력해주세요" maxlength="5">
-                <span class="error-message" id="nameError" style="display: none; color: red; font-size: 12px;"></span>
+                <label for="recipientName">받는 사람</label>
+                <input type="text" id="recipientName" class="input-field" required>
+                <div class="error-message" id="nameError"></div>
             </div>
             <div class="shipping-field">
-                <label>휴대폰 번호 (필수)</label>
-                <input type="tel" id="recipientPhone" 
-                       th:value="${memberPhone}"
-                       th:placeholder="${memberPhone != null ? memberPhone : '010-0000-0000'}" 
-                       pattern="010-\d{4}-\d{4}"
-                       title="010-XXXX-XXXX 형식으로 입력해주세요">
-                <span class="error-message" id="phoneError" style="display: none; color: red; font-size: 12px;"></span>
+                <label for="recipientPhone">연락처</label>
+                <input type="tel" id="recipientPhone" class="input-field" required>
+                <div class="error-message" id="phoneError"></div>
             </div>
             <div class="shipping-field">
-                <label>배송지 (필수)</label>
-                <div class="address-wrapper">
-                    <input type="text" id="recipientAddress" 
-                           th:value="${memberAddress}" 
-                           th:data-address="${memberAddress}"
-                           th:placeholder="${memberAddress != null ? memberAddress : '주소를 입력해주세요'}" 
-                           readonly>
-                    <button type="button" class="address-search-btn" onclick="searchAddress()">
-                        <i class="fas fa-search"></i> 주소 검색
-                    </button>
+                <label>배송지</label>
+                <div class="address-group">
+                    <input type="text" id="postcode" placeholder="우편번호" class="input-field" readonly>
+                    <button type="button" onclick="searchAddress()" class="address-search-btn">주소 검색</button>
+                    <input type="text" id="address" placeholder="주소" class="input-field" readonly>
+                    <input type="text" id="detailAddress" placeholder="상세주소" class="input-field">
                 </div>
-                <input type="text" id="recipientAddressDetail" 
-                       placeholder="상세주소를 입력해주세요"
-                       class="detail-address">
-                <span th:if="${memberAddress == null}" style="color: #666; font-size: 12px;">* 회원 정보에 저장된 주소가 없습니다.</span>
+                <div class="error-message" id="addressError"></div>
             </div>
             <div class="shipping-field">
-                <label>배송 요청사항</label>
-                <select id="shippingRequest" class="shipping-note" onchange="this.value==='direct' ? document.getElementById('customShippingRequest').style.display='block' : document.getElementById('customShippingRequest').style.display='none'">
-                    <option value="">배송 시 요청사항을 선택해주세요</option>
-                    <option value="부재시 경비실에 맡겨주세요">부재시 경비실에 맡겨주세요</option>
-                    <option value="부재시 문앞에 놓아주세요">부재시 문앞에 놓아주세요</option>
-                    <option value="배송 전 연락바랍니다">배송 전 연락바랍니다</option>
-                    <option value="direct">직접입력</option>
-                </select>
-                <textarea id="customShippingRequest" class="shipping-note custom-note" 
-                    style="display: none;" placeholder="배송 요청사항을 입력해주세요 (최대 50자)"
-                    maxlength="50"></textarea>
+                <label for="deliveryRequest">배송 요청사항</label>
+                <input type="text" id="deliveryRequest" class="input-field" placeholder="예) 부재시 경비실에 맡겨주세요.">
             </div>
         </div>
 
@@ -439,6 +419,38 @@
             document.getElementById('usedPoint').textContent = formatPrice(appliedPoint) + '원';
         }
 
+        // 주소 검색 함수
+        function searchAddress() {
+            if (window.Android) {
+                // 안드로이드 앱에서 실행
+                window.Android.searchAddress();
+            } else {
+                // 웹에서 실행
+                new daum.Postcode({
+                    oncomplete: function(data) {
+                        let addr = '';
+                        if (data.userSelectedType === 'R') {
+                            addr = data.roadAddress;
+                        } else {
+                            addr = data.jibunAddress;
+                        }
+
+                        document.getElementById('postcode').value = data.zonecode;
+                        document.getElementById('address').value = addr;
+                        document.getElementById('detailAddress').focus();
+                    }
+                }).open();
+            }
+        }
+
+        // 안드로이드에서 주소 선택 후 호출되는 함수
+        function onAddressSelected(postcode, address) {
+            document.getElementById('postcode').value = postcode;
+            document.getElementById('address').value = address;
+            document.getElementById('detailAddress').value = '';
+            document.getElementById('detailAddress').focus();
+        }
+
         // 배송정보 유효성 검사
         document.getElementById('recipientName').addEventListener('input', function(e) {
             const nameRegex = /^[가-힣]{2,5}$/;
@@ -484,40 +496,11 @@
             }
         });
 
-        function searchAddress() {
-            // 안드로이드 환경인지 확인
-            if (window.Android) {
-                // 안드로이드의 주소 검색 액티비티 호출
-                window.Android.searchAddress();
-            } else {
-                // 웹 환경에서는 다음 주소 검색 API 사용
-                new daum.Postcode({
-                    oncomplete: function(data) {
-                        let address = data.address;
-                        let extraAddress = '';
-
-                        if (data.buildingName !== '') {
-                            extraAddress = (data.bname !== '' ? `${data.bname}, ` : '') + 
-                                         (data.buildingName !== '' ? data.buildingName : '');
-                        }
-                        if (extraAddress !== '') {
-                            address += ` (${extraAddress})`;
-                        }
-
-                        document.getElementById('recipientAddress').value = address;
-                        document.getElementById('recipientAddressDetail').focus();
-                    },
-                    width: '100%',
-                    height: '100%'
-                }).open();
-            }
-        }
-
         function processPurchase() {
             const recipientName = document.getElementById('recipientName').value;
             const recipientPhone = document.getElementById('recipientPhone').value;
-            const address = document.getElementById('recipientAddress').value;
-            const addressDetail = document.getElementById('recipientAddressDetail').value;
+            const address = document.getElementById('address').value;
+            const addressDetail = document.getElementById('detailAddress').value;
             const fullAddress = addressDetail ? `${address} ${addressDetail}` : address;
             const shippingRequestSelect = document.getElementById('shippingRequest');
             const customShippingRequest = document.getElementById('customShippingRequest');

@@ -186,12 +186,12 @@
           </label>
           <div class="address-group">
             <div class="postcode-group">
-              <input type="text" id="sample6_postcode" placeholder="우편번호" class="input-box postcode" th:value="${memberZipCode}" readonly>
-              <button type="button" onclick="sample6_execDaumPostcode()" class="address-search-btn">주소 검색</button>
+              <input type="text" id="sample6_postcode" th:value="${member != null && member.address != null} ? ${#strings.substring(member.address, 1, #strings.indexOf(member.address, ')'))} : ''" placeholder="우편번호" class="input-box postcode" readonly>
+              <button type="button" onclick="searchAddress()" class="address-search-btn">주소 검색</button>
             </div>
-            <input type="text" id="sample6_address" placeholder="주소" class="input-box" th:value="${memberAddress1}" readonly>
-            <input type="text" id="sample6_detailAddress" placeholder="상세주소" class="input-box" th:value="${memberAddress2}">
-            <input type="hidden" name="address" id="fullAddress" th:value="${memberDTO.address}" >
+            <input type="text" id="sample6_address" th:value="${member != null && member.address != null && #strings.indexOf(member.address, '|') > 0} ? ${#strings.substring(member.address, #strings.indexOf(member.address, '|') + 1, member.address.length() - (#strings.contains(member.address, '|', #strings.indexOf(member.address, '|') + 1) ? (#strings.length(member.address) - #strings.indexOf(member.address, '|', #strings.indexOf(member.address, '|') + 1)) : 0))} : ''" placeholder="주소" class="input-box" readonly>
+            <input type="text" id="sample6_detailAddress" th:value="${member != null && member.address != null && #strings.contains(member.address, '|', #strings.indexOf(member.address, '|') + 1)} ? ${#strings.substring(member.address, #strings.lastIndexOf(member.address, '|') + 1)} : ''" placeholder="상세주소" class="input-box">
+            <input type="hidden" name="address" id="fullAddress" th:value="${member != null ? member.address : ''}">
             <div class="error-message" id="addressError"></div>
           </div>
         </div>
@@ -203,108 +203,78 @@
 
   <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
   <script>
-    // 주소 검색 API
-    function sample6_execDaumPostcode() {
-      // 안드로이드 환경인지 확인
-      if (window.Android) {
-        // 안드로이드의 주소 검색 액티비티 호출
-        window.Android.searchAddress();
-      } else {
-        new daum.Postcode({
-          oncomplete: function(data) {
-            document.getElementById('sample6_postcode').value = data.zonecode;
-            document.getElementById('sample6_address').value = data.address;
-            document.getElementById('sample6_detailAddress').focus();
-            updateFullAddress();
-          }
-        }).open();
-      }
+    // 주소 검색 함수
+    function searchAddress() {
+        if (window.Android) {
+            // 안드로이드 앱에서 실행
+            window.Android.searchAddress();
+        } else {
+            // 웹에서 실행
+            sample6_execDaumPostcode();
+        }
     }
 
-    // 전체 주소 업데이트
-    function updateFullAddress() {
-      const postcode = document.getElementById('sample6_postcode').value;
-      const address = document.getElementById('sample6_address').value;
-      const detailAddress = document.getElementById('sample6_detailAddress').value;
-      
-      let fullAddress = '';
-      if (postcode) fullAddress += `${postcode}` + `|`;
-      if (address) fullAddress += `${address}` + `|`;
-      if (detailAddress) fullAddress += `${detailAddress}`;
-      
-      document.getElementById('fullAddress').value = fullAddress.trim();
+    // 안드로이드에서 주소 선택 후 호출되는 함수
+    function onAddressSelected(postcode, address) {
+        document.getElementById('sample6_postcode').value = postcode;
+        document.getElementById('sample6_address').value = address;
+        document.getElementById('sample6_detailAddress').value = '';
+        updateFullAddress();
     }
+
+    function sample6_execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                var addr = '';
+                if (data.userSelectedType === 'R') {
+                    addr = data.roadAddress;
+                } else {
+                    addr = data.jibunAddress;
+                }
+
+                document.getElementById('sample6_postcode').value = data.zonecode;
+                document.getElementById('sample6_address').value = addr;
+                document.getElementById('sample6_detailAddress').focus();
+                updateFullAddress();
+            }
+        }).open();
+    }
+
+    function updateFullAddress() {
+        var postcode = document.getElementById('sample6_postcode').value;
+        var address = document.getElementById('sample6_address').value;
+        var detailAddress = document.getElementById('sample6_detailAddress').value;
+        
+        var fullAddress = '';
+        if (postcode) fullAddress += '(' + postcode + ') ';
+        if (address) fullAddress += address + ' ';
+        if (detailAddress) fullAddress += detailAddress;
+        
+        document.getElementById('fullAddress').value = fullAddress.trim();
+    }
+
+    // 상세주소 입력 시에도 전체 주소 업데이트
+    document.getElementById('sample6_detailAddress').addEventListener('input', updateFullAddress);
 
     // 페이지 로드 시 주소 분리
     document.addEventListener('DOMContentLoaded', function() {
-      const fullAddress = document.getElementById('fullAddress').value;
-      if (fullAddress) {
-        const postcodeMatch = fullAddress.match(/\[(\d{5})\]/);
-        if (postcodeMatch) {
-          document.getElementById('sample6_postcode').value = postcodeMatch[1];
-          const remainingAddress = fullAddress.replace(/\[\d{5}\]\s*/, '').split(' ');
-          const detailAddressStart = remainingAddress.findIndex(part => part.includes('동') || part.includes('호'));
-          
-          if (detailAddressStart !== -1) {
-            document.getElementById('sample6_address').value = remainingAddress.slice(0, detailAddressStart).join(' ');
-            document.getElementById('sample6_detailAddress').value = remainingAddress.slice(detailAddressStart).join(' ');
-          } else {
-            document.getElementById('sample6_address').value = remainingAddress.join(' ');
-          }
+        const fullAddress = document.getElementById('fullAddress').value;
+        if (fullAddress) {
+            const postcodeMatch = fullAddress.match(/\((\d{5})\)/);
+            if (postcodeMatch) {
+                document.getElementById('sample6_postcode').value = postcodeMatch[1];
+            }
+
+            let remainingAddress = fullAddress.replace(/\(\d{5}\)\s*/, '').trim();
+            const detailIndex = remainingAddress.lastIndexOf(' ');
+            
+            if (detailIndex !== -1) {
+                document.getElementById('sample6_address').value = remainingAddress.substring(0, detailIndex);
+                document.getElementById('sample6_detailAddress').value = remainingAddress.substring(detailIndex + 1);
+            } else {
+                document.getElementById('sample6_address').value = remainingAddress;
+            }
         }
-      }
-    });
-
-    // 상세주소 입력 시 전체 주소 업데이트
-    document.getElementById('sample6_detailAddress').addEventListener('input', updateFullAddress);
-
-    // 폼 제출 전 유효성 검사
-    document.getElementById('updateForm').addEventListener('submit', function(e) {
-      let isValid = true;
-      const name = document.querySelector('input[name="name"]').value;
-      const birthday = document.querySelector('input[name="birthday"]').value;
-      const phone = document.querySelector('input[name="phone"]').value;
-      const gender = document.getElementById('genderInput').value;
-      const address = document.getElementById('fullAddress').value;
-
-      // 이름 검사
-      if (name.trim().length < 2) {
-        document.getElementById('nameError').textContent = '이름은 2자 이상이어야 합니다.';
-        document.getElementById('nameError').style.display = 'block';
-        isValid = false;
-      }
-
-      // 생년월일 검사
-      if (!/^\d{8}$/.test(birthday)) {
-        document.getElementById('birthdayError').textContent = '생년월일은 8자리 숫자여야 합니다.';
-        document.getElementById('birthdayError').style.display = 'block';
-        isValid = false;
-      }
-
-      // 전화번호 검사
-      if (!/^01[0-9]{8,9}$/.test(phone)) {
-        document.getElementById('phoneError').textContent = '올바른 휴대폰 번호를 입력해주세요.';
-        document.getElementById('phoneError').style.display = 'block';
-        isValid = false;
-      }
-
-      // 성별 검사
-      if (!gender) {
-        document.getElementById('genderError').textContent = '성별을 선택해주세요.';
-        document.getElementById('genderError').style.display = 'block';
-        isValid = false;
-      }
-
-      // 주소 검사
-      if (!address) {
-        document.getElementById('addressError').textContent = '주소를 입력해주세요.';
-        document.getElementById('addressError').style.display = 'block';
-        isValid = false;
-      }
-
-      if (!isValid) {
-        e.preventDefault();
-      }
     });
   </script>
 </body>

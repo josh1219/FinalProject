@@ -137,10 +137,24 @@ public class MemberController {
             Member member = memberService.findBymEmail(userEmail);
             if (member != null) {
                 MemberDTO memberDTO = MemberDTO.fromEntity(member);
-                String[] address = member.getAddress().split("\\|");
-                String zipCode = address[0];
-                String address1 = address[1];
-                String address2 = address[2];
+                
+                // 주소 처리
+                String zipCode = "";
+                String address1 = "";
+                String address2 = "";
+                
+                if (member.getAddress() != null && !member.getAddress().isEmpty()) {
+                    String[] addressParts = member.getAddress().split("\\|");
+                    zipCode = addressParts[0].trim();
+                    
+                    if (addressParts.length > 1) {
+                        address1 = addressParts[1].trim();
+                    }
+                    
+                    if (addressParts.length > 2) {
+                        address2 = addressParts[2].trim();
+                    }
+                }
 
                 model.addAttribute("memberZipCode", zipCode);
                 model.addAttribute("memberAddress1", address1);

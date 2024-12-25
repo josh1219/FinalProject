@@ -385,7 +385,6 @@
                 if (window.Android.checkCameraPermission()) {
                     window.Android.openCamera();
                 } else {
-                    Swal.fire('알림', '카메라 권한이 없습니다.', 'info');
                     window.Android.requestCameraPermission();
                 }
             } else {
@@ -399,7 +398,6 @@
                 if (window.Android.checkGalleryPermission()) {
                     window.Android.openGallery();
                 } else {
-                    Swal.fire('알림', '갤러리 권한이 없습니다.', 'info');
                     window.Android.requestGalleryPermission();
                 }
             } else {

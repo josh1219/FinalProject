@@ -379,7 +379,7 @@
                 if (window.Android.checkCameraPermission()) {
                     window.Android.openCamera();
                 } else {
-                    Swal.fire('알림', '카메라 권한이 없습니다.', 'info');
+                    window.Android.requestCameraPermission();
                 }
             } else {
                 Swal.fire('알림', '카메라 기능은 안드로이드 앱에서만 사용 가능합니다.', 'info');
@@ -392,18 +392,18 @@
                 if (window.Android.checkGalleryPermission()) {
                     window.Android.openGallery();
                 } else {
-                    Swal.fire('알림', '갤러리 권한이 없습니다.', 'info');
                     window.Android.requestGalleryPermission();
                 }
             } else {
-                // 웹 환경에서는 견종 식별용 input 사용
-                document.getElementById('breed-input').click();
+                // 웹 환경에서는 기존 file input 사용
+                document.getElementById('file-input').click();
             }
         }
 
         function onImageSelected(imagePath) {
             // 이미지 미리보기 업데이트
             const previewImg = document.getElementById('preview');
+            
             if (previewImg) {
                 previewImg.src = imagePath;
             }

@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="//fonts.googleapis.com">
     <link href="//fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         body {
             margin: 0;
@@ -23,7 +24,7 @@
         }
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             padding: 15px 0;
             max-width: 1200px;
@@ -248,86 +249,65 @@
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script th:inline="javascript">
-    function toggleNav() {
-        const nav = document.querySelector('.side-nav');
-        const overlay = document.querySelector('.nav-overlay');
-        nav.classList.toggle('open');
-        overlay.classList.toggle('show');
-    }
-
-    // 오버레이 클릭시 네비게이션 닫기
-    document.querySelector('.nav-overlay').addEventListener('click', function() {
-        const nav = document.querySelector('.side-nav');
-        const overlay = document.querySelector('.nav-overlay');
-        nav.classList.remove('open');
-        overlay.classList.remove('show');
-    });
-
-    function sortProducts(sortOption) {
-        // 현재 URL에서 파라미터 가져오기
-        const urlParams = new URLSearchParams(window.location.search);
-        
-        // 정렬 옵션 설정
-        urlParams.set('sort', sortOption);
-        
-        // 현재 카테고리가 있다면 유지
-        const category = urlParams.get('category');
-        if (category) {
-            urlParams.set('category', category);
+        function showAlert(message) {
+            Swal.fire({
+                icon: 'info',
+                title: message,
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true
+            });
         }
-        
-        // 새로운 URL로 이동
-        window.location.href = window.location.pathname + '?' + urlParams.toString();
-    }
-    
-    function showAlert(message) {
-        const alertContainer = document.createElement('div');
-        alertContainer.className = 'alert-container';
-        
-        alertContainer.innerHTML = `
-            <div class="alert-content">
-                <div class="alert-message">${message}</div>
-                <button class="alert-close">확인</button>
-            </div>
-        `;
-        
-        document.body.appendChild(alertContainer);
-        
-        const closeButton = alertContainer.querySelector('.alert-close');
-        closeButton.addEventListener('click', () => {
-            alertContainer.style.animation = 'slideOut 0.3s ease-out forwards';
-            setTimeout(() => {
-                document.body.removeChild(alertContainer);
-            }, 300);
+
+        // 장바구니 메시지 표시
+        const cartMessage = [[${message}]];
+        if (cartMessage) {
+            showAlert(cartMessage);
+        }
+
+        function toggleNav() {
+            const nav = document.querySelector('.side-nav');
+            const overlay = document.querySelector('.nav-overlay');
+            nav.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        // 오버레이 클릭시 네비게이션 닫기
+        document.querySelector('.nav-overlay').addEventListener('click', function() {
+            const nav = document.querySelector('.side-nav');
+            const overlay = document.querySelector('.nav-overlay');
+            nav.classList.remove('open');
+            overlay.classList.remove('show');
         });
-        
-        // 3초 후 자동으로 닫기
-        setTimeout(() => {
-            if (document.body.contains(alertContainer)) {
-                alertContainer.style.animation = 'slideOut 0.3s ease-out forwards';
-                setTimeout(() => {
-                    if (document.body.contains(alertContainer)) {
-                        document.body.removeChild(alertContainer);
-                    }
-                }, 300);
+
+        function sortProducts(sortOption) {
+            // 현재 URL에서 파라미터 가져오기
+            const urlParams = new URLSearchParams(window.location.search);
+            
+            // 정렬 옵션 설정
+            urlParams.set('sort', sortOption);
+            
+            // 현재 카테고리가 있다면 유지
+            const category = urlParams.get('category');
+            if (category) {
+                urlParams.set('category', category);
             }
-        }, 3000);
-    }
-
-    // 장바구니 추가 성공 시 알림 표시
-    const cartMessage = [[${message}]];
-    if (cartMessage) {
-        showAlert(cartMessage);
-    }
-
-    // 마우스 휠로 가로 스크롤
-    document.querySelector('.category-nav').addEventListener('wheel', function(e) {
-        if (e.deltaY !== 0) {
-            e.preventDefault(); // 기본 세로 스크롤 방지
-            this.scrollLeft += e.deltaY;
+            
+            // 새로운 URL로 이동
+            window.location.href = window.location.pathname + '?' + urlParams.toString();
         }
-    });
+        
+        // 마우스 휠로 가로 스크롤
+        document.querySelector('.category-nav').addEventListener('wheel', function(e) {
+            if (e.deltaY !== 0) {
+                e.preventDefault(); // 기본 세로 스크롤 방지
+                this.scrollLeft += e.deltaY;
+            }
+        });
     </script>
 </body>
 </html>

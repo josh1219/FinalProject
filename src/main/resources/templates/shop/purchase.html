@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         body {
             margin: 0;
@@ -389,19 +390,40 @@
             const pointToUse = parseInt(pointInput.value) || 0;
 
             if (pointToUse < 0) {
-                showAlert('포인트는 0보다 작을 수 없습니다.');
+                Swal.fire({
+                    icon: 'error',
+                    title: '포인트는 0보다 작을 수 없습니다.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
                 pointInput.value = 0;
                 return;
             }
 
             if (pointToUse > maxPoint) {
-                showAlert('보유한 포인트를 초과하여 사용할 수 없습니다.');
+                Swal.fire({
+                    icon: 'error',
+                    title: '보유한 포인트를 초과하여 사용할 수 없습니다.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
                 pointInput.value = maxPoint;
                 return;
             }
 
             if (pointToUse > productPrice) {
-                showAlert('상품 가격을 초과하여 포인트를 사용할 수 없습니다.');
+                Swal.fire({
+                    icon: 'error',
+                    title: '상품 가격을 초과하여 포인트를 사용할 수 없습니다.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
                 pointInput.value = productPrice;
                 return;
             }
@@ -509,7 +531,15 @@
 
             // 유효성 검사
             if (!recipientName || !recipientPhone || !address) {
-                alert('모든 필수 배송정보를 입력해주세요.');
+                Swal.fire({
+                    icon: 'error',
+                    title: '입력 오류',
+                    text: '모든 필수 배송정보를 입력해주세요.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
                 return;
             }
 
@@ -517,16 +547,31 @@
             const phoneRegex = /^010-\d{4}-\d{4}$/;
 
             if (!nameRegex.test(recipientName)) {
-                alert('올바른 이름을 입력해주세요.');
+                Swal.fire({
+                    icon: 'error',
+                    title: '입력 오류',
+                    text: '올바른 이름을 입력해주세요.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
                 return;
             }
 
             if (!phoneRegex.test(recipientPhone)) {
-                alert('올바른 휴대폰 번호를 입력해주세요.');
+                Swal.fire({
+                    icon: 'error',
+                    title: '입력 오류',
+                    text: '올바른 휴대폰 번호를 입력해주세요.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
                 return;
             }
 
-            // 결제 처리 요청
             const purchaseData = {
                 fromCart: /*[[${fromCart}]]*/ false,
                 productId: /*[[${product.pIdx}]]*/ null,
@@ -549,18 +594,42 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    alert('결제가 완료되었습니다.');
-                    window.location.href = '/shop/order/history';  // 주문 내역 페이지로 이동
+                    Swal.fire({
+                        icon: 'success',
+                        title: '결제 완료',
+                        text: '결제가 완료되었습니다.',
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        window.location.href = '/shop/order/history';  // 주문 내역 페이지로 이동
+                    });
                 } else {
-                    alert(data.message || '결제 처리 중 오류가 발생했습니다.');
+                    Swal.fire({
+                        icon: 'error',
+                        title: '결제 실패',
+                        text: data.message || '결제 처리 중 오류가 발생했습니다.',
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('결제 처리 중 오류가 발생했습니다.');
+                Swal.fire({
+                    icon: 'error',
+                    title: '오류',
+                    text: '결제 처리 중 오류가 발생했습니다.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
             });
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/alert.js"></script>
 </body>
 </html>

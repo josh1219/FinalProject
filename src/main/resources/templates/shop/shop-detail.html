@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="preconnect" href="//fonts.googleapis.com">
     <link href="//fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100;300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <style>
         body {
             margin: 0;
@@ -462,7 +463,18 @@
                     const cartBtn = document.querySelector('.btn-cart');
                     cartBtn.classList.add('in-cart');
                     updateHeaderCartCount(1);
-                    showAlert('상품이 장바구니에 추가되었습니다.');
+                    Swal.fire({
+                        icon: 'success',
+                        title: '장바구니에 추가되었습니다.',
+                        text: '장바구니로 이동하시겠습니까?',
+                        showCancelButton: true,
+                        confirmButtonText: '이동',
+                        cancelButtonText: '계속 쇼핑'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '/shop/cart';
+                        }
+                    });
                     checkCartStatus();
                 } else {
                     throw new Error('Failed to add to cart');
@@ -470,7 +482,11 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showAlert('장바구니 추가 중 오류가 발생했습니다.');
+                Swal.fire({
+                    icon: 'error',
+                    title: '오류',
+                    text: '장바구니 추가 중 오류가 발생했습니다.'
+                });
             });
         }
 
@@ -489,7 +505,18 @@
                     const cartBtn = document.querySelector('.btn-cart');
                     cartBtn.classList.remove('in-cart');
                     updateHeaderCartCount(-1);
-                    showAlert('상품이 장바구니에서 제거되었습니다.');
+                    Swal.fire({
+                        icon: 'success',
+                        title: '장바구니에서 제거되었습니다.',
+                        text: '계속 쇼핑하시겠습니까?',
+                        showCancelButton: true,
+                        confirmButtonText: '쇼핑 계속',
+                        cancelButtonText: '장바구니로 이동'
+                    }).then((result) => {
+                        if (!result.isConfirmed) {
+                            window.location.href = '/shop/cart';
+                        }
+                    });
                     checkCartStatus();
                 } else {
                     throw new Error('Failed to remove from cart');
@@ -497,7 +524,11 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showAlert('장바구니 제거 중 오류가 발생했습니다.');
+                Swal.fire({
+                    icon: 'error',
+                    title: '오류',
+                    text: '장바구니 제거 중 오류가 발생했습니다.'
+                });
             });
         }
 
@@ -521,13 +552,35 @@
         }
         
         function updateQuantity(change) {
-            quantity = Math.max(1, quantity + change);
-            document.getElementById('quantityInput').value = quantity;
+            const quantityInput = document.getElementById('quantityInput');
+            const currentQuantity = parseInt(quantityInput.value);
+            const stock = [[${product.stock}]];
+            const newQuantity = currentQuantity + change;
+
+            if (newQuantity < 1) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '수량 오류',
+                    text: '최소 주문 수량은 1개입니다.'
+                });
+                return;
+            }
+
+            if (newQuantity > stock) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '재고 부족',
+                    text: '재고가 부족합니다.'
+                });
+                return;
+            }
+
+            quantityInput.value = newQuantity;
             updateTotalPrice();
         }
         
         function updateTotalPrice() {
-            const total = productPrice * quantity;
+            const total = productPrice * parseInt(document.getElementById('quantityInput').value);
             document.getElementById('totalPrice').textContent = total.toLocaleString() + '원';
         }
         
@@ -537,6 +590,7 @@
         }
     /*]]>*/
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="/js/alert.js"></script>
 </body>
 </html>

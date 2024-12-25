@@ -41,9 +41,6 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         
         // Get registrationId from OAuth2AuthenticationToken
         String registrationId = ((OAuth2AuthenticationToken) authentication).getAuthorizedClientRegistrationId();
-        System.out.println("\n=== OAuth2 Success Handler Start ===");
-        System.out.println("Registration ID: " + registrationId);
-        System.out.println("Raw OAuth2 Attributes: " + attributes);
         
         try {
             // Naver 로그인
@@ -56,19 +53,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 provider = "naver";  // 명시적으로 "naver"로 설정
                 socialId = String.valueOf(naverResponse.get("id"));
                 
-                System.out.println("Naver Login Details:");
-                System.out.println("Email: " + email);
-                System.out.println("Name: " + name);
-                System.out.println("Provider: " + provider);
-                System.out.println("SocialId: " + socialId);
                 
                 // socialId로 기존 회원 확인
                 Member member = memberRepository.findByProviderAndSocialId(provider, socialId).orElse(null);
                 
                 if (member != null) {
-                    System.out.println("\nExisting Naver Member Found:");
-                    System.out.println("Member Email: " + member.getMEmail());
-                    System.out.println("Member Provider: " + member.getProvider());
                     
                     member.updateOAuth2Info(picture, provider, socialId);
                     memberRepository.save(member);
@@ -100,19 +89,11 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 picture = (String) attributes.get("picture");
                 provider = registrationId;  // registrationId를 사용하여 provider 설정
                 socialId = String.valueOf(attributes.get("sub"));
-                
-                System.out.println("Google Login Details:");
-                System.out.println("Email: " + email);
-                System.out.println("Name: " + name);
-                System.out.println("Provider: " + provider);
-                System.out.println("SocialId: " + socialId);
+            
                 
                 Member member = memberRepository.findByProviderAndSocialId(provider, socialId).orElse(null);
                 
                 if (member != null) {
-                    System.out.println("\nExisting Google Member Found:");
-                    System.out.println("Member Email: " + member.getMEmail());
-                    System.out.println("Member Provider: " + member.getProvider());
                     
                     member.updateOAuth2Info(picture, provider, socialId);
                     memberRepository.save(member);
@@ -148,18 +129,10 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
                 email = kakaoAccount.containsKey("email") ? (String) kakaoAccount.get("email") : null;
                 provider = registrationId;
 
-                System.out.println("Kakao Login Details:");
-                System.out.println("Email: " + email);
-                System.out.println("Name: " + name);
-                System.out.println("Provider: " + provider);
-                System.out.println("SocialId: " + socialId);
                 
                 Member member = memberRepository.findByProviderAndSocialId(provider, socialId).orElse(null);
                 
                 if (member != null) {
-                    System.out.println("\nExisting Kakao Member Found:");
-                    System.out.println("Member Email: " + member.getMEmail());
-                    System.out.println("Member Provider: " + member.getProvider());
                     
                     // 기존 회원 정보 업데이트 (이메일은 업데이트하지 않음)
                     member.updateOAuth2Info(picture, provider, socialId);
@@ -218,9 +191,5 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         emailCookie.setMaxAge(3600);
         response.addCookie(emailCookie);
         
-        // 디버그 로그 추가
-        System.out.println("OAuth2 Session mIdx: " + session.getAttribute("mIdx"));
-        System.out.println("OAuth2 Session email: " + session.getAttribute("email"));
-        System.out.println("OAuth2 Cookie userInfo: " + userInfo);
     }
 }

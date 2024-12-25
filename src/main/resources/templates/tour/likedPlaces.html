@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>찜한 장소 목록</title>
+    <link rel="stylesheet" href="/css/header.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <style>
+        .header {
+            height: 21px;
+        }
+        .liked-places-container {
+            max-width: 477px;
+            margin: 20px auto;
+            padding: 0 20px;
+            margin-top: 75px;
+            margin-bottom: 75px;
+            min-height: calc(100vh - 300px);
+        }
+        
+        .liked-places-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #333;
+            text-align: center;
+            position: relative;
+        }
+        
+        .liked-places-title:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 3px;
+            background: #4CAF50;
+            border-radius: 2px;
+        }
+        
+        .liked-places-flex {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 10px 0;
+        }
+        
+        .place-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.08);
+        }
+        
+        .place-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.12);
+        }
+        
+        .place-info {
+            padding: 25px 25px 20px;
+            position: relative;
+        }
+        
+        .place-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin: 0;
+            line-height: 1.4;
+            word-break: keep-all;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .place-name:before {
+            content: '📍';
+            font-size: 22px;
+        }
+        
+        .place-actions {
+            padding: 0 15px 15px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        .action-button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .view-button {
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        .view-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .unlike-button {
+            background-color: #fff;
+            color: #ff4444;
+            border: 2px solid #ff4444;
+        }
+        
+        .unlike-button:hover {
+            background-color: #ff4444;
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .no-places {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+            font-size: 16px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            margin: 20px auto;
+            border: 1px dashed #ddd;
+        }
+        
+        .no-places:before {
+            content: '🔍';
+            display: block;
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 477px) {
+            .liked-places-container {
+                padding: 0 15px;
+                margin: 20px auto;
+                margin-top: 75px;
+                margin-bottom: 75px;
+            }
+            
+            .place-card {
+                border-radius: 12px;
+            }
+            
+            .place-info {
+                padding: 20px 20px 15px;
+            }
+            
+            .place-actions {
+                padding: 0 12px 12px;
+                gap: 10px;
+            }
+            
+            .action-button {
+                padding: 12px 16px;
+                font-size: 14px;
+                border-radius: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{common/header :: header}"></div>
+    
+    <div class="liked-places-container">
+        <h1 class="liked-places-title">내가 찜한 장소</h1>
+        
+        <div th:if="${#lists.isEmpty(likedPlaces)}" class="no-places">
+            <p>아직 찜한 장소가 없습니다</p>
+        </div>
+        
+        <div th:unless="${#lists.isEmpty(likedPlaces)}" class="liked-places-flex">
+            <div th:each="place : ${likedPlaces}" class="place-card">
+                <div class="place-info">
+                    <h2 class="place-name" th:text="${place.placeName}"></h2>
+                </div>
+                
+                <div class="place-actions">
+                    <button class="action-button view-button" 
+                            th:data-place="${place.placeName}"
+                            onclick="viewOnMap(this.getAttribute('data-place'))">
+                        지도 보기
+                    </button>
+                    <button class="action-button unlike-button"
+                            th:data-id="${place.id}"
+                            onclick="unlikePlace(this.getAttribute('data-id'))">
+                        찜 취소
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:replace="~{common/footer :: footer}"></div>
+
+    <script th:inline="javascript">
+    // CSRF 토큰 가져오기
+    const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+    const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+    function viewOnMap(placeName) {
+        location.href = '/tour/map?place=' + encodeURIComponent(placeName);
+    }
+    
+    function unlikePlace(placeId) {
+        if (confirm('정말로 찜을 취소하시겠습니까?')) {
+            fetch('/tour/like/' + placeId, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    [csrfHeader]: csrfToken
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('찜 취소 중 오류가 발생했습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('찜 취소 중 오류가 발생했습니다.');
+            });
+        }
+    }
+    </script>
+</body>
+</html>

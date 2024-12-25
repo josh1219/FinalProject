@@ -75,7 +75,7 @@ public class BoardController {
         model.addAttribute("boardList", boardList);
         model.addAttribute("attachmentCounts", attachmentCounts);
         model.addAttribute("currentCategory", category);
-        return "board";
+        return "board/board";
     }
 
     // 글쓰기 페이지
@@ -86,7 +86,7 @@ public class BoardController {
             response.getWriter().write("<script>alert('로그인이 필요한 서비스입니다.'); window.location.href='/member/login';</script>");
             return null;
         }
-        return "boardCreate";
+        return "board/boardCreate";
     }
 
     // 게시글 작성 처리
@@ -217,7 +217,7 @@ public class BoardController {
         boolean isLiked = boardService.isLikedByMember(board, sessionMember);
         model.addAttribute("isLiked", isLiked);
         
-        return "boardDetail";
+        return "board/boardDetail";
     }
 
     // 게시글 삭제
@@ -280,7 +280,7 @@ public class BoardController {
 
             model.addAttribute("board", board);
             model.addAttribute("sessionMember", sessionMember);
-            return "boardUpdate";
+            return "board/boardUpdate";
         } catch (Exception e) {
             e.printStackTrace();
             return "redirect:/board?error=error";

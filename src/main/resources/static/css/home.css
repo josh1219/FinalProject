@@ -1,292 +1,543 @@
-
-
-.home,
-.home * {
+* {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
-.home {
-  background: #ffffff;
-  padding: 30px 20px 30px 20px;
+
+
+body {
+  font-family: Arial, sans-serif;
+  padding-bottom: 60px; /* 하단 네비게이션 높이만큼 여백 */
+  min-height: 100vh;
+  position: relative;
+}   
+
+
+
+.admin-badge {
+  background-color: #ff4757;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.icons {
+  display: flex;
+  gap: 20px;
+}
+.grid-container {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: repeat(4, auto);
+  grid-gap: 0px;
+  padding: 0 20px;
+  margin-bottom: 0px;
+}
+.grid-item {
+  background-color: #D3D3D3;
+  width: 100%;
+  min-height: 200px;
+}
+.large-item {
+  grid-row: span 2;
+}
+.full-width {
+  grid-column: 1 / -1;
+  min-height: 200px;
+  margin: 10px 20px;
+  background-color: #D3D3D3;
+}
+.navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
+  display: flex;
+  justify-content: space-around;
+  padding: 10px 0;
+  border-top: 1px solid #eee;
+  z-index: 1000;
+  height: 60px; /* 네비게이션 높이 지정 */
+}
+
+.nav-item {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  align-items: flex-start;
-  justify-content: flex-start;
-  height: 862px;
-  position: relative;
-  overflow: hidden;
+  align-items: center;
+  text-decoration: none;
+  color: #333;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 5px;
 }
-.header {
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  align-self: stretch;
-  flex-shrink: 0;
-  height: 49px;
-  position: relative;
-  overflow: hidden;
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
 }
-.frame-48 {
-  padding: 10px;
+
+.nav-icon img {
+  width: 100%;
+  height: 100%;
+}
+
+.nav-item span {
+  margin-top: 4px;
+}
+.walk-button {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
-  flex-direction: row;
-  gap: 10px;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  width: 86px;
-  position: relative;
+  background-color: white;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.3s ease;
 }
-.petopia {
-  color: #000000;
+
+.walk-button:hover {
+  transform: scale(1.02);
+}
+
+.walk-button img, .dogShop-button img {
+  width: 276.66px;
+  height: 200px;
+  object-fit: contain;
+  background-color: white;
+}
+
+.dogShop-button:hover {
+  transform: scale(1.02);
+}
+
+.insertDog-button, .dogList-button {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  background: none;
+  transition: transform 0.3s ease;
+}
+
+.walk-button:hover, .insertDog-button:hover, .dogList-button:hover {
+  transform: scale(1.02);
+}
+
+.insertDog-button img, .dogList-button img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background-color: white;
+}
+
+.overlay {
+  position: absolute;
+  bottom: 10%; /* 하단에서 약간 위로 배치 */
+  left: 50%; /* 가로 중앙 정렬 */
+  transform: translateX(-50%); /* 가로 중앙 정렬을 위한 변환 */
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 15px;
+  font-weight: bold;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  font-size: 0.9em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center; /* 텍스트 정렬 */
+}
+
+/* 산책하기 버튼의 overlay - 상단 오른쪽 */
+.walk-overlay {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 15px;
+  font-weight: bold;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  font-size: 0.9em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   text-align: center;
-  font-family: "IstokWeb-Bold", sans-serif;
-  font-size: 20px;
-  font-weight: 700;
-  position: relative;
+  z-index: 10;
 }
-.alram {
-  padding: 10px;
+
+/* 등록하기와 목록 버튼의 overlay - 하단 가운데 배치 */
+.insert-overlay, .list-overlay {
+  position: absolute;
+  bottom: 20px;         /* 하단에서 20px 위에 배치 */
+  left: 50%;           /* 수평 가운데 */
+  transform: translateX(-50%);  /* 수평 가운데 정렬을 위한 변환 */
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 16px;
+  border-radius: 15px;
+  font-weight: bold;
+  color: #333;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  font-size: 0.9em;
+  white-space: nowrap;
+  min-width: 120px;
+  text-align: center;
+  z-index: 10;
+}
+
+.gotoPetopia {
+  position: relative;
+  margin: 20px;
+  cursor: pointer;
+  overflow: hidden;
+  max-height: 200px;  /* 높이 제한 추가 */
+}
+
+.gotoPetopia .slider {
+  position: relative;
+  height: 100%;
+}
+
+.gotoPetopia .slide img {
+  width: 100%;
+  height: 200px;  /* 고정 높이 설정 */
+  object-fit: cover;  /* 이미지 비율 유지하면서 채우기 */
+  display: block;
+  border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.gotoPetopia::before {
+  content: "Go to PETOPIA!";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-size: 2em;
+  font-weight: bold;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;  /* 텍스트가 한 줄로 유지되도록 설정 */
+}
+
+.gotoPetopia::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 10px;
+}
+
+.gotoPetopia:hover::before,
+.gotoPetopia:hover::after {
+  opacity: 1;
+}
+
+.gotoPetopia:hover .slide img {
+  transform: scale(1.05);
+}
+
+.main-content {
+  margin-top: 70px;
+  margin-bottom: 60px; /* 하단 네비게이션 높이만큼 여백 */
+}
+
+.boardTop5 {
+  margin: 20px;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.boardTop5 h3 {
+  margin-bottom: 15px;
+  color: #333;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.boardTop5 table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.boardTop5 th,
+.boardTop5 td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.boardTop5 th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  color: #495057;
+}
+
+.boardTop5 td.title {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.boardTop5 td.title a {
+  color: #333;
+  text-decoration: none;
+}
+
+.boardTop5 td.title a:hover {
+  color: #007bff;
+}
+
+.boardTop5 .no-posts {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+
+.boardTop5 tr:hover {
+  background-color: #f8f9fa;
+}
+
+.withDogWalkButton, .dogShopButton {
+  grid-column: 1;
+  height: 200px;
   display: flex;
-  flex-direction: row;
-  gap: 10px;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  width: 46px;
-  height: 49px;
-  position: absolute;
-  right: 46px;
-  top: 0px;
+  overflow: hidden;
+  padding: 0px;
 }
-.iconly-regular-outline-notification {
-  flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  position: relative;
-}
-.notification {
-  height: auto;
-  position: absolute;
-  left: 3.75px;
-  top: 1.25px;
-  overflow: visible;
-}
-.profile {
-  padding: 10px;
+
+.insertDogButton {
+  grid-column: 2;
+  grid-row: 1;
+  height: 200px;
   display: flex;
-  flex-direction: row;
-  gap: 10px;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  height: 49px;
-  position: absolute;
-  right: 0px;
-  top: 0px;
+  overflow: hidden;
 }
-.group-50 {
-  flex-shrink: 0;
-  width: 30px;
-  height: 30px;
-  position: relative;
-  overflow: visible;
-}
-.footer {
+
+.dogListButton {
+  grid-column: 2;
+  grid-row: 2;
+  height: 200px;
   display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  justify-content: space-between;
-  align-self: stretch;
-  flex-shrink: 0;
-  height: 77px;
-  position: absolute;
-  right: 20px;
-  left: 20px;
-  bottom: 14px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
-.div {
+
+.walk-button, .dogShop-button, .insertDog-button, .dogList-button {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.3s ease;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.newestBoard {
+  margin: 20px 20px;
+  padding: 0px;
+  max-width: 1000px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.newestBoard h3 {
+  margin-bottom: 5px;
+  color: #2c3e50;
+  font-size: 1.5em;
+  font-weight: 600;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f2f5;
+}
+
+.newestBoard .board-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.newestBoard .board-item {
   padding: 10px;
+  border-bottom: 1px solid #f0f2f5;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.newestBoard .board-item:hover {
+  background-color: #f8fafc;
+}
+
+.newestBoard .board-item:last-child {
+  border-bottom: none;
+}
+
+.newestBoard .title-section {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.newestBoard .board-title {
+  font-size: 16px;
+  color: #1a202c;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.newestBoard .board-title:hover {
+  color: #3182ce;
+}
+
+.newestBoard .board-category {
+  font-size: 12px;
+  color: #4a5568;
+  background-color: #edf2f7;
+  padding: 4px 10px;
+  border-radius: 20px;
+  margin-left: 12px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.newestBoard .board-info {
+  font-size: 13px;
+  color: #718096;
+  display: flex;
+  align-items: center;
+}
+
+.newestBoard .board-info .writer {
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.newestBoard .board-info .separator {
+  margin: 0 8px;
+  color: #cbd5e0;
+}
+
+.newestBoard .board-info .view-count {
+  display: flex;
+  align-items: center;
+  color: #718096;
+}
+
+.newestBoard .board-info .view-count i {
+  margin-right: 4px;
+  font-size: 14px;
+}
+
+
+
+@media (max-width: 768px) {
+  .newestBoard {
+      margin: 5px 20px;
+      padding: 0px;
+  }
+
+  .newestBoard .board-title {
+      font-size: 15px;
+  }
+
+  .newestBoard .board-category {
+      font-size: 11px;
+      padding: 3px 8px;
+  }
+
+  .newestBoard .board-info {
+      font-size: 12px;
+  }
+}
+.company-info {
+  margin: 20px 20px;
+  padding: 5px;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+}
+
+.company-info-table {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  border-collapse: separate;
+  border-spacing: 0 12px;
+}
+
+.company-info-table th {
+  color: #6b7280;
+  text-align: left;
+  padding-right: 20px;
+  vertical-align: top;
+  width: 120px;
+  font-weight: normal;
+}
+
+.company-info-table td {
+  color: #374151;
+}
+
+.company-info-table .terms {
+  font-size: 11px;
+  color: #6b7280;
   display: flex;
   flex-direction: column;
-  gap: 0px;
+  gap: 3px;
+}
+
+.company-info-table .terms a {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 65px;
-  height: 65px;
-  position: relative;
+  transition: color 0.2s ease;
 }
-.calendar {
-  flex-shrink: 0;
-  width: 34px;
-  height: 29px;
-  position: static;
+
+.company-info-table .terms a:hover {
+  color: #4a5568;
 }
-.iconly-regular-light-calendar {
-  width: 34px;
-  height: 29px;
-  position: absolute;
-  left: 15.5px;
-  top: 10px;
+
+.company-info-table .terms a i {
+  margin-left: 4px;
+  font-size: 8px;
 }
-.calendar2 {
-  width: 75%;
-  height: 83.33%;
-  position: absolute;
-  right: 12.5%;
-  left: 12.5%;
-  bottom: 8.33%;
-  top: 8.33%;
-  overflow: visible;
-}
-.div2 {
-  color: #000000;
-  text-align: center;
-  font-family: "IstokWeb-Regular", sans-serif;
-  font-size: 11px;
-  font-weight: 400;
-  position: relative;
-  align-self: stretch;
-}
-.walk {
-  flex-shrink: 0;
-  width: 32.34px;
-  height: 29px;
-  position: static;
-}
-.iconly-regular-outline-location {
-  width: 32.34px;
-  height: 29px;
-  position: absolute;
-  left: 16.33px;
-  top: 10px;
-}
-.location {
-  height: auto;
-  position: absolute;
-  left: 5.39px;
-  top: 2.42px;
-  overflow: visible;
-}
-.home2 {
-  flex-shrink: 0;
-  width: 30px;
-  height: 26.5px;
-  position: static;
-}
-.iconly-regular-outline-home {
-  width: 30px;
-  height: 26.5px;
-  position: absolute;
-  left: 17.5px;
-  top: 11.25px;
-}
-.home3 {
-  width: 85.42%;
-  height: 89.6%;
-  position: absolute;
-  right: 6.25%;
-  left: 8.33%;
-  bottom: 6.23%;
-  top: 4.17%;
-  overflow: visible;
-}
-.group-48 {
-  flex-shrink: 0;
-  width: 36.83px;
-  height: 27px;
-  position: static;
-}
-.iconly-regular-outline-3-user {
-  width: 36.83px;
-  height: 27px;
-  position: absolute;
-  left: 14.09px;
-  top: 11px;
-}
-._3-user {
-  width: 90.72%;
-  height: 69.96%;
-  position: absolute;
-  right: 5.12%;
-  left: 4.17%;
-  bottom: 13.37%;
-  top: 16.67%;
-  overflow: visible;
-}
-.div3 {
-  color: #000000;
-  text-align: center;
-  font-family: "IstokWeb-Regular", sans-serif;
-  font-size: 11px;
-  font-weight: 400;
-  position: relative;
-  width: 56px;
-}
-.group-49 {
-  flex-shrink: 0;
-  width: 32.34px;
-  height: 29px;
-  position: static;
-}
-.iconly-regular-outline-category {
-  width: 32.34px;
-  height: 29px;
-  position: absolute;
-  left: 16.33px;
-  top: 10px;
-}
-.category {
-  height: auto;
-  position: absolute;
-  left: 2.69px;
-  top: 2.42px;
-  overflow: visible;
-}
-.board-frame {
-  background: #d9d9d9;
-  flex-shrink: 0;
-  height: 270px;
-  position: absolute;
-  right: 20px;
-  left: 20px;
-  top: 489px;
-}
-.advertisement {
-  background: #d9d9d9;
-  flex-shrink: 0;
-  height: 190px;
-  position: absolute;
-  right: 20px;
-  left: 20px;
-  top: 289px;
-}
-.dog-list {
-  background: #d9d9d9;
-  flex-shrink: 0;
-  height: 90px;
-  position: absolute;
-  right: 20px;
-  left: 328px;
-  top: 190px;
-}
-.dog-insert {
-  background: #d9d9d9;
-  flex-shrink: 0;
-  height: 91px;
-  position: absolute;
-  right: 20px;
-  left: 328px;
-  top: 89px;
-}
-.with-dog-walk {
-  background: #d9d9d9;
-  flex-shrink: 0;
-  width: 300px;
-  height: 190px;
-  position: absolute;
-  left: 20px;
-  top: 89px;
+
+.company-info-table .contact-info {
+  margin-top: 5px;
+  color: #6b7280;
+  font-size: 0.95em;
 }

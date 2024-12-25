@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="_csrf" th:content="${_csrf.token}"/>
+        <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+        <link rel="stylesheet" href="/css/header.css">
+        <link rel="stylesheet" href="/css/footer.css">
+        <link rel="stylesheet" href="/css/chatList.css">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <title>PETOPIA 채팅 목록</title>
+    </head>
+    <body>
+        <div th:replace="~{common/header :: header}"></div>
+        <!-- /header -->
+        <main>
+            <div class="main-content">
+                <div class="chat">
+                    <div class="chat-list">
+                        <div class="chat-list-title">
+                            <span>채팅 목록</span>
+                            <button id="selectModeBtn" class="select-mode-btn">선택</button>
+                            <button id="deleteSelectedBtn" class="delete-selected-btn" style="display: none;">삭제</button>
+                            <button id="cancelSelectBtn" class="cancel-select-btn" style="display: none;">취소</button>
+                        </div>
+                        
+                        <div th:if="${#lists.isEmpty(latestChats)}" class="no-chat-message">
+                            <p>🐾 진행 중인 채팅이 없습니다 🐾</p>
+                        </div>
+                        
+                        <div th:each="chat : ${latestChats}" class="chat-item" 
+                            th:with="targetId=${chat.sender.getMIdx() == currentUser.getMIdx() ? chat.receiver.getMIdx() : chat.sender.getMIdx()}"
+                            th:data-room-id="${currentUser.getMIdx() < targetId ? currentUser.getMIdx() + '_' + targetId : targetId + '_' + currentUser.getMIdx()}"
+                            th:onclick="handleChatItemClick(this, event)">
+                            <input type="checkbox" class="chat-select-checkbox" 
+                                   th:value="${currentUser.getMIdx() < targetId ? currentUser.getMIdx() + '_' + targetId : targetId + '_' + currentUser.getMIdx()}"
+                                   style="display: none;" 
+                                   onclick="event.stopPropagation();">
+                            <div class="profile-image">
+                                <img th:if="${chat.sender.getMIdx() == currentUser.getMIdx()}" 
+                                    th:src="${chat.receiver.getPicture() != null ? chat.receiver.getPicture() : '/images/defaultUser.png'}" 
+                                    onerror="this.src='/images/defaultUser.png'" 
+                                    class="profile-image">
+                                <img th:if="${chat.sender.getMIdx() != currentUser.getMIdx()}" 
+                                    th:src="${chat.sender.getPicture() != null ? chat.sender.getPicture() : '/images/defaultUser.png'}" 
+                                    onerror="this.src='/images/defaultUser.png'" 
+                                    class="profile-image">
+                            </div>
+                            <div class="chat-content">
+                                <div class="chat-header">
+                                    <span class="username" th:text="${chat.sender.getMIdx() == currentUser.getMIdx() ? chat.receiver.getName() : chat.sender.getName()}"></span>
+                                    <span class="time" th:text="${chat.sendTime}"></span>
+                                </div>
+                                <!-- 동영상인 경우 -->
+                                <div th:if="${chat.content != null and chat.content.contains('.mp4')}">
+                                    <p class="last-message">동영상</p>
+                                </div>
+                                <!-- 이미지인 경우 -->
+                                <div th:if="${#strings.endsWith(#strings.toLowerCase(chat.content), '.jpg') or 
+                                            #strings.endsWith(#strings.toLowerCase(chat.content), '.jpeg') or 
+                                            #strings.endsWith(#strings.toLowerCase(chat.content), '.png') or 
+                                            #strings.endsWith(#strings.toLowerCase(chat.content), '.gif')}">
+                                    <p class="last-message">사진</p>
+                                </div>
+                                <!-- 일반 텍스트인 경우 -->
+                                <div th:unless="${(chat.content != null and chat.content.contains('.mp4')) or
+                                                (#strings.endsWith(#strings.toLowerCase(chat.content), '.jpg') or 
+                                                 #strings.endsWith(#strings.toLowerCase(chat.content), '.jpeg') or 
+                                                 #strings.endsWith(#strings.toLowerCase(chat.content), '.png') or 
+                                                 #strings.endsWith(#strings.toLowerCase(chat.content), '.gif'))}">
+                                    <p class="last-message" th:text="${#strings.abbreviate(chat.content, 15)}"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                </div>
+                    <div class="scroll-indicator">
+                        새로운 메시지가 있습니다
+                    </div>
+        </main>
+  <!-- footer -->
+  <div th:replace="~{common/footer :: footer}"></div>
+  <!-- /footer -->
+        
+        <script>
+            let currentSwipedItem = null;
+            let lastScrollTop = 0;
+            let isSelectMode = false;
+
+            // 채팅방 클릭 처리 함수를 전역 스코프로 이동
+            function handleChatItemClick(element, event) {
+                if (isSelectMode) {
+                    const checkbox = element.querySelector('.chat-select-checkbox');
+                    checkbox.checked = !checkbox.checked;
+                    event.preventDefault();
+                } else {
+                    const roomId = element.getAttribute('data-room-id');
+                    location.href = '/chat/' + roomId;
+                }
+            }
+
+            const chatList = document.querySelector('.chat-list');
+            const scrollIndicator = document.querySelector('.scroll-indicator');
+
+            // 스크롤 위치 감지 및 표시기 제어
+            chatList.addEventListener('scroll', () => {
+                const scrollTop = chatList.scrollTop;
+                const scrollHeight = chatList.scrollHeight;
+                const clientHeight = chatList.clientHeight;
+                
+                // 스크롤이 맨 아래가 아닐 때만 표시기 보이기
+                if (scrollHeight - scrollTop - clientHeight > 100) {
+                    scrollIndicator.classList.add('visible');
+                } else {
+                    scrollIndicator.classList.remove('visible');
+                }
+                
+                lastScrollTop = scrollTop;
+            });
+
+            // 스크롤 표시기 클릭 시 맨 아래로 스크롤
+            scrollIndicator.addEventListener('click', () => {
+                chatList.scrollTo({
+                    top: chatList.scrollHeight,
+                    behavior: 'smooth'
+                });
+            });
+
+            // 새 메시지 추가 시 자동 스크롤 (예시 함수)
+            function addNewMessage(messageHtml) {
+                const wasAtBottom = chatList.scrollHeight - chatList.clientHeight <= chatList.scrollTop + 1;
+                
+                // 새 메시지 추가
+                chatList.insertAdjacentHTML('beforeend', messageHtml);
+                
+                // 이전에 스크롤이 맨 아래였다면 자동 스크롤
+                if (wasAtBottom) {
+                    chatList.scrollTo({
+                        top: chatList.scrollHeight,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    scrollIndicator.classList.add('visible');
+                }
+            }
+
+            // 채팅 목록 상태 체크 함수
+            function checkChatList() {
+                const chatList = document.querySelector('.chat-list');
+                const noChatMessage = document.querySelector('.no-chat-message');
+                const chatItems = document.querySelectorAll('.chat-item');
+                const selectModeBtn = document.getElementById('selectModeBtn');
+
+                if (chatItems.length === 0) {
+                    // 채팅 목록이 비어있을 때
+                    if (!noChatMessage) {
+                        const message = document.createElement('div');
+                        message.className = 'no-chat-message';
+                        message.textContent = '진행 중인 채팅이 없습니다.';
+                        chatList.appendChild(message);
+                    }
+                    // 선택 버튼 숨기기
+                    selectModeBtn.style.display = 'none';
+                } else {
+                    // 채팅이 있을 때
+                    if (noChatMessage) {
+                        noChatMessage.remove();
+                    }
+                    // 선택 버튼 표시
+                    selectModeBtn.style.display = 'inline-block';
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                // 초기 채팅 목록 상태 체크
+                checkChatList();
+
+                document.getElementById('selectModeBtn').addEventListener('click', function() {
+                    isSelectMode = true;
+                    toggleSelectMode(true);
+                });
+
+                document.getElementById('cancelSelectBtn').addEventListener('click', function() {
+                    isSelectMode = false;
+                    toggleSelectMode(false);
+                });
+
+                document.getElementById('deleteSelectedBtn').addEventListener('click', function() {
+                    const selectedChats = document.querySelectorAll('.chat-select-checkbox:checked');
+                    if (selectedChats.length === 0) {
+                        Swal.fire({
+                            title: '알림',
+                            text: '삭제할 채팅방을 선택해주세요.',
+                            icon: 'warning',
+                            confirmButtonText: '확인',
+                            confirmButtonColor: '#3085d6'
+                        });
+                        return;
+                    }
+
+                    Swal.fire({
+                        title: '채팅 삭제',
+                        text: '선택한 채팅방을 삭제하시겠습니까?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: '삭제',
+                        cancelButtonText: '취소',
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const roomIds = Array.from(selectedChats).map(checkbox => checkbox.value);
+                            console.log('Deleting room IDs:', roomIds);
+
+                            const token = document.querySelector('meta[name="_csrf"]')?.content;
+                            const header = document.querySelector('meta[name="_csrf_header"]')?.content;
+
+                            const headers = {
+                                'Content-Type': 'application/json'
+                            };
+                            
+                            if (token && header) {
+                                headers[header] = token;
+                            }
+
+                            fetch('/chat/deleteRooms', {
+                                method: 'POST',
+                                headers: headers,
+                                body: JSON.stringify({ roomIds: roomIds })
+                            })
+                            .then(response => {
+                                console.log('Response status:', response.status);
+                                return response.json();
+                            })
+                            .then(data => {
+                                console.log('Response data:', data);
+                                if (data.success) {
+                                    roomIds.forEach(roomId => {
+                                        const chatItem = document.querySelector(`[data-room-id="${roomId}"]`);
+                                        if (chatItem) chatItem.remove();
+                                    });
+                                    toggleSelectMode(false);
+                                    checkChatList();
+                                    Swal.fire({
+                                        title: '삭제 완료',
+                                        text: '선택한 채팅방이 삭제되었습니다.',
+                                        icon: 'success',
+                                        confirmButtonText: '확인',
+                                        confirmButtonColor: '#3085d6'
+                                    });
+                                } else {
+                                    Swal.fire({
+                                        title: '실패',
+                                        text: data.error || '채팅방 삭제에 실패했습니다.',
+                                        icon: 'error',
+                                        confirmButtonText: '확인',
+                                        confirmButtonColor: '#3085d6'
+                                    });
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error:', error);
+                                Swal.fire({
+                                    title: '오류',
+                                    text: '채팅방 삭제 중 오류가 발생했습니다.',
+                                    icon: 'error',
+                                    confirmButtonText: '확인',
+                                    confirmButtonColor: '#3085d6'
+                                });
+                            });
+                        }
+                    });
+                });
+
+                const buttons = document.querySelectorAll('.select-mode-btn, .delete-selected-btn, .cancel-select-btn');
+                
+                buttons.forEach(button => {
+                    button.addEventListener('click', function() {
+                        this.classList.remove('bounce');
+                        void this.offsetWidth; // 리플로우 트리거
+                        this.classList.add('bounce');
+                    });
+                });
+
+                function toggleSelectMode(enable) {
+                    const checkboxes = document.querySelectorAll('.chat-select-checkbox');
+                    const chatItems = document.querySelectorAll('.chat-item');
+                    
+                    document.getElementById('selectModeBtn').style.display = enable ? 'none' : 'inline-block';
+                    document.getElementById('deleteSelectedBtn').style.display = enable ? 'inline-block' : 'none';
+                    document.getElementById('cancelSelectBtn').style.display = enable ? 'inline-block' : 'none';
+                    
+                    checkboxes.forEach(checkbox => {
+                        checkbox.style.display = enable ? 'block' : 'none';
+                        checkbox.checked = false;
+                    });
+                    
+                    chatItems.forEach(item => {
+                        item.classList.toggle('selectable', enable);
+                    });
+                }
+            });
+
+        </script>
+    </body>
+</html>

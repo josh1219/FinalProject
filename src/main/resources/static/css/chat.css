@@ -31,6 +31,7 @@ body {
 }
 
 .chat-messages {
+    background-color: aliceblue;
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;

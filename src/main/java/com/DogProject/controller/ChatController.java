@@ -61,7 +61,7 @@ public class ChatController {
         model.addAttribute("latestChats", latestChats);
         model.addAttribute("currentUser", loginUser);
         
-        return "chatList";
+        return "chat/chatList";
     }
 
     @GetMapping("/chat/room/{receiverId}")
@@ -75,7 +75,7 @@ public class ChatController {
             List<Chat> chatHistory = chatService.getChatsBetweenUsers(member.getMIdx(), receiverId);
             model.addAttribute("currentUser", member);
             model.addAttribute("chatHistory", chatHistory);
-            return "chat";
+            return "chat/chat";
         } catch (Exception e) {
             model.addAttribute("error", "채팅 내역을 불러오는 중 오류가 발생했습니다.");
             return "error/500";
@@ -148,7 +148,7 @@ public class ChatController {
         model.addAttribute("datesToWeekdays", datesToWeekdays);
         model.addAttribute("today", todayStr);
         
-        return "chat";
+        return "chat/chat";
     }
 
     @PostMapping("/chat/upload")

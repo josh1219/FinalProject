@@ -86,13 +86,18 @@ public class DogController {
     }
 
     @GetMapping("/insert")
-    public String insertDogForm(Model model, @AuthenticationPrincipal Object principal) {
+    public String insertDogForm(
+            @RequestParam(value = "returnUrl", required = false) String returnUrl,
+            Model model, 
+            @AuthenticationPrincipal Object principal
+    ) {
         try {
             Member member = getMemberFromPrincipal(principal);
             if (member == null) {
                 return "redirect:/member/login";
             }
             model.addAttribute("member", member);
+            model.addAttribute("returnUrl", returnUrl);
             return "dog/insertDog";
         } catch (Exception e) {
             log.error("Error in insertDogForm", e);
@@ -109,6 +114,7 @@ public class DogController {
             @RequestParam("subGender") String subGender,
             @RequestParam("dType") String dType,
             @RequestParam(value = "image", required = false) MultipartFile image,
+            @RequestParam(value = "returnUrl", required = false) String returnUrl,
             @AuthenticationPrincipal Object principal,
             RedirectAttributes redirectAttributes
     ) {
@@ -148,15 +154,15 @@ public class DogController {
             }
 
             redirectAttributes.addFlashAttribute("successMessage", "강아지가 등록되었습니다!");
-            return "redirect:/dog/list";
+            return returnUrl != null ? "redirect:" + returnUrl : "redirect:/dog/list";
 
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/dog/insert";
+            return "redirect:/dog/insert" + (returnUrl != null ? "?returnUrl=" + returnUrl : "");
         } catch (Exception e) {
             log.error("Error in insertDog", e);
             redirectAttributes.addFlashAttribute("errorMessage", "서버 오류가 발생했습니다.");
-            return "redirect:/dog/insert";
+            return "redirect:/dog/insert" + (returnUrl != null ? "?returnUrl=" + returnUrl : "");
         }
     }
 

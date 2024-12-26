@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -27,7 +28,7 @@
 
         .container {
             max-width: 800px;
-            margin: 68px 20px;  
+            margin: 68px 20px;
             padding: 0 20px;
         }
 
@@ -102,7 +103,7 @@
             max-height: 190px;
             margin: 0.5rem auto;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             display: block;
             position: relative;
             z-index: 1;
@@ -197,6 +198,7 @@
             animation: spin 1s linear infinite;
             margin: 10px auto;
         }
+
         .grid-container {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -232,7 +234,7 @@
             padding: 0.8rem;
             font-size: 0.9rem;
         }
-        
+
         .form-group {
             margin-bottom: 1.2rem;
         }
@@ -264,7 +266,7 @@
         .form-control {
             padding: 1rem;
         }
-        
+
         .img-buttons {
             gap: 3.5rem;
         }
@@ -272,6 +274,7 @@
         .img-preview {
             max-height: 230px;
         }
+
         .grid-container {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -279,47 +282,49 @@
             padding: 0 20px;
             margin-bottom: 20px;
         }
-        
     </style>
     <title>PETOPIA - 강아지 등록</title>
 </head>
+
 <body>
     <!-- header -->
     <div th:replace="~{common/header :: header}"></div>
     <!-- /header -->
-    
-    <div class="container">    
+
+    <div class="container">
         <div class="main-content">
-            <form action="/dog/insert" method="post" enctype="multipart/form-data" class="dog-form">
-            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-            <div class="form-content">
-                <div class="form-group">
-                    <h2>강아지 등록</h2>
-                </div>
-                    
-                <div class="form-group">
-                    <label>강아지 사진</label>
-                    <div class="img-container">
-                        <div class="img-area">
-                            <div class="img-preview-area">
-                                <img id="preview" src="/images/dogdefault.png" alt="강아지 사진 미리보기" class="img-preview">
+            <form th:action="@{/dog/insert}" method="post" enctype="multipart/form-data" class="dog-form">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" name="returnUrl" th:value="${returnUrl}">
+                <div class="form-content">
+                    <div class="form-group">
+                        <h2>강아지 등록</h2>
+                    </div>
+
+                    <div class="form-group">
+                        <label>강아지 사진</label>
+                        <div class="img-container">
+                            <div class="img-area">
+                                <div class="img-preview-area">
+                                    <img id="preview" src="/images/dogdefault.png" alt="강아지 사진 미리보기"
+                                        class="img-preview">
+                                </div>
+                                <input type="file" id="file-input" name="image" style="display: none;" accept="image/*">
                             </div>
-                            <input type="file" id="file-input" name="image" style="display: none;" accept="image/*">
-                        </div>
-                        <div class="img-buttons">
-                            <button type="button" class="img-button" onclick="openCamera()">
-                                <img src="/images/camera0.svg" alt="카메라">
-                            </button>
-                            <button type="button" class="img-button" onclick="openGallery()">
-                                <img src="/images/photo-1.svg" alt="갤러리">
-                            </button>
-                            <button type="button" class="img-button" onclick="removeImage()">
-                                <img src="/images/trash.svg" alt="삭제">
-                            </button>
+                            <div class="img-buttons">
+                                <button type="button" class="img-button" onclick="openCamera()">
+                                    <img src="/images/camera0.svg" alt="카메라">
+                                </button>
+                                <button type="button" class="img-button" onclick="openGallery()">
+                                    <img src="/images/photo-1.svg" alt="갤러리">
+                                </button>
+                                <button type="button" class="img-button" onclick="removeImage()">
+                                    <img src="/images/trash.svg" alt="삭제">
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
                 <div class="form-group">
                     <label for="dType">강아지 종류</label>
                     <input type="text" id="dType" name="dType" class="form-control" required>
@@ -333,7 +338,8 @@
 
                 <div class="form-group">
                     <label for="birthday">강아지 생일</label>
-                    <input type="date" id="birthday" name="birthday" class="form-control" required onchange="calculateAge(this.value)">
+                    <input type="date" id="birthday" name="birthday" class="form-control" required
+                        onchange="calculateAge(this.value)">
                 </div>
 
                 <div class="form-group">
@@ -341,7 +347,7 @@
                     <input type="text" id="age" name="age" class="form-control" required min="0" readonly>
                     <small class="text-muted">* 생일 선택 시 자동으로 계산됩니다.</small>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="gender">강아지 성별</label>
                     <select id="gender" name="gender" class="form-control" required>
@@ -361,9 +367,9 @@
                 </div>
 
                 <button type="submit" class="submit-button">마이펫 등록</button>
-            </div>
-            </form>
         </div>
+        </form>
+    </div>
     </div>
 
     <div id="loading-modal" class="loading-modal">
@@ -409,7 +415,7 @@
         function onImageSelected(imagePath) {
             // 이미지 미리보기 업데이트
             const previewImg = document.getElementById('preview');
-            
+
             if (previewImg) {
                 previewImg.src = imagePath;
             }
@@ -423,16 +429,16 @@
                 for (let i = 0; i < binaryData.length; i++) {
                     bytes[i] = binaryData.charCodeAt(i);
                 }
-                
+
                 // Blob 생성
                 const blob = new Blob([bytes], { type: 'image/jpeg' });
                 const file = new File([blob], "camera_image.jpg", { type: 'image/jpeg' });
-                
+
                 // file input에 파일 설정
                 const dataTransfer = new DataTransfer();
                 dataTransfer.items.add(file);
                 document.getElementById('file-input').files = dataTransfer.files;
-                
+
                 // 견종 식별 시작
                 identifyBreed(file);
             }
@@ -442,27 +448,27 @@
             // 로딩 모달 표시
             const loadingModal = document.getElementById('loading-modal');
             loadingModal.style.display = 'block';
-            
+
             try {
                 const formData = new FormData();
                 formData.append('image', imageFile);
-                
+
                 console.log('이미지 업로드 시작');
                 const response = await fetch('/api/identify-breed', {
                     method: 'POST',
                     body: formData
                 });
-                
+
                 if (!response.ok) {
                     throw new Error('견종 식별 실패');
                 }
-                
+
                 const breed = await response.text();
                 console.log('견종 식별 결과:', breed);
-                
+
                 // 견종 정보 업데이트
                 document.getElementById('dType').value = breed;
-                
+
             } catch (error) {
                 console.error('견종 식별 중 오류 발생:', error);
                 Swal.fire('오류', '견종 식별 중 오류가 발생했습니다. 수동으로 입력해주세요.', 'error');
@@ -474,7 +480,7 @@
 
         function removeImage() {
             const previewImg = document.getElementById('preview');
-            
+
             if (previewImg) {
                 previewImg.src = '/images/dogdefault.png';  // 기본 이미지로 변경
                 previewImg.style.display = 'block';
@@ -484,18 +490,18 @@
         function calculateAge(birthday) {
             const birthDate = new Date(birthday);
             const today = new Date();
-            
+
             let age = today.getFullYear() - birthDate.getFullYear();
             const monthDiff = today.getMonth() - birthDate.getMonth();
-            
+
             if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
                 age--;
             }
-            
+
             document.getElementById('age').value = age + 1;
         }
 
-        document.getElementById('birthday').addEventListener('change', function() {
+        document.getElementById('birthday').addEventListener('change', function () {
             calculateAge(this.value);
         });
 
@@ -525,11 +531,11 @@
         }
 
         // file input change 이벤트 핸들러 추가
-        document.getElementById('file-input').addEventListener('change', function(e) {
+        document.getElementById('file-input').addEventListener('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     onImageSelected(e.target.result);
                 };
                 reader.readAsDataURL(file);
@@ -537,4 +543,5 @@
         });
     </script>
 </body>
+
 </html>

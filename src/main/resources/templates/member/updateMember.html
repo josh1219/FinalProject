@@ -186,11 +186,11 @@
           </label>
           <div class="address-group">
             <div class="postcode-group">
-              <input type="text" id="sample6_postcode" th:value="${member != null && member.address != null} ? ${#strings.substring(member.address, 1, #strings.indexOf(member.address, ')'))} : ''" placeholder="우편번호" class="input-box postcode" readonly>
+              <input type="text" id="sample6_postcode" th:value="${memberZipCode}" placeholder="우편번호" class="input-box postcode" readonly>
               <button type="button" onclick="searchAddress()" class="address-search-btn">주소 검색</button>
             </div>
-            <input type="text" id="sample6_address" th:value="${member != null && member.address != null && #strings.indexOf(member.address, '|') > 0} ? ${#strings.substring(member.address, #strings.indexOf(member.address, '|') + 1, member.address.length() - (#strings.contains(member.address, '|', #strings.indexOf(member.address, '|') + 1) ? (#strings.length(member.address) - #strings.indexOf(member.address, '|', #strings.indexOf(member.address, '|') + 1)) : 0))} : ''" placeholder="주소" class="input-box" readonly>
-            <input type="text" id="sample6_detailAddress" th:value="${member != null && member.address != null && #strings.contains(member.address, '|', #strings.indexOf(member.address, '|') + 1)} ? ${#strings.substring(member.address, #strings.lastIndexOf(member.address, '|') + 1)} : ''" placeholder="상세주소" class="input-box">
+            <input type="text" id="sample6_address" th:value="${memberAddress1}" placeholder="주소" class="input-box" readonly>
+            <input type="text" id="sample6_detailAddress" th:value="${memberAddress2}" placeholder="상세주소" class="input-box">
             <input type="hidden" name="address" id="fullAddress" th:value="${member != null ? member.address : ''}">
             <div class="error-message" id="addressError"></div>
           </div>

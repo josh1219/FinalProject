@@ -295,7 +295,7 @@
         <div class="main-content">
             <form th:action="@{/dog/insert}" method="post" enctype="multipart/form-data" class="dog-form">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="hidden" name="returnUrl" th:value="${returnUrl}">
+                <input type="hidden" name="returnUrl" th:value="${returnUrl != null ? returnUrl : '/dog/list'}">
                 <div class="form-content">
                     <div class="form-group">
                         <h2>강아지 등록</h2>
@@ -367,9 +367,8 @@
                 </div>
 
                 <button type="submit" class="submit-button">마이펫 등록</button>
+            </form>
         </div>
-        </form>
-    </div>
     </div>
 
     <div id="loading-modal" class="loading-modal">

@@ -150,19 +150,19 @@ public class DogController {
                     fileService.saveFile(saveFile, image);
                 } catch (IOException e) {
                     log.error("Error saving file: {}", e.getMessage());
+                    // 파일 저장 실패해도 강아지 등록은 완료된 상태이므로 계속 진행
                 }
             }
 
             redirectAttributes.addFlashAttribute("successMessage", "강아지가 등록되었습니다!");
-            return returnUrl != null ? "redirect:" + returnUrl : "redirect:/dog/list";
+            String redirectUrl = (returnUrl != null && !returnUrl.trim().isEmpty()) ? returnUrl : "/dog/list";
+            log.debug("Redirecting to: {}", redirectUrl);
+            return "redirect:" + redirectUrl;
 
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/dog/insert" + (returnUrl != null ? "?returnUrl=" + returnUrl : "");
         } catch (Exception e) {
             log.error("Error in insertDog", e);
             redirectAttributes.addFlashAttribute("errorMessage", "서버 오류가 발생했습니다.");
-            return "redirect:/dog/insert" + (returnUrl != null ? "?returnUrl=" + returnUrl : "");
+            return "redirect:/dog/list";  // 에러가 발생해도 /dog/list로 리다이렉트
         }
     }
 

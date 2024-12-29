@@ -388,7 +388,16 @@
                             xhr.setRequestHeader(header, token);
                         },
                         success: function() {
-                            window.location.href = '/board';
+                            Swal.fire({
+                                title: '삭제 완료',
+                                text: '게시글이 성공적으로 삭제되었습니다.',
+                                icon: 'success',
+                                customClass: {
+                                    popup: 'small-swal'
+                                }
+                            }).then(() => {
+                                window.location.href = '/board';
+                            });
                         },
                         error: function(xhr) {
                             Swal.fire({

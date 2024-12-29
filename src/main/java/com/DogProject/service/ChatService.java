@@ -1,5 +1,6 @@
 package com.DogProject.service;
 
+import com.DogProject.dto.ChatDTO;
 import com.DogProject.entity.Chat;
 import com.DogProject.entity.Member;
 import com.DogProject.repository.ChatRepository;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,16 +46,24 @@ public class ChatService {
 
     // 사용자의 모든 채팅방 목록 조회 (각 상대방과의 최신 메시지만)
     public List<Chat> getLatestChatsByUserId(int userId) {
-        List<Chat> latestChats = chatRepository.findLatestChatsByUserId(userId);
-        
-        // 각 채팅에 대해 읽지 않은 메시지 수 설정
-        for (Chat chat : latestChats) {
-            Member otherUser = chat.getSender().getMIdx() == userId ? chat.getReceiver() : chat.getSender();
-            int unreadCount = chatRepository.countUnreadMessages(userId, otherUser.getMIdx());
-            chat.setUnreadCount(unreadCount);
-        }
-        
-        return latestChats;
+        List<ChatDTO> chatDTOs = chatRepository.findLatestChatsByUserId(userId);
+        return chatDTOs.stream()
+            .map(dto -> {
+                Member sender = memberRepository.findById(dto.getSender()).orElseThrow();
+                Member receiver = memberRepository.findById(dto.getReceiver()).orElseThrow();
+                
+                Chat chat = new Chat();
+                chat.setCIdx(dto.getCIdx());
+                chat.setContent(dto.getContent());
+                chat.setSendTime(dto.getSendTime());
+                chat.setSender(sender);
+                chat.setReceiver(receiver);
+                chat.setRead(dto.getIsRead());
+                chat.setUnreadCount(dto.getUnreadCount());
+                
+                return chat;
+            })
+            .collect(Collectors.toList());
     }
 
     // 두 사용자 간의 채팅 내역 조회

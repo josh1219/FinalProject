@@ -70,15 +70,6 @@ public class ChatController {
         
         List<Chat> latestChats = chatService.getLatestChatsByUserId(loginUser.getMIdx());
         
-        // 각 채팅방별 읽지 않은 메시지 수 계산
-        for (Chat chat : latestChats) {
-            int senderId = chat.getSender().getMIdx() == loginUser.getMIdx() 
-                ? chat.getReceiver().getMIdx() 
-                : chat.getSender().getMIdx();
-            int unreadCount = chatRepository.countUnreadMessages(loginUser.getMIdx(), senderId);
-            chat.setUnreadCount(unreadCount); // Chat 엔티티에 unreadCount 필드 추가 필요
-        }
-        
         model.addAttribute("latestChats", latestChats);
         model.addAttribute("currentUser", loginUser);
         

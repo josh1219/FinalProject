@@ -33,10 +33,10 @@ public class Chat {
     @Comment("채팅을 받은 회원")
     private Member receiver;
 
-    @Column(name = "is_read", nullable = false, columnDefinition = "boolean default false")
     @Comment("읽음 여부")
-    private boolean isRead = false;
+    @Column(name = "is_read")
+    private boolean isRead;
 
-    @Transient
+    @Transient // DB에 저장하지 않는 필드
     private int unreadCount;
 }

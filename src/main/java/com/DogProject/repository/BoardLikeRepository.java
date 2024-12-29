@@ -10,4 +10,7 @@ import org.springframework.stereotype.Repository;
 public interface BoardLikeRepository extends JpaRepository<BoardLike, Long> {
     boolean existsByBoardAndMember(Board board, Member member);
     void deleteByBoardAndMember(Board board, Member member);
+    
+    // 특정 게시글의 모든 좋아요 삭제
+    void deleteByBoard(Board board);
 }

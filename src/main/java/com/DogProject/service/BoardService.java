@@ -130,6 +130,20 @@ public class BoardService {
     public void deletePost(int bIdx) {
         Board board = boardRepository.findById(bIdx)
             .orElseThrow(() -> new RuntimeException("게시글을 찾을 수 없습니다."));
+        
+        // board_view 테이블의 데이터 먼저 삭제
+        boardViewRepository.deleteByBoard(board);
+        
+        // board_like 테이블의 데이터 삭제
+        boardLikeRepository.deleteByBoard(board);
+        
+        // 게시글 관련 파일 삭제
+        List<File> files = fileService.findAllByTypeAndIdx(1, bIdx); // 1은 게시글 타입
+        for (File file : files) {
+            fileService.deleteFile(file);
+        }
+        
+        // board 테이블의 데이터 삭제
         boardRepository.delete(board);
     }
 

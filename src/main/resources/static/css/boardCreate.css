@@ -102,6 +102,10 @@
     transition: all 0.2s ease;
   }
 
+  .file-upload-btn input[type="file"] {
+    display: none;
+  }
+
   .file-upload-btn:hover {
     border-color: #4A90E2;
     background: #f8f9fa;

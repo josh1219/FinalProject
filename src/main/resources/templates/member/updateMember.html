@@ -246,8 +246,8 @@
         var detailAddress = document.getElementById('sample6_detailAddress').value;
         
         var fullAddress = '';
-        if (postcode) fullAddress += '(' + postcode + ') ';
-        if (address) fullAddress += address + ' ';
+        if (postcode) fullAddress += postcode + '|';
+        if (address) fullAddress += address + '|';
         if (detailAddress) fullAddress += detailAddress;
         
         document.getElementById('fullAddress').value = fullAddress.trim();

@@ -542,13 +542,15 @@
                 const longitude = parseFloat(place.경도);
                 const category = getCategoryMapping(place.카테고리1, place.카테고리2, place.카테고리3);
 
-                const mapCenter = map.getCenter();
-                const distance = calculateDistance(
-                    mapCenter.lat(),
-                    mapCenter.lng(),
-                    latitude,
-                    longitude
-                );
+                let distance = null;
+                if (currentPosition) {
+                    distance = calculateDistance(
+                        currentPosition.lat,
+                        currentPosition.lng,
+                        latitude,
+                        longitude
+                    );
+                }
 
                 return {
                     name: place.시설명,
